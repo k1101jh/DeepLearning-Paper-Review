@@ -59,7 +59,7 @@ LLM을 MLLM으로 확장하기 위해 visual instruction tuning이 제안됨
     -> 효과적인 공간 이해를 가능하게 함
 
 **locality-enhanced projector(Honeybee)를 제안**
-![alt text](Fig1.png)
+![alt text](./images/Fig1.png)
 > **Figure 1. Projector의 성능과 효율성 비교**
 $Avg^N$: 정규화된 벤치마크 점수(MME, MMBench, SEED-Bench)의 평균
 step time: 사전 훈련 중 single step 실행 시간
@@ -130,7 +130,7 @@ abstraction:
 
 #### 3.1. Motivation
 
-![alt text](Fig2.png)
+![alt text](./images/Fig2.png)
 
 > **Figure 2. Projector간의 개념 비교**
 visual features를 visual tokens로 변환하는 방법에 대한 projector간의 개념 비교
@@ -147,7 +147,7 @@ visual token의 수는 MLLM의 전반적인 효율성과 계산량을 결정
 visual token의 수를 줄여서 효율성을 향상시킬 수 있다.
 -> 최근 연구에서 linear projector보다 resampler 및 Q-former와 같은 abstractor 선호
 
-![alt text](Fig3.png)
+![alt text](./images/Fig3.png)
 
 > **Figure 3.** (왼쪽) resampler의 attention map 샘플
 (오른쪽) resampler와 linear projector의 공간 이해 능력 비교. 6가지 공간 이해 작업(MME, MMB, SEED 등)을 사용하여 평균 점수 계산
@@ -166,7 +166,7 @@ Fig. 3에서, resampler은 주로 몇몇 지역의 정보를 요약하고 일부
 
 #### 3.2.2 Architecture
 
-![alt text](Fig4.png)
+![alt text](./images/Fig4.png)
 
 > **Figure 4. 제안한 projector의 개념 아키텍처**
 
@@ -196,7 +196,7 @@ deformable attention은 local context를 보존하는데 도움이 된다.
 이를 통해 MLLM은 image-text 데이터를 사용하여 시각적 단서가 텍스트 설명과 어떻게 일치하는지에 대한 미묘한 이해를 개발할 수 있다.
 
 **두 번째 단계: 시각적 instruction 조정**
-![alt text](Table2.png)
+![alt text](./images/Table2.png)
 
 > **Table 2. 모든 training dataset list**
 
@@ -295,7 +295,7 @@ GPT-4를 활용하여 MLLM의 설명 응답을 평가(LLaVA-Bench)
 
 ### 5.2. Locality-Enhanced Projector 분석
 
-![alt text](Table3.png)
+![alt text](./images/Table3.png)
 
 > **Table 3. Projector 간의 공간 이해 능력 비교**
 
@@ -312,7 +312,7 @@ MME, MMBench, SEED-Bench의 6가지 공간 이해 작업을 사용하여 Table 3
 
 **Dataset combination**
 
-![alt text](Table4.png)
+![alt text](./images/Table4.png)
 
 > **Table 4. instruction tuning 중 data 혼합의 영향**
 VQA(Open): open-ended visual question answering
@@ -334,7 +334,7 @@ Table 4는 다양한 멀티모달 벤치마크에 대한 dataset의 개별 영�
 -> 기존 vision-language dataset에 대한 풍부한 지식이 MLLM의 perception understanding 또는 시각적 추론 능력을 향상시킨다는 것을 시사
 -> 작업과 데이터세트 모두 다양성이 중요하다.
 
-![alt text](Table5.png)
+![alt text](./images/Table5.png)
 
 > **dataset balancing 및 instructization에 대한 절제**
 AvgN: $MMB$, $SEED^I$, $MME^P$의 정규화된 평균
@@ -383,14 +383,14 @@ Table 5d는 multi-turn template와 중복 제거 전략의 효과를 보임
 
 ### 5.4. Putting It Altogether
 
-![alt text](Table6.png)
+![alt text](./images/Table6.png)
 
 > **Table 6. 다른 SOTA MLLM과의 비교**
 Res 및 M은 각각 이미지 해상도와 visual token의 수를 나타냄
 최상의 결과: 굵은 글씨
 두 번째로 좋은 결과: 밑줄
 
-![alt text](Table7.png)
+![alt text](./images/Table7.png)
 
 > **Table 7. C-Abstractor로 visual token 수를 늘려서 한계에 도전하기**
 s/step: pre-training step time
