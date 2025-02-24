@@ -1,0 +1,244 @@
+# MobRecon: Mobile-Friendly Hand Mesh Reconstruction From Monocular Image
+
+---
+
+- Hand Mesh Reconstruction
+
+---
+
+- Xingyu Chen et al
+- CVPR 2022
+- url: https://openaccess.thecvf.com/content/CVPR2022/html/Chen_MobRecon_Mobile-Friendly_Hand_Mesh_Reconstruction_From_Monocular_Image_CVPR_2022_paper.html
+
+---
+
+## Abstract
+
+- 높은 재구성 정확도, 빠른 추론 속도 및 시간적 일관성을 동시에 달성할 수 있는 single view hand mesh reconstruction을 위한 프레임워크 제안
+- 2D encoding: 가벼우면서도 효과적인 적층 구조 제안
+- 3D decoding: 효율적인 graph operator, 즉 depth-separable spiral convolution을 제겅
+- 2D 와 3D 표현 사이의 격차를 해소하기 위한 새로운 lifting module을 제시
+    - map-based position regression(MapReg) 블록으로 시작하여 heatmap 인코딩 및 position regression 패러다임의 장점을 통합하여 2D 정확도와 시간적 일관성을 개선
+    - MapReg 다음에 pose pooling 및 pose-to-vertex lifting 접근 방식을 적용
+        - 2D pose encoding을 3D vertex의 의미론적 특징으로 변환
+
+- Apple A14 CPU에서 83FPS의 높은 추론 속도에 도달
+
+
+# 1. Introduction
+
+![alt text](./images/Fig1.png)
+> **Figure 1. Accuraacy vs inference speed**  
+> 마커 크기는 모델 크기에 비례  
+> 제안한 방법은 모바일 cpu에서 빠른 속도로 실행 가능
+
+Single-view hand mesh reconstruction
+- AR/VR, 행동 이해 등의 분야에서 적용
+- 실제 응용 프로그램에서 필요한 성능
+    - 재구성 정확도
+    - 추론 효율성
+    - 시간적 일관성
+
+모바일 플랫폼에서 3D hand reconstruction을 탐구
+
+일반적인 pipeline은 세 단계로 구성
+- 2D encoding
+    - 기존 접근 방식은 계산 집약적인 네트워크를 채택
+    - 모바일 네트워크를 그대로 사용하면 재구성 정확도가 크게 저하된다.
+
+    -> 추론 효율성과 정확성의 균형을 맞추기 위해 경량 2D encoding 구조 개발
+- 2D-to-3D mapping
+    - 효율성은 상대적으로 탐구되지 않음
+- 3D decoding
+    - 효율성은 상대적으로 탐구되지 않음
+
+-> 2D-to-3D mapping 문제를 해결하고 3D mesh data 처리를 위한 효율적인 graph operator을 설계하기 위해 가벼우면서도 효과적인 lifting 방법을 모색
+
+시간적 일관성은 일반적으로 3D 손 재구성 작업에서 무시된다.
+- 이전 방법[11, 37, 41, 49]는 과거와 미래를 모두 통합하기 위해 sequential model 채택
+    - offline이거나 계산 비용이 많이 들기 때문에 모바일 애플리케이션에 사용하기 어렵다.
+
+-> 비순차적 방법으로 시간적 일관성을 탐구
+
+MobRecon(Mobile Mesh Reconstruction)
+- 최고의 정확도, 효율성 및 시간적 일관성을 동시에 탐구
+- 2D encoding: hourglass network의 정신을 활용하여 효율적인 stack encoding 구조를 설계
+- 3D decoding: depth-separable spiral convolution(DSConv)를 제안
+    - DSConv는 깊이별 분리 가능한 convolution에서 영감을 받아 graph 구조의 mesh data를 효율적으로 처리
+- 2D-to-3D mapping
+    - MapReg(Map Based Position Regression), pose pooling, PVL(pose-to-vertex lifting) 접근 방식을 사용하는 feature lifting module 제안
+    - MapReg는 2D 포즈 정확도와 시간적 일관성을 동시에 개선하기 위한 Hybrid 방법
+    - PVL은 학습 가능한 lifting matrix를 기반으로 2D pose encoding을 3D vertex features로 변환하여 3D 정확도와 시간적 일관성을 향상
+    - 잠재 공간에서 fully connected operator을 기반으로 하는 표준 접근 방식과 비교할 때, feature lifting module은 모델 크기를 크게 줄임
+- 균일하게 분포된 손 포즈와 시점을 가진 합성 데이터셋을 구축
+(Fig1 참조)
+
+논문의 기여:
+- MobRecon은 123M 곱셈-덧셈 작업(Mult-Adds) 및 5M 매개변수만 포함  
+Apple A14 CPU에서 최대 83FPS로 실행할 수 있는 hand mesh 재구성을 위한 모바일 친화적인 pipeline을 제안
+- 효율적인 2D 인코딩 및 3D 디코딩을 위한 경량 적층 구조와 DSConv 제공
+- 2D 및 3D 표현을 연결하기 위해 Mapeg, pose pooling 및 PVL 방법을 사용하는 새로운 feature lifting 모듈을 제안
+- 논문의 방법이 포괄적인 평가 및 SOTA 접근 방법과의 비교를 통해 모델 효율성, 재구성 정확도 및 시간적 일관성 측면에서 우수한 형태를 달성함을 보임
+
+## 2. Related Work
+
+**Hand mesh estimation**
+
+다섯 가지 타입으로 나눌 수 있다.
+- parametric model
+
+    많은 model-based approaches는 MANO를 parametric model로 사용
+    - hand mesh를 모양 및 포즈 계수로 분해
+    - 이 파이프라인은 lightweight network에 적합하지 않음
+        - coefficient estimation은 공간 상관 관계를 무시하는 매우 추상적인 문제
+- voxel representation
+
+    Voxel 기반 접근법은 3D 데이터를 2.5D 방식으로 설명
+    - Moon et al. [52]
+        - voxel 공간을 3개의 lixel 공간으로 나눈다.
+        - 1D heatmap을 사용하여 메모리 소비를 줄이는 I2L-MeshNet을 제안
+    - 이러한 최적화에도 불구하고 I2L-MeshNet은 lixel style 2.5D heatmap을 처리하기 위해 막대한 메모리를 필요로 함
+    - 메모리가 제한된 모바일 장치에 적합하지 않다.
+
+- implicit function
+
+    - 연속성과 고해상도라는 장점
+    - 최근에는 articulated human을 디지털화하는 데 사용
+    - 수천 개의 3D point를 계산해야 함
+    -> 모바일 설정에서 효율성이 떨어진다.
+
+- UV map
+
+    - Chen et al.[8]
+        - hand mesh 재구성을 image-to-image 변환 작업으로 처리
+        - UV 맵을 사용하여 2D와 3D 공간을 연결
+    - 이 pipeline은 geometry correlation을 통합하여 개선할 수 있다.
+
+- vertex position
+
+    - 3D 꼭짓점 좌표를 직접 예측
+    - 2D 인코딩, 2D-to-3D mapping 및 3D 디코딩 절차를 따른다.
+    - Kulon et al[42]
+        - 3D 꼭짓점 좌표를 얻기 위해 ResNet, global pooling, spiral convolution(SpiralConv)를 기반으로 encoder과 decoder을 설계
+
+    - 본 논문에서는 효율적인 모듈로 vertex-based pipeline을 재구축
+        - 2D encoding 을 위한 lightweight stacked structures
+        - 2D-to-3D mapping을 위한 feature lifting module
+        - 3D decoding을 위한 DSConv
+    - 높은 재구성 정확도와 시간 전반에 걸친 일관성을 달성
+
+**Lightweight networks**
+
+인기 있는 효율적인 아이디어를 활용하여 Euclidean 2D images와 Non-Euclidean 3D meshes를 위한 graph network를 위한 stacked networks 설계
+- 2D-to-3D mapping 문제를 효율적으로 처리하기 위해 feature lifting module 제안
+- Mobile Hand[18]는 모바일 CPU에서 75FPS로 동작
+- MobRecon은 정확도와 추론 속도가 더 뛰어나다
+
+**Temporally coherent human reconstruction**
+
+human/hand mesh 재구성의 시간적 일관성에 대한 연구는 제한적
+- [11, 37, 41, 49]
+    - 시간적 접근 방식을 사용하여 시간적 성능에 집중
+- Kocabas et al[41]
+    - bi-directional gated recurrent unit을 사용하여 across-time features를 융합
+        - SMPL 매개변수들이 시간적 단서로 회귀하도록
+- 이러한 순차적 방식은 계산 비용을 증가시키고, 미래의 정보가 필요할 수도 있다.
+- 대조적으로, 본 논문에서는 non-sequential single-view method에 대한 시간적 일관성을 향상시키기 위해  MapReg를 사용하여 feature lifting module을 설계
+
+**Pixel-aligned representation**
+
+convolutional features는 dense와 regularly structured 2D 단서들로 만들어짐
+
+하지만 3D 데이터는 sparse하고 unordered points로 구성
+
+- 3D 정보를 설명하기 위해 이미지 특징을 더 잘 추출하기 위해 최근 작업은 일반적으로 pixel-aligned representations를 채택[59, 53, 19, 74, 22, 78]
+- 여기에 영감을 얻이 feature lifting을 위한 pixel alignment 아이디어를 사용 & pose-aligned encoding을 vertex features로 변환하는 PVL을 디자인
+
+heatmap 또는 position을 2D representation으로 사용한 것은 주목할만하다.
+- Li et al[43]
+    - 정확도 측면에서 heatmap과 position based human pose를 분석하고 고정밀 회귀를 달성하기 위해 RLE 제안
+
+- 본 논문에서는 시간적 일관성의 관점에서 heatmap과 position 표현을 고려하고 MapReg를 제안하여 heatmap 및 position 기반 2D representation의 장점을 탕합
+- RLE와 MapReg는 서로 보완할 수 있다.
+
+## 3. Our Method
+
+![alt text](./images/Fig2.png)
+> **MobRecon framework의 overview**
+
+입력: single-view 이미지
+목표: 예측된 정점 $\text{V} = \{\text{v}_i\}^V_{i=1}$ 및 사전 정의된 표면 $\text{C} = \{\text{c}_i\}^C_{i=1}$을 사용하여 3D 손 mesh를 추론
+
+
+### 3.1 Stacked Encoding Network
+
+- hourglass network에서 영감을 받음
+- 점차적으로 개선된 인코딩 기능을 얻기 위함
+- 두 개의 계단식 encoding block 그룹으로 구성(Fig 3)
+    - 첫 번째 group은 feature fusion을 위한 업샘플링 모듈
+    - single-view 이미지를 입력으로 사용하면 인코딩 feature $\text{F}^e \in \mathbb{R}^{C^e \times H^e \times W^e}$ 생성
+    > $C:$ 채널 크기  
+    > $H:$ 높이  
+    > $W:$ 너비
+
+- 두 가지 block 대안을 설계
+    - DenseStack(Fig 3 참조)
+        - DenseNet[31]과 SENet[30]에 따라서, DenseStack을 형성하기 위한 dense block 제시
+        - $128 \times 128$ 입력 해상도에서 373.0M Multi-Add 및 6.6M 매개변수로 구성
+    - GhostStack 개발
+        - 모델 크기를 더욱 줄이기 위해 ghost operation[23]을 활용
+        - 저렴한 operation으로 주요 feature을 기반으로 ghost feature을 생성
+        - $128 \times 128$ 입력 해상도에서 96.2M Multi-Add 및 5.0M 매개변수로 구성
+
+ResNet18을 사용한 stacked network 작업은 2391.3M Multi-Add 및 25.2M 매개변수로 구성
+- 모바일 애플리케이션에서 사용 불가
+
+### 3.2 Featuring Lifting Module
+
+Lifting: 2D에서 3D로의 매핑
+
+feature lifting에 두 가지 문제 고려 필요
+1. 2D feature을 수집하는 방법
+2. 3D domain에 매핑하는 방법
+
+이전 방법[42, 15, 9]
+- global average pooling 연산을 통해 $F^e$를 latent vector로 포함
+- 이후 latent vector는 fully connected layer(FC)를 사용하여 3D 영역에 매핑되고, vector 재배열을 통해 vertex feature을 얻는다.
+- 이러한 방식은 FC의 차원이 크기 때문에 모델 크기가 증가.  
+-> $C^e=256$일 때, 3.2M 매개변수 포함
+
+최근 연구[59, 19, 22, 74, 78]
+- 2D 랜드마크를 기반으로 하는 pixel-aligned feature extraction과 pixel-aligned feature pooling을 보고
+- heatmap $\text{H}^p$는 일반적으로 2D 랜드마크[19, 15, 9, 75]를 인코딩하는데 사용
+    - 2D 위치 $\text{L}^p$[43, 66, 7, 63, 68]의 직접 회귀에 비해 더 정확한 랜드마크를 추정
+
+**Map-based position regression**
+
+- Fig 4(a):
+    - $H^p$는 고해상도 표현
+- Fig 4(b):
+    - soft-argmax는 $\text{H}^p$를 해당 2D 위치로 decoding하는 차별화 가능한 기술
+- Fig 4(c):
+    - direct position regression은 저해상도 표현으로, $\text{H}^p$에 의존하지 않고 $\text{L}^p$를 얻을 수 있다.
+
+human pose estimation 작업에는 저해상도 encoding과 고해상도 encoding이 모두 필요함이 입증됨[67]  
+-> feature을 융합하는 skip-connection은 $H^p$의 우수한 정확도의 주요 원인[55]
+
+$\text{L}^p$를 예측하기 위해 사용하는 global feature($1 \times 1$ 해상도인)이 global semantics과 receptive field로 인해 더 나은 시간적 일관성(temporal coherence)를 유도한다.(Fig 4(c) 참조)
+
+이 전역 속성은 손 포즈의 관절 관계를 더 잘 설명할 수 있다.  
+반대로, $\text{H}^p$는 convolution 및 고해상도 feature로 예측되며, 제한된 receptive field로 인해 랜드마크 간 제약이 부족하다.
+
+~
+
+
+### 3.3 Depth-Separable SpiralConv
+
+
+### 3.4 Loss Functions
+
+## 4. Experiments
+
+### 4.1 Implementation Details
+
+### 4.2 Evaluation Criterion

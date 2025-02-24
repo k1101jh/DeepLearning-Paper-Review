@@ -113,11 +113,59 @@ iPhone 12 Pro에서 FastViT의 ImageNet Top-1 정확도가 83.9%일 때,
 - CMT-S보다 $3.5\times$,
 - ConvNeXt보다 $1.9\times$ 빠르다.
 
-데스크톱 GPU에서 FastViT의 ImageNet Top-1 정확도가 84.9%일 때,
-- NFNet F1만큼 빠르지만 66.7% 더 작고 FLOPs는 50.1% 더 적다.  
-모바일 장치에서 42.8%만큼 더 빠르다.
+FastViT의 ImageNet Top-1 정확도가 84.9%일 때,
+- 데스크톱 GPU에서 NFNet F1만큼 빠르지만 66.7% 더 작고 FLOPs는 50.1% 더 적다.  
+- 모바일 장치에서 42.8%만큼 더 빠르다.
+
+iPhone 12 Pro에서 0.8ms latency일 때
+- MobileOne-S0보다 ImageNet에서 4.2% 더 나은 Top-1 정확도를 보인다.
+
+Mask-RCNN 헤드를 사용한 MS COCO 객체 감지 및 instance 분할의 경우
+- CMT-S와 유사한 성능을 달성하면서 backbone 지연 시간이 $4.3\times$ 낮다.
 
 ~~
 
 ## 2. Related Work
+
+
+## 3. Architecture
+
+### 3.1 Overview
+
+FastViT (Fig 2 참조)
+- 하이브리드 transformer
+- 서로 다른 scale에서 작동하는 4개의 개별 stage가 존재
+- RepMixer 사용
+    - skip connection을 재매개변수화
+    - 메모리 엑세스 비용을 완화하는데 도움이 됨(Fig 2d)
+- 효율성과 성능을 개선하기 위해 stem 및 patch embedding layer에서 흔히 볼 수 있는 dense k $\times$ k convolution을 train-time overparameterization을 사용하는 factorized 버전으로 교체(Fig 2a)
+- Self-attention token mixer
+    - 더 높은 해상도에서 계산적으로 효율적
+- 초기 수용장(receptive field)를 개선하기 위한 효율적인 대안으로 큰 kernel convolution 사용
+
+![alt text](./images/Table1.png)
+
+> **Table 1**  
+> PoolFormer-S12부터 시작해서 FastViT-S12를 얻기 위한 아키텍처 선택 사항 분석  
+> "LK."는 대형 kernel을 의미
+
+표 1에서 PoolFormer baseline에서 FastViT를 설계할 때 선택한 다양한 아키텍처 선택 사항을 분석
+
+### 3.2 FastViT
+
+#### 3.2.1 Reparameterizing Skip Connections
+
+**RepMixer**
+
+convolutional mixing
+
+입력 텐서 $X$의 경우 layer에 있는 mixing block은 다음과 같이 구현
+
+$$
+\displaystyle
+\begin{aligned}
+&Y = \text{BN}(\sigma(\text{DWConv}(X))) + X
+&(1)
+\end{aligned}
+$$
 
