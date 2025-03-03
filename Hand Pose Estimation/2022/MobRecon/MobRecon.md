@@ -164,13 +164,19 @@ heatmap 또는 position을 2D representation으로 사용한 것은 주목할만
 ## 3. Our Method
 
 ![alt text](./images/Fig2.png)
-> **MobRecon framework의 overview**
+
+> **Figure 2. MobRecon framework의 overview**
 
 입력: single-view 이미지
 목표: 예측된 정점 $\text{V} = \{\text{v}_i\}^V_{i=1}$ 및 사전 정의된 표면 $\text{C} = \{\text{c}_i\}^C_{i=1}$을 사용하여 3D 손 mesh를 추론
 
 
 ### 3.1 Stacked Encoding Network
+
+![alt text](./images/Fig3.png)
+
+> **Figure 3. Tailored stacked encoding 구조**
+
 
 - hourglass network에서 영감을 받음
 - 점차적으로 개선된 인코딩 기능을 얻기 위함
@@ -214,6 +220,17 @@ feature lifting에 두 가지 문제 고려 필요
 
 **Map-based position regression**
 
+![alt text](./images/Fig4.png)
+
+> **Figure 4. 2D 표현과 pose pooling 방법 비교**  
+> (a) heatmap  
+> (b) heatmap + soft-argmax  
+> (c) regression 기반 방법  
+> (d) MapReg 기반 방법  
+> (e) heatmap을 사용한 joint-wise pooling  
+> (f) 2D 위치를 사용한 grid sampling  
+> 더 나은 시각화를 위해 4개의 랜드마크만 표시
+
 - Fig 4(a):
     - $H^p$는 고해상도 표현
 - Fig 4(b):
@@ -229,11 +246,121 @@ $\text{L}^p$를 예측하기 위해 사용하는 global feature($1 \times 1$ 해
 이 전역 속성은 손 포즈의 관절 관계를 더 잘 설명할 수 있다.  
 반대로, $\text{H}^p$는 convolution 및 고해상도 feature로 예측되며, 제한된 receptive field로 인해 랜드마크 간 제약이 부족하다.
 
-~
 
+- Fig 4(d):
+    - MapReg: heatmap과 위치 기반 패러다임의 장점을 결합한 중간 해상도 방법
+        1. 정확도를 위해 저해상도 및 고해상도 feature을 융합
+        2. 시간적 일관성을 위해 global receptive field를 사용
+
+    - position regression 패러다임에 skip connection을 통합하여 공간적으로 작은 크기(예: $16 \times 16$)의 feature map을 생성
+    - 각 feature channel을 vector로 flatten한 다음 MLP(Multi-Layer Perceptron)을 사용하여 2D 위치 생성
+    - 두 개의 $2 \times$-upsampling 작업만 포함하기 때문에 heatmap보다 우수한 middle-resolution 공간 복잡성을 얻는다.
+
+**Pose pooling**
+- 2D 표현을 얻은 후 pixel-aligned features를 얻는 프로세스
+- $N$개의 2D joint landmark로 pose-aligned된 feature을 캡처
+- 히트맵 $\text{H}^p$가 2D 표현으로 사용되는 경우 pose pooling은 joint-wise pooling으로 수행된다.
+
+    joint-wise pooling:
+
+    $$
+    \displaystyle
+    \begin{aligned}
+    &\text{F}^p = [\Psi (\text{F}^e \odot \text{interpolation}(\text{H}^p_i) )]_{i=1, 2, ..., N}
+    &(1)
+    \end{aligned}
+    $$
+
+    > $[\cdot]:$ concatenation
+
+    1. $\text{H}^p_i$의 공간 크기를 $H^e \times W^e$로 보간
+    2. 보간된 $\text{H}^p$와 $\text{F}^e$ 사이에 channel-wise 곱을 채택
+
+    -> joint landmark와 관련 없는 feature가 억제됨
+
+    joint-wise feature을 추출하기 위해 feature reduction $\Psi$를 설계
+    - global max-pooling 또는 spatial sum reduction을 나타냄
+    - $C^e$ 길이 feature vector을 생성
+
+    concatenation 이후 $\text{F}^p \in \mathbb{R}^{N \times C^e}$는 pose-aligned feature을 나타냄
+
+- Fig 4(f):
+    - 2D 포즈를 설명하기 위해 $\text{H}^p$ 대신 $\text{L}^p$를 사용하면 다음과 같이 grid sampling을 사용하여 pose pooling을 달성 가능
+
+    $$
+    \displaystyle
+    \begin{aligned}
+    &\text{F}^p = [\text{F}^e(\text{L}^p_i)]_{i=1,2,...,N}
+    &(2)
+    \end{aligned}
+    $$
+
+    -> convolutional encoding $\text{F}^e$는 pose-aligned 표현 $\text{F}^p$로 변환됨
+
+**Pose-to-vertex lifting**
+
+PVL(몇 가지 학습 가능한 매개변수)을 사용하여 3D 공간으로의 feature mapping을 위한 선형 연산자를 설계(Fig 2 참조)
+
+MANO-style 손 mesh는 $V$개의 정점(778개)과 $N$개의 joint(21개)로 구성
+
+$V \gg N$ -> $\text{F}^p$를 $V$ 정점 feature로 변환하기 어렵다.
+- 대신 template mesh를 2 값으로 4번 downsampling하고 $V^{mini}=49$ 정점이 있는 최소 크기의 손 mesh를 얻는다.
+- 이후 2D에서 3D로의 mapping 기능을 위해 학습 가능한 lifting matrix $M^l \in \mathbb{R}^{V^{mini} \times N}$을 설계. PVL은 다음과 같다.
+
+$$
+\displaystyle
+\begin{aligned}
+&\text{F}^{mini_v} = \text{M}^l \cdot \text{F}^p
+&(3)
+\end{aligned}
+$$
+
+> $\text{F}^{mini_v}:$ minimal-size vertex feature
+
+PVL은 $O(V^{mini} C^{e2})$에서 $O(NV^{mini}C^e)$로 feature mapping의 계산 복잡성을 줄인다.
 
 ### 3.3 Depth-Separable SpiralConv
 
+![alt text](./images/Fig5.png)
+
+> **Figure 5. SpiralConv, SpiralConv++, DSConv의 비교**  
+> 더 나은 시각화를 위해, $S = D = 3$으로 표시
+
+SpiralConv: 나선형 이웃을 다음과 같이 설계하는 euclidean convolution과 동일:
+
+$$
+\displaystyle
+\begin{aligned}
+0-\text{ring}(\text{v}) &= {v}
+\\
+(k+1)-\text{ring}(\text{v}) &= \mathbb{N}(k-\text{ring}(\text{v})) \setminus k-\text{disk}(\text{v})
+&(4)
+\\
+k-\text{disk}(\text{v}) &= \cup_{i=0,...,k} i-\text{ring}(\text{v})
+\end{aligned}
+$$
+
+> $\mathbb{N}: $ 꼭짓점 $v$의 이웃을 추출
+
+$k-\text{disk}(v)$를 사용하면 SpiralConv는 convolution을 sequential problem으로 공식화하고 feature 융합을 위해 LSTM을 활용:
+
+$$
+\displaystyle
+\begin{aligned}
+&\text{f}^{out}_v = \text{LSTM}(\text{f}_{\text{v}'}), \text{v}' \in k-\text{disk}(\text{v})
+&(5)
+\end{aligned}
+$$
+
+> $\text{f}_v \in \mathbb{R}^{1 \times D}:$ D 차원인 $\text{v}$에서의 feature vector
+
+LSTM을 사용한 SpiralConv는 직렬 sequence 처리로 인해 느려질 수 있다.
+
+SpiralConv++[20]
+- SpiralConv의 효율적인 버전
+    - 이웃 vertices의 집계 순서를 명시적으로 공식화함으로써
+- 효율을 위해 $S$ 정점이 있는 고정 크기 spiral 이웃만 채택
+- FC를 활용하여 이러한 feature을 융합
 
 ### 3.4 Loss Functions
 
