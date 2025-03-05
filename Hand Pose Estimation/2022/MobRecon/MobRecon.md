@@ -332,12 +332,12 @@ SpiralConv: 나선형 이웃을 다음과 같이 설계하는 euclidean convolut
 $$
 \displaystyle
 \begin{aligned}
-0-\text{ring}(\text{v}) &= {v}
+0\text{-ring}(\text{v}) &= {v}
 \\
-(k+1)-\text{ring}(\text{v}) &= \mathbb{N}(k-\text{ring}(\text{v})) \setminus k-\text{disk}(\text{v})
+(k+1)\text{-ring}(\text{v}) &= \mathbb{N}(k\text{-ring}(\text{v})) \setminus k\text{-disk}(\text{v})
 &(4)
 \\
-k-\text{disk}(\text{v}) &= \cup_{i=0,...,k} i-\text{ring}(\text{v})
+k\text{-disk}(\text{v}) &= \cup_{i=0,...,k} i\text{-ring}(\text{v})
 \end{aligned}
 $$
 
@@ -348,7 +348,7 @@ $k-\text{disk}(\text{v})$를 사용하면 SpiralConv는 convolution을 sequentia
 $$
 \displaystyle
 \begin{aligned}
-&\text{f}^{out}_v = \text{LSTM}(\text{f}_{\text{v}'}), \text{v}' \in k-\text{disk}(\text{v})
+&\text{f}^{out}_v = \text{LSTM}(\text{f}_{\text{v}'}), \text{v}' \in k\text{-disk}(\text{v})
 &(5)
 \end{aligned}
 $$
@@ -365,6 +365,11 @@ SpiralConv++[20]
 
 $$
 \displaystyle
+\begin{aligned}
+&\text{f}_\text{v}^{out} = \text{W} \cdot [\text{f}_{\text{v}'}] + b,
+&\text{v}' \in k\text{-disk}(\text{v})_S
+\quad&(6)
+\end{aligned}
 $$
 
 > $\text{W}, \text{b}:$ learnable parameters
@@ -381,8 +386,9 @@ $$
     $$
     \displaystyle
     \begin{aligned}
-    &
-    &(7)
+    &\text{f}_\text{v}^{d} = [\text{W}_i^d \cdot [\text{f}_{\text{v}',i}]]^D_{i=1},
+    &\text{v}' \in k\text{-disk}(\text{v})_S
+    \quad&(7)
     \end{aligned}
     $$
 
@@ -391,7 +397,7 @@ $$
     $$
     \displaystyle
     \begin{aligned}
-    &
+    &\text{f}_\text{v}^{out} = \text{W}^{\text{v}} \cdot \text{f}^d_{\text{v}}
     &(8)
     \end{aligned}
     $$
@@ -441,7 +447,10 @@ $$
 $$
 \displaystyle
 \begin{aligned}
+&\mathcal{L}_{con3D} = ||R_{1 \rightarrow 2} \text{V}_{view1} - \text{V}_{view2}||_1
 &(10)
+\\
+&\mathcal{L}_{con2D} = ||T_{1 \rightarrow 2} \text{L}^p_{view1} - \text{L}^p_{view2}||_1
 \end{aligned}
 $$
 
@@ -529,25 +538,171 @@ $
 - 2D encoding network와 data만 바꿔서 비교
 - 다른 stacked structure도 from-scratch training으로 비교
 
-
 ResNet과 MobileNet을 stacked structure을 설계할 때 사용
 - ResNet
     - 집약적인 계산 비용 포함
 - MobileNet
     - 계산을 다루기 쉬움
+    - 성능(PA-MPJPE)를 크게 떨어뜨림
 
+**사전 훈련**
+
+- ImageNet
+    - classification 작업에 사용됨
+    - 이 지식을 2D/3D 위치 회귀로 전달하기 어려움
+    - ImageNet 사전 훈련은 1mm PA-MPJPE보다 적은 개선을 가져옴
+- complement data
+    - 사전 훈련 및 fine-tuning에 사용 가능
+    - DenseStack/GhostStack 은 7.55/8.89mm PA-MPJPE 개선을 가져옴
+
+맞춤형 encoding 구조와 데이터셋으로 정확도를 유지하며 컴퓨팅 비용을 절감
+-> DenseStack/GhostStack을 모바일 환경에 적합하게 만듬
+
+**Feature lifting module**
+
+![alt text](./images/Table2.png)
+
+> **Table 2. Feature lifting module의 절제 연구**  
+> 첫 번째 행: CMR 설정(표 1의 마지막 행)  
+> skip: skip-connection  
+> reg: direct regression  
+> 2D 및 3D 정확도는 각각 RHD 및 FreiHAND에서 테스트  
+> Acc은 Ho3Dv2로 테스트
+
+DenseStack을 통해 정확성과 시간적 일관성에 대한 연구 수행
+- 표 2에서는 sequential module, temporal optimization, pose-processing을 수행하지 않음
+- $\text{H}^p$는 고해상도 표현. skip-connection은 high & low-resolution feature을 융합하는데 중요  
+-> skip-connection을 제거하면 $\text{H}^p$ 정확도가 떨어짐
+- soft-argmax는 $\text{H}^p$에서 더 부드러운 2D position 생성 가능  
+-> 2D AUC와 ACC을 모두 개선할 수 있다.
+- $\text{L}^p$ w/ erg.(그림 4(c))는 상대적으로 적은 정확도를 갖지만 더 나은 시간적 성능을 보임
+- MapReg는 더 나은 2D 정확도와 시간 일관성을 달성
 
 ![alt text](./images/Fig6.png)
 
+> **Figure 6. 다양한 2D pose 표현 map 시각화**  
+> 
+
+- $\text{H}^p$ +soft-argmax
+    - 훈련을 위해 동일한 loss(식 9)를 추가로 사용
+    - heatmap supervision이 포함되지 않음  
+    -> heuristic soft-argmax가 시각적 semantics를 무시하기 때문에 $\text{H}^p$의 부드러운 버전을 순진하게 유도
+- MapReg
+    - vector로 평면화되기 전에 map을 표시
+    - $\text{H}^p$와 달리 joint landmark 제약 조건을 적응적으로 설명 가능. 또한, 적응형 local-global 정보를 사용하여 2D 위치 예측 가능  
+    (예: 랜드마크를 예측할 때 엄지 손가락 전체가 활성화됨)
+    - MapReg는 시간적 일관성을 향상시키기 위해 보다 합리적인 관절 구조를 생성 가능(supplimental material 참고)
+
+2D pose aligned feature을 사용하여 3D 성능을 탐구
+- pose pooling 중에 joint-wise pooling을 사용하여 $\text{H}^p$를 기반으로 2D pose aligned feature을 얻을 수 있음
+- grid sampling은 soft-argmax 또는 $\text{L}^p$를 사용할 때 일반적으로 채택
+- $\text{L}^p$ w/ reg는 $\text{H}^p$+soft-argmax보다 2D 정확도가 떨어지지만 더 나은 PA-MPJPE를 보임  
+-> 동일한 pose pooling방법으로는 안정적인 훈련 process를 확립하는 데 정확성보다 2D 일관성이 중요
+- MapReg 기반 $\text{L}^p$는 가장 좋은 PA-MPJPE 및 3D 정확도를 보임
+
 ![alt text](./images/Fig7.png)
+
+> **Figure 7. 학습한 lifting matrix**
 
 ![alt text](./images/Fig8.png)
 
-## Supplementary Materials
+> **lifting matrix의 여러 정점에 대한 관련성이 높은 연결**  
+> 숫자는 정점 인덱스
 
-1. Complement Dataset
+PVL에서는 lifting matrix $\text{M}^l \in \mathbb{R}^{V^{mini} \times N}$을 사용하여 2D pose 공간에서 3D 정점 공간으로 feature을 변환하는 선형 operation을 설계  
+-> $V^{mini}$ 정점 feature은 $N$개의 랜드마크 feature의 선형 조합에 의해 생성됨
+- Fig 7은 잘 훈련된 lifting matrix를 보임. abs($\text{M}^l$)을 사용하여 joint-vertex 관계를 명확하게 나타냄
+- 학습된 $\text{M}^l$은 희박함
+- joint landmark(집게손가락의 root에 위치한 joint 5)는 전역 정보 역할을 하며 대부분의 정점에 기여
+- 일부 관절 랜드마크 특성인 관련된 정점으로 전파됨
+- Fig 8은 관련성이 높은 $\text{M}^l$ 연결을 보여줌. PVL 접근 방식이 의미론적 일관성을 유지할 수 있음을 보임
+
+feature lifting module
+- CMR보다 더 나은 PA-MPJPE 및 3D Acc을 제공
+- CMR에 비해 2D-3D부분의 계산 비용을 크게 줄임
+- 2D 파트에서 추가 Mult-Add를 사용했음에도 2D pose 예측은 multi-task learning 및 root recovery task로 인해 3D 손 재구성에 도움이 되는 것으로 입증됨
+
+**Towards balancing model efficiency and performance**
+
+![alt text](./images/Table3.png)
+
+> **Table 3. 일관성 학습의 절제 연구**  
+> 정확도는 FreiHAND로 측정  
+> Acc은 HO3Dv2로 측정
+
+3D/2D 일관성 loss를 설계
+- 표 3은 일관성 학습이 시간적 일관성을 향상시킴을 보임
+- 정확한 일관성과 시간적 일관성은 서로 도움이 될 수 있으므로 PA-MPJPE도 향상됨
+
+![alt text](./images/Table4.png)
+
+> **Table 4. 3D decoding의 절제 연구**  
+> Mult-Adds와 #Param은 3D decoder/전체 모델  
+> 2D/3D Acc을 표시  
+> Apple A14 CPU에서 테스트 한 FPS 표시  
+> 정확도와 시간적 성능은 각각 FreiHAND와 HO3Dv2로 테스트
+
+- DSConv는 3D decoder의 Mult-Adds와 #Param을 크게 감소시키고 SpiralConv++와 비교하여 동등하거나 더 나은 성능을 보임
+- DenseStack/GhostStack을 사용한 MobRecon은 Apple A14 CPU에서 67/83 FPS에 도달할 수 있음
+
+**Discussion**
+MobRecon은 DSConv가 메모리 접근 비용을 증가시킨다는 제한이 있음  
+-> 더 높은 inference speed를 위해 일부 엔지니어링 최적화를 포함해야 함
+
+### 4.4 현대적 방법과 비교
+
+![alt text](./images/Fig9.png)
+
+> **Figure 9. 3D PCK vs. error thresholds.**
+
+![alt text](./images/Table5.png)
+
+> **Table 5. FreiHAND 데이터셋 결과**  
+> *: stacked structure  
+> \dagger: ImageNet 사전 훈련 backbone + mixed fine-tuning data
+> \ddagger: complement data와 관련 없음
+
+![alt text](./images/Table6.png)
+
+> **Table 6. HO3Dv2 데이터셋 결과**
+
+FreiHAND 데이터셋에서 공정한 비교
+- $224 \times 224$ 입력 해상도로 ResNet 기반 모델 확장
+- ResNet50은 이전 방법을 능가하여 5.7mm PA-MPJPE를 제공(표 5 참조)
+- DenseStack 또는 GhostStack을 기반으로 하는 MobRecon은 일부 ResNet 기반 방법 능가
+- MobRecon은 3D PCK에서 우수한 성능 발휘(그림 9 참조)
+- 또한 뛰어난 추론 속도를 달성(그림 1 참조)
+
+RHD 및 HO3Dv2로 실험
+- complement data는 DenseStack/GhostStack을 사전 학습하는 데만 사용
+- DenseStack/GhostStack을 사용한 MobRecon은 0.955 및 0.940의 3D AUC를 보임. 대부분의 비교한 접근 방식을 능가(그림 9 RHD)
+
+HO3Dv2 데이터셋 평가
+- MobRecon은 기존 방법보다 뛰어난 성능을 보임
+- HO3Dv2는 심각한 객체 폐색 때문에 FreiHAND 및 RHD보다 더 까다로움
+- MobRecon은 더 나은 일반화 기능으로 인해 일부 ResNet 기반 방법보다 성능이 뛰어나다.
+- 또한 더 나은 시간적 일관성을 달성(표 2 참조)
+
+## 5. Conclusions and Future Work
+
+우수한 효율성, 정확성 및 시간적 일관성을 가진 새로운 손 mesh 재구성 구조 방ㅂ접을 제시
+- 2D encoding을 위한 경량 적층 구조 제안
+- 2D-to-3D mapping을 위해 MapReg, pose pooling, PVl 접근 방식을 사용하는 feature lifting 모듈 설계
+- DSConv는 3D 디코딩 작업을 효율적으로 처리
+- MobRecon은 123M Mult-Add 및 5M 매개변수만 포함
+- Apple A14 CPU에서 83FPS 추론 속도 달성
+- FreiHAND, RHD, Ho3Dv2에서 SOTA 달성
+
+향후 계획
+- 손을 상호작용하기 위한 효율적인 방법 조사
+
+# Supplementary Materials
+
+## 1. Complement Dataset
 
 **Data Designs**
+
+- 5633개 vertices와 11232개 face로 구성
 
 **Network pre-training**
 - 2D encoding network를 사전 훈련하기 위해 2D pose estimation 작업 설계
@@ -560,3 +715,15 @@ ResNet과 MobileNet을 stacked structure을 설계할 때 사용
     - learning rate: $10^{-3}$
     - learning rate decay: 20, 40, 60번째 epoch에서 10으로 나눔
     - input resolution: $128 \times 128$
+
+## 2. Analysis and Application
+
+![alt text](./images/Fig6_sup.png)
+
+> **Figure 6. data augmentation에 기반한 consistency loss**
+
+**Diagram of our consistency loss**
+
+- 입력 이미지에서 두 개의 view가 파생됨
+- 본문의 식 11과 같이 2D 공간과 3D 공간 모두에서 설계 가능
+
