@@ -400,3 +400,25 @@ distillation objective로 학습된 모델의 성능(표 6)
 
 ### 4.2 Robustness Evaluation
 
+
+### 4.3 3D Hand mesh estimation
+
+real-time 3D hand mesh estimation은 CNN 기반 backbone에 복잡한 mesh regression layer을 도입
+- backbone으로는 보통 ResNet이나 MobileNet 아키텍처 제품군 사용
+- 이와 달리 METRO와 MeshGraphormer은 HRNets를 feature extraction에 사용
+- 대부분의 하드웨어 장치는 2D CNNs로 feature extraction하는 데 최적화되어 있음
+- 이러한 방법에서 사용되는 복잡한 mesh regression head에 대해서는 최적화되어 있지 않음
+- 복잡한 mesh regression head를 간단한 regression module로 변환(다음을 회귀하는)
+    - weak perspective camera
+    - MANO model의 pose & shape parameters
+    
+기본 이미지들에 대해 좋은 표현을 학습하는 feature extraction backbone을 사용하면 mesh 회귀 학습 문제를 완화할 수 있음
+- 다른 실시간 방법은 복잡한 mesh regression layer가 있는 weak feature extraction backbone을 사용
+- 본 논문에서는 간단한 mesh regression layer가 있는 더 나은 feature extraction backbone을 사용
+- FreiHand 데이터셋으로 다른 방법과 비교
+    - FreiHand 데이터셋만 사용한 결과를 인용
+    - 사전 훈련에만 ImageNet-1k 데이터셋을 사용
+    - [32]에 설명된 실험 설정을 사용하여 FreiHand 데이터셋에서만 훈련
+    - 실시간 방법 중 제안 방법은 모든 joint 및 vertex error 관련 지표에서 다른 방법보다 우수함
+        - MobileHand[16]보다 $1.9 \times$ 빠름
+        - 최신 MobRecon보다 $2.8 \times$ 빠름
