@@ -158,12 +158,20 @@ corruption 및 out-of-distribution에 대한 모델의 견고성 연구
 
 ### 3.1 Overview
 
+![alt text](./images/Fig2.png)
+
+> **Figure 2.**  
+> (a) train-time과 inference-time 아키텍처를 분리한 FastViT 아키텍처 개요. Stage 1, 2, 3은 같은 아키텍처를 가지며 Token mixing을 위해 RepMixer을 사용한다. Stage 4에서는 Token mixing을 위해 self attention layer을 사용한다.  
+> (b) Convolutional stem 아키텍처  
+> (c) Convolutional-FFN 아키텍처
+> (d) RepMixer block 개요. 추론 단계에서 skip connection을 재매개변수화 함
+
 FastViT (Fig 2 참조. 모든 변형에 대해서는 표 2 참조)
 - 하이브리드 transformer
 - 서로 다른 scale에서 작동하는 4개의 개별 stage가 존재
 - RepMixer 사용
     - skip connection을 재매개변수화
-    - 메모리 엑세스 비용을 완화하는데 도움이 됨(Fig 2d)
+    - 메모리 접근 비용을 완화하는데 도움이 됨(Fig 2d)
 - 효율성과 성능을 개선하기 위해 stem 및 patch embedding layer에서 흔히 볼 수 있는 dense k $\times$ k convolution을 train-time overparameterization을 사용하는 factorized 버전으로 교체(Fig 2a)
 - Self-attention token mixer
     - 더 높은 해상도에서 계산적으로 효율적
@@ -191,14 +199,6 @@ FastViT (Fig 2 참조. 모든 변형에 대해서는 표 2 참조)
 
 #### 3.2.1 Reparameterizing Skip Connections
 
-![alt text](./images/Fig2.png)
-
-> **Figure 2.**  
-> (a) train-time과 inference-time 아키텍처를 분리한 FastViT 아키텍처 개요. Stage 1, 2, 3은 같은 아키텍처를 가지며 Token mixing을 위해 RepMixer을 사용한다. Stage 4에서는 Token mixing을 위해 self attention layer을 사용한다.  
-> (b) Convolutional stem 아키텍처  
-> (c) Convolutional-FFN 아키텍처
-> (d) RepMixer block 개요. 추론 단계에서 skip connection을 재매개변수화 함
-
 **RepMixer**
 
 convolutional mixing
@@ -217,7 +217,7 @@ $$
 > $\text{BN}:$ batch normalization layer  
 > $\text{DWConv}:$ depthwise convolutional layer
 
-RepMizer에서는 아래와 같이 연산을 재정렬하고 비선형 활성화 함수를 제거하기만 하면 됨
+RepMixer에서는 아래와 같이 연산을 재정렬하고 비선형 활성화 함수를 제거하기만 하면 됨
 
 $$
 \displaystyle
