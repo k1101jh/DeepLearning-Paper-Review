@@ -151,8 +151,15 @@ corruption 및 out-of-distribution에 대한 모델의 견고성 연구
 
 ## 2. Related Work
 
+- 최근 transformer 모델들이 컴퓨터 비전 작업에서 큰 성공을 보임
+- convolutional layer과 달리, vision transformer의 self-attention layer는 장거리 의존성을 모델링하여 글로벌 context를 제공
+- 이러한 global scope는 종종 높은 계산 비용을 요구
+- [41, 57, 29, 39]와 같은 작업들은 self-attention layer과 관련된 계산 비용을 완화하는 방법을 다룸
+- 본 논문에서는 더 낮은 latency를 위해 self-attention layer에 효율적인 대안을 탐구
 
-지난 10년 동안 컨볼루션 신경망은 비전 모델의 표준 아키텍처였습니다[21, 43, 64, 48, 49, 26, 46, 25, 36, 13, 55]. 보다 최근에는 트랜스젠더들이 컴퓨터 비전 과제에서 큰 성공을 거두었다[14, 63, 51, 35, 58, 52, 42, 41]. 컨볼루션 레이어(convolutional layer)와 달리, 비전 트랜스포머(vision transformers)의 셀프-어텐션(self-attention) 레이어는 장거리 의존성을 모델링하여 글로벌 컨텍스트를 제공합니다. 불행히도 이러한 글로벌 범위는 종종 높은 계산 가격으로 제공됩니다[39]. [41, 57, 29, 39]와 같은 작품은 셀프 어텐션 계층과 관련된 계산 비용을 완화하는 방법을 다룹니다. 우리의 작업에서는 더 낮은 대기 시간을 위해 self-attention 계층에 native로 효율적인 alter를 탐구합니다.
+**Hybrid Vision Transformers**
+
+**Structural Reparameterization**
 
 ## 3. Architecture
 
@@ -400,10 +407,24 @@ distillation objective로 학습된 모델의 성능(표 6)
 
 ### 4.2 Robustness Evaluation
 
+![alt text](./images/Table7.png)
+
+> **Table 7. 강인함 benchmark 데이터셋 결과**  
+> FLOPs 기준으로 모델들을 그룹화  
+> 경쟁 모델의 성능은 [38]과 [36]에서 보고됨  
+> *ResNet-50 모델은 강인함을 향상시키기 위해 AugMix로 훈련됨([38] 참조)  
+> ImageNet-C는 평균 corruption error 보고  
+> 다른 데이터셋의 Top-1 accuracy 보고  
+> 가장 좋은 결과는 굵은 글씨, 두 번째로 좋은 결과는 밑줄 처리
+
 
 ### 4.3 3D Hand mesh estimation
 
-real-time 3D hand mesh estimation은 CNN 기반 backbone에 복잡한 mesh regression layer을 도입
+![alt text](./images/Fig2_sup.png)
+
+> **Figure 2(supplementary). 3D hand mesh estimation framework 개요**
+
+- real-time 3D hand mesh estimation은 CNN 기반 backbone에 복잡한 mesh regression layer을 도입
 - backbone으로는 보통 ResNet이나 MobileNet 아키텍처 제품군 사용
 - 이와 달리 METRO와 MeshGraphormer은 HRNets를 feature extraction에 사용
 - 대부분의 하드웨어 장치는 2D CNNs로 feature extraction하는 데 최적화되어 있음
@@ -412,7 +433,7 @@ real-time 3D hand mesh estimation은 CNN 기반 backbone에 복잡한 mesh regre
     - weak perspective camera
     - MANO model의 pose & shape parameters
     
-기본 이미지들에 대해 좋은 표현을 학습하는 feature extraction backbone을 사용하면 mesh 회귀 학습 문제를 완화할 수 있음
+- 기본 이미지들에 대해 좋은 표현을 학습하는 feature extraction backbone을 사용하면 mesh 회귀 학습 문제를 완화할 수 있음
 - 다른 실시간 방법은 복잡한 mesh regression layer가 있는 weak feature extraction backbone을 사용
 - 본 논문에서는 간단한 mesh regression layer가 있는 더 나은 feature extraction backbone을 사용
 - FreiHand 데이터셋으로 다른 방법과 비교
@@ -422,3 +443,62 @@ real-time 3D hand mesh estimation은 CNN 기반 backbone에 복잡한 mesh regre
     - 실시간 방법 중 제안 방법은 모든 joint 및 vertex error 관련 지표에서 다른 방법보다 우수함
         - MobileHand[16]보다 $1.9 \times$ 빠름
         - 최신 MobRecon보다 $2.8 \times$ 빠름
+
+![alt text](./images/Table8.png)
+
+> **Table 8. FreiHAND test dataset 결과**  
+> MobRecon과 유사한 설정에서 NVIDIA RTX-2080Ti으로 FPS 측정  
+> 경쟁 방법의 성능은 FreiHand 데이터셋으로만 훈련한 성능
+
+![alt text](./images/Fig3_sup.png)
+
+> **Figure 3(supplementary). 제안 프레임워크의 FreiHand test set 정성적 결과**  
+> 3D 예측은 weak perspective camera model을 사용하여 이미지로 투영됨  
+> camera model의 매개변수 또한 모델에 의해 예측됨
+
+### 4.4 Semantic Segmentation and Object Detection
+
+- ADE20k 데이터셋으로 성능 평가
+    - 20K training images & 2K validation images
+    - 150 semantic categories
+
+- Semantic FPN[28] decoder로 훈련
+    - Semantic FPN head는 [65]의 설정을 따름
+
+![alt text](./images/Table9.png)
+
+> **Table 9. ADE20K semantic segmentation 작업에서 서로 다른 backbone의 성능**  
+> FLOPs와 backbone latency는 $512 \times 512$로 잘린 이미지로 측정
+
+- 모든 모델은 각각에 해당하는 image classification model로 사전훈련된 가중치 사용
+- FLOPs 및 backbone latency는 $512 \times 512$로 crop된 이미지로 측정
+- GPU latency는 표 9와 표 10에서 batch size=2로 추정(입력 이미지 해상도가 높기 때문)
+- 표 9에서 최신 모델과 비교
+    - FastViT-MA36은 PoolFormer-M36보다 5.2% 높은 mIoU를 보임
+        - PoolFormer-M36이 desktop GPU와 모바일 장치 모두에서 FLOPs, 파라미터 수, latency가 더 높음
+
+![alt text](./images/Table10.png)
+
+> **Table 10. MS-COCO val2017의 object detection 및 instance segmentation에 대한 결과**
+> $1 \times$ training schedule(즉, 모델 훈련에 사용되는 12 epochs 동안)을 사용한 Mask-RCNN[20] 프레임워크를 사용
+> Backbone latency는 $512 \times 512$로 잘린 이미지로 측정
+
+- MS-COCO 데이터셋으로 object detection 훈련
+    - 80개 클래스
+    - 118K training images & 5K validation images
+- 표 10에서 최신 모델과 비교
+- 모든 모델은 Mask-RCNN head를 사용하여 $1 \times$ schedule로 훈련됨
+- 모든 모델은 각각에 해당하는 image classification model로 사전훈련된 가중치 사용
+- 제안 모델은 multiple latency 체제에서 SOTA를 달성
+    - FastViT-MA36 모델은 CMT-S와 비슷한 성능을 보임
+        - Desktop GPU에서 $2.4 \times$ 더 빠름
+        - 모바일 장치에서 $4.3 \times$ 더 빠름
+
+## 5. 결론
+
+- 여러 컴퓨팅 장치에서 효율적인 범용 hybrid vision transformer 제안
+- 구조적 재매개변수화를 통해 메모리 접근 비용을 줄임
+    - 더 높은 해상도에서 실행 시간을 크게 향상시킴
+- downstream 작업의 성능을 향상시키는 추가 아키텍처 변경을 제안
+    - ImageNet 분류, 객체 감지, semantic segmentation, 3D 손 mesh 추정과 같은 작업들
+- 제안한 backbone은 분포를 벗어난 샘플에 대해 매우 견고하며 경쟁하는 견고한 모델보다 훨씬 빠름
