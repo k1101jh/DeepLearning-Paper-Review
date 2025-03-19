@@ -12,6 +12,9 @@
 
 ---
 
+
+---
+
 ## GPT 요약
 
 1. 새로운 하이브리드 Vision Transformer 아키텍처: FastViT
@@ -148,7 +151,6 @@ corruption 및 out-of-distribution에 대한 모델의 견고성 연구
 - 이미지 분류, 객체 감지, semantics segmentation 및 3D 손 mesh regression과 같은 많은 작업으로 일반화됨
 - corruption 및 out-of-distribution 샘플에 강건하며 다른 견고한 모델보다 훨씬 빠름
 
-
 ## 2. Related Work
 
 - 최근 transformer 모델들이 컴퓨터 비전 작업에서 큰 성공을 보임
@@ -159,7 +161,27 @@ corruption 및 out-of-distribution에 대한 모델의 견고성 연구
 
 **Hybrid Vision Transformers**
 
+- 최근 연구에서는 convolution 설계와 transformer 설계를 결합
+    - local 및 global 정보를 효과적으로 캡처
+    - 정확성을 유지하면서 효율적인 네트워크를 설계하기 위함
+    - 예시:
+        - patchify stem을 convolution layer로 대체
+        - windowed attention을 통해 암시적으로 hybridize
+- 최근 연구는 token(또는 patch) 사이의 정보 교환을 위해 명시적인 hybrid 구조를 구축
+- 대부분 hybrid 아키텍처에서 token mixer는 주로 self-attention을 기반으로 함
+- MetaFormer은 token mixing을 위한 간단하고 효율적인 pooling을 제안
+
 **Structural Reparameterization**
+
+- 최근 연구[13, 55]는 메모리 접근 비용을 낮추기 위해 skip connection을 reparameterizing
+- 제안 모델은 추론 시 reparameterizable한 RepMixer을 제안
+- [26, 46, 25, 37, 69]와 같은 작업은 깊이별 또는 그룹화된 convolution을 사용한 후 $1 \times 1$ pointwise convolution을 사용하여 factorized $k \times k$ convolution을 도입
+    - 모델의 전반적인 효율성을 개선하는데 매우 효과적
+    - 매개 변수 수가 적으면 용량이 감소할 수 있음
+- 이러한 모델의 용량을 향상시키기 위해 [55, 11, 12]에서는 linear train-time overparameterization 도입
+    - factorized $k \times k$ convolution와 linear train-time overparameterization를 사용  
+    -> 이러한 layer의 용량을 늘림
+- skip connection 및 linear overparameterization을 제거하기 위한 구조적 reparameterization은 이전의 hybrid transformer 아키텍처에서 시도되지 않음
 
 ## 3. Architecture
 
