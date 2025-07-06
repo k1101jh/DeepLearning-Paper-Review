@@ -230,7 +230,7 @@ FastViT (Fig 2 참조. 모든 변형에 대해서는 표 2 참조)
 
 **RepMixer**
 
-convolutional mixing
+convolutional mixing(ConvMixer[53]가 제안):
 
 입력 텐서 $X$의 경우 layer에 있는 mixing block은 다음과 같이 구현
 
@@ -439,6 +439,20 @@ distillation objective로 학습된 모델의 성능(표 6)
 > 다른 데이터셋의 Top-1 accuracy 보고  
 > 가장 좋은 결과는 굵은 글씨, 두 번째로 좋은 결과는 밑줄 처리
 
+
+다음 벤치마크에서 out-of-distribution robustness를 평가
+1. ImageNet-A: ResNet에 의해 잘못 분류된 자연적으로 발생하는 샘플이 포함된 데이터세트
+2. ImageNet-R: 서로 다른 texture 및 local 이미지 통계를 가진 ImageNet 객체 class의 natural 표현을 포함하는 데이터셋
+3. ImageNet-Sketch: Google 이미지 query를 사용하여 얻은 모든 ImageNet 클래스의 흑백 스케치를 포함하는 데이터셋
+4. ImageNet-C: ImageNet 테스트셋에 적용된 알고리즘으로 생성된 손상(흐림, 노이즈)로 구성된 데이터셋
+
+- 제안 모델은 최신 vision transformer보다 강력함
+    - 순수 CNN기반 모델보다 빠르다
+- FFN에서 large kernel convolution을 사용하고 self-attention layer과 함께 patch imbedding을 사용하면 모델의 견고성 향상에 도움이 된다.
+- 표 7의 모든 모델은 유사한 학습 레시피를 사용하여 ImageNet-1K 데이터셋으로만 학습
+- 제안 모델은 RVT 및 ConvNeXt에 비해 경쟁력이 높다
+- FastViT-M36은 더 나은 정확도, corruption에 대해 더 나은 견고성을 갖는다.
+    - 이보다 6.1M 더 많은 매개변수와 10% 더 많은 FLOPs를 갖는 ConvNeXt-S와 유사한 out-of-distribution 견고성을 갖는다.
 
 ### 4.3 3D Hand mesh estimation
 
