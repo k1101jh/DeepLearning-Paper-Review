@@ -89,7 +89,7 @@ Vision Transformers
     - ConvMixer와 유사한 정보의 spatial mixing을 위해 depthwise convolution을 사용
         - 주요 차이점: 추론 시 모듈을 재매개변수화하여 branch를 제거할 수 있음
 
-대기 시간, FLOPs 및 매개 변수 수를 더 개선하기 위해 조밀한 k $\times$ k convolutions를 factorized버전(pointwise convolution 이후 depthwise convolutions 사용)으로 교체
+대기 시간, FLOPs 및 매개 변수 수를 더 개선하기 위해 조밀한 k $\times$ k convolutions를 factorized버전(depthwise convolution 이후 pointwise convolutions 사용)으로 교체
 - 효율성 metric을 개선하기 위해 효율적인 아키텍처[26, 46, 25]에서 사용하는 일반적인 접근방식
     - 이 방식을 그대로 사용하면 성능이 저하(표 1 참조)
 - 이러한 layer의 용량을 늘리기 위해 [13, 11, 12, 55, 18]에 소개된 대로 선형 train-time overparameterization을 사용
@@ -99,12 +99,12 @@ Vision Transformers
 - token mixing에 기반한 self-attention가 경쟁력있는 정확도를 달성하는데 매우 효과적
     - 하지만 latency 측면에서는 비효율적
 
-- Feed Forward Network(FFN) 레이어에 large kernel convolution을 통합하고 patch embedding layer을 통합
+- Feed Forward Network(FFN) & patch embedding 레이어에 large kernel convolution을 통합
 -> 모델의 전체 대기 시간에 미치는 영향을 최소화하면서 성능 향상
 
 **FastViT**
 1. RepMixer block을 사용하여 skip connection을 제거
-2. linear train-time connection을 사용하여 정확도를 높임
+2. linear train-time overparameterization을 사용하여 정확도를 높임
 3. 초기 단계에서 self-attention layer을 대체하기 위해 large convolutional kernel을 사용
 
 - 다른 Hybrid vision transformer 아키텍처에 비해 latency를 크게 개선 및 여러 작업에서 정확도를 유지
@@ -203,8 +203,8 @@ FastViT (Fig 2 참조. 모든 변형에 대해서는 표 2 참조)
     - 메모리 접근 비용을 완화하는데 도움이 됨(Fig 2d)
 - 효율성과 성능을 개선하기 위해 stem 및 patch embedding layer에서 흔히 볼 수 있는 dense k $\times$ k convolution을 train-time overparameterization을 사용하는 factorized 버전으로 교체(Fig 2a)
 - Self-attention token mixer
-    - 더 높은 해상도에서 계산적으로 효율적
-- 초기 수용장(receptive field)를 개선하기 위한 효율적인 대안으로 큰 kernel convolution 사용
+    - 더 높은 해상도에서 계산이 비쌈
+- 초기 수용장(receptive field)을 개선하기 위한 효율적인 대안으로 큰 kernel convolution 사용
 
 ![alt text](./images/Table1.png)
 
