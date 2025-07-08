@@ -6,27 +6,95 @@
 
 ---
 
-paper: 
+url
+- [paper](https://ieeexplore.ieee.org/abstract/document/10943362)
 
 ---
 
 목차
 
 0. [Abstract](#abstract)
-1. 
+1. [Introduction](#1-introduction)
+2. [Related Work](#2-related-work)
+3. [Methodology](#3-methodology)
+4. [Results](#4-results)
+5. [Conclusion](#5-conclusion)
 
 ---
 
 ## Abstract
 
+Camera Relocalization 방법
+ - dense image 정렬
+ - query 이미지로부터 camera pose 회귀
+
+sparse feature matching은 효율적이고 일반적인 경량 접근 방식
+ - feature-based 방법은 종종 중요한 시점 및 외관 변화에 어려움을 겪어 매칭 실패 및 부정확한 자세 추정을 초래함  
+ -> 2D feature의 global적으로 희소하지만 지역적으로 밀집한 3D 표현을 활용하는 새로운 접근 방식을 제안
+
+여러 프레임에 걸쳐 landmark를 추적하고 삼각 측량하여 tracking 중에 관측된 image patch descriptors를 렌더링하는데 최적화된 sparse voxel map을 생성
+ - 상세 방법
+    - 초기 pose가 주어지면 volumetric rendering을 사용하여 voxel에서 descriptors를 합성
+    - feature matching을 수행하여 카메라 자세 추정
+ - unseen view에 대한 descriptor을 생성할 수 있게 하여 시점 변화에 대한 강인성을 높임
+
+사용 데이터:
+ - 7-Scenes
+ - Cambridge Landmark datasets
+
+실험 결과
+ - 실내 환경에서 기존 SOTA feature representation 방식보다 크게 우수함
+   - median translation error을 최대 39% 개선
+ - 야외 장면에서도 다른 방법들과 비슷한 결과를 보이지만 계산과 메모리 사용량이 적음
+
 
 ## 1. Introduction
 
+**Visual localization**
+ - 넓은 viewpoint와 외관 변화로 인해 힘든 과제
 
-## 2. 
+**성능 개선 전략들**
+ - sequence-based 장소 인식
+   - 프레임 간의 일관성을 활용하여 이전에 방문했던 위치를 식별[27]
+   - point cloud 정렬 및 3D-3D 매칭에서 파생된 기하학적 제약은 유용한 정보를 제공할 수 있음
+   - 카메라 포즈를 결정하는데 광범위하게 사용되는 low-level feature matcing의 신뢰성과 견고성에 따라 달라짐
+ - NeRF 기반 방법[26]
+   - feature podint 추출을 위한 프레임을 합성하거나 photometric 정렬을 수행하여 dense/semi-dense SLAM 프레임워크를 기반으로 함
+ - neural view 합성을 활용하여 known map에서 위치를 지정하거나 query viewpoint에서 관찰된 sparse한 feature point set의 외관 변화를 캡쳐하는 dense descriptyor space를 렌더링[14] 
+
+**이러한 방법의 단점**
+ - dense descriptor representation은 배포 전에 dense하고 완전히 최적화된 radiance field를 학습해야 하기 때문에 더 많은 학습 시간과 메모리를 요구
+ - sparse descriptors를 합성하는 작업은 많은 채널의 설명자를 렌더링하는데 어려움을 겪음
+
+**FaVoR**
+ - 사전 학습된 신경망을 활용하여 feature을 추출하고 sparse voxel-based 공식화를 사용하여 3D 공간에서 feature descriptors를 인코딩하고 렌더링하는 새로운 feature rendering 방법
+ - 이를 통한 scene representation은 전반적으로 희소하지만 지역적으로 밀집함
+   - 어떤 query 카메라 위치에서도 view-conditioned 3D point descriptor을 효율적으로 추출할 수 있음
+ - 훈련 중 일련의 프레임에서 keypoint을 추출하고 추적한 후, known 카메라 자세를 사용하여 3D 랜드마크를 삼각측량함
+   - 기존의 online localization pipeline[30]과 유사함
+ - 각 랜드마크는 voxel로 표현되며, volume rendering을 통해 최적화되어 관련된 descriptor가 새로운 view에서 렌더링 될 수 있음  
+ -> 넓은 시점 변화 하에 low-level feature matching을 수행할 수 있음
+ - dense radiance fields를 학습하는 이전 기술들과 달리, sparse landmark descriptors만 훈련하므로 descriptor 견고성과 자원 효율성 사이의 유리한 균형을 제공  
+ -> 확장성 향상
+ - descriptor을 렌더링하기 위해 신경망을 사용하는 대신 명시적인 voxel 표현과 trilinear interpolation을 사용하여 렌더링을 수행하여 훈련 및 렌더링 과정을 가속화
+ - 7-Scenes(실내) 데이터셋에서 SOTA implicit feature rendering 방식을 크게 능가하여 median translation error을 최대 39% 줄임
+
+**논문의 기여**
+ - 1
+ - 2
+
+
+## 2. Related Work
 
 
 ## 3. Methodology
+
+![alt text](./images/Fig%201.png)
+
+> **Figure 1. 제안 방법의 도식적 표현**  
+> 1. feature points를 추적하고 삼각 측량하여 지속적인 랜드마크(많은 view에서 관찰된 랜드마크)를 위한 voxel 표현을 생성  
+> 2. voxel은 feature tracking 중에 추출된 descriptor patches를 렌더링하기 위하 최적화됨  
+> 3. voxel을 쿼리하여 주어진 query pose에서 보이는 descriptor을 렌더링하고, query 이미지와 랜드마크간의 2D-3D 매칭을 찾고, 포즈 추정 수행
 
 훈련 이미지들을 사용해서 sparse landmark 집합을 추적
 
@@ -42,12 +110,12 @@ paper:
 ### 3.1 Landmark Tracking
 
  - M 개의 RGB 이미지($H \times W$ \times 3) Sequence를 고려
- - 랜드마크 $l_i \in \mathbb{R}^3$ 은 월드 frame에서 정의됨
- - $S_j$ = $l_j$를 포함하는 훈련 이미지의 index 집합($l_j$를 관찰하는 이미지들)일 떄, 각 이미지 $I_i$에 대해, $i \in S_j$인 경우, keypoint $k_{ij} \in \mathbb{R}^2$($l_j$가 $I_i$에 투영된)가 존재
+ - 랜드마크 $\ell_i \in \mathbb{R}^3$ 은 월드 frame에서 정의됨
+ - $S_j$ = $\ell_j$를 포함하는 훈련 이미지의 index 집합($\ell_j$를 관찰하는 이미지들)일 떄, 각 이미지 $I_i$에 대해, $i \in S_j$인 경우, keypoint $k_{ij} \in \mathbb{R}^2$($\ell_j$가 $I_i$에 투영된)가 존재
  - $I_i$에서 월드 frame 카메라 포즈는 $T_i \in \text{SE}(3)$
  - $F$ = 주어진 이미지 $I_i$에 대해 keypoints와 dense descriptor map $D_i \in \mathbb{R}^{H \times W \times C}$를 제공하는 feature extractor.
  - $C$ = descriptor channel 개수
- - $D_i$로부터 각 추출된 keypoint $k_{ij}를 중심으로 $S \times S$ 픽셀 크기의 패치 $P_{ij} \in \mathbb^{S \times S \times C}$를 잘라냄
+ - $D_i$로부터 각 추출된 keypoint $k_{ij}를 중심으로 $S \times S$ 픽셀 크기의 패치 $P_{ij} \in \mathbb{R}^{S \times S \times C}$를 잘라냄
 
 $$
 \displaystyle
@@ -57,9 +125,9 @@ $$
 \end{aligned}
 $$
 
- - 각 랜드마크 $l_j$에 대해, $l_j$를 포함하는 이미지 sequence의 카메라 포즈 $T_i$, keypoint 집합 $k_{ij}$, 해당하는 descriptor patch $P_{ij}$를 포함하는 track을 저장
- - track이 주어지면, world frame에서 랜드마크 위치 $l_j$를 삼각 측량
- - $l_j$의 초기 추정치 = 선형 tranform 알고리즘[15]를 사용하여 찾음. 
+ - 각 랜드마크 $\ell_j$에 대해, $\ell_j$를 포함하는 이미지 sequence의 카메라 포즈 $T_i$, keypoint 집합 $k_{ij}$, 해당하는 descriptor patch $P_{ij}$를 포함하는 track을 저장
+ - track이 주어지면, world frame에서 랜드마크 위치 $\ell_j$를 삼각 측량
+ - $\ell_j$의 초기 추정치 = 선형 tranform 알고리즘[15]를 사용하여 찾음. 
  이후 Levenberg-Marquardt 최적화 기법을 통해 reprojection 오류를 최소화하여 보정
  - 이상치를 감안하여, 최적화 과정에서 robust cost를 적용[13]
  - 최적화의 수치적 안정성을 보장하기 위해, 카메라 프레임의 랜드마크 위치의 inverse depth 매개변수화를 사용
@@ -68,13 +136,13 @@ $$
 
 ### 3.2 Voxel Creation
 
- - 각 track이 최소 길이보다 긴 경우, $l_j$를 중심으로 하는 새로운 voxel $V_j$를 생성  
+ - 각 track이 최소 길이보다 긴 경우, $\ell_j$를 중심으로 하는 새로운 voxel $V_j$를 생성  
  -> 지속적인 랜드마크 선택을 위한 위치 추적 시스템과 유사함[30]
  - track과 연관된 랜드마크는 유용한 위치 정보를 제공하기 위해 여러 pose에서 볼 수 있어야 함
  - 각 voxel $V_j$는 $R \times R \times R$ 해상도를 갖는 더 작은 하위 voxel로 구성된 grid를 포함
  - grid의 각 node(정점)은 $F$에 의해 제공되는 descriptor channel에 해당하는 $C$ 크기의 벡터를 저장
  - 적절한 voxel(및 그 하위 voxel)의 크기를 결정하는 방법
-    1. 각 patch $P_{ij}$에 대해 $\text{T}_i$에서 점 $l_j$까지의 유클리드 거리 $l_{ij}$를 계산
+    1. 각 patch $P_{ij}$에 대해 $\text{T}_i$에서 점 $\ell_j$까지의 유클리드 거리 $l_{ij}$를 계산
     2. patch 크기가 $S \times S$ 픽셀일 때, voxel 크기 $s_{v_j}$(m 단위)를 다음과 같이 추정
 
 $$
@@ -90,6 +158,10 @@ $$
  - keypoint $k_{ij}$와 연관된 descriptor을 렌더링하는데 필요한 정보를 캡처하기에 충분하므로 최소 voxel 크기를 선택
  - 각 voxel $V_j$는 descriptors grid와 동일한 해상도를 갖는 density grid와 연결되지만, $C$ 대신 크기 1의 node를 사용. density grid는 volume rendering 과정에 사용됨
 
+> Density grid:  
+> - 희소성 마스크 역할  
+> - 여기서는 voxel의 각 정점에 descriptor가 저장되므로, voxel의 어느 위치에 descriptor가 저장되었는지 확인하는 역할
+
 ### 3.3 Descriptor Learning and Rendering
 
  - voxel이 생성되면, 관련된 track을 따라서 관찰된 descriptor patches를 렌더링하기 위해 시스템을 훈련할 수 있음
@@ -97,7 +169,7 @@ $$
  - 모든 patches와 poses $i \in S_j$에 대해, patch $P_{ij}$의 각 요소를 통해 지나가는 카메라 중심 $T_i$에서 광선을 추적
  - 각 ray $r$은 voxel grid $V_j$ 및 관련된 density grid와 두 개의 point에서 교차함
  - 카메라에 가까운 지점: $p_n$, 다른 지점: $p_f$
- - 두 교차점 사이의 광선에서 $N$개의 샘플, $d_t \in \mathbb{R}^C$와 $\hat{sigma}_t \in \mathbb{R}$($t = 1, ..., N)을 샘플링하고, $V_j$와 density grid에서 각각 trilinear interpolation을 사용
+ - 두 교차점 사이의 광선에서 $N$개의 샘플, $d_t \in \mathbb{R}^C$와 $\hat{\sigma}_t \in \mathbb{R}$ $(t = 1, ..., N)$을 샘플링하고, $V_j$와 density grid에서 각각 trilinear interpolation을 사용(3차원 공간이므로 3차원 보간 사용)
  - 이 과정은 [25]에서 제안된 volume rendering 방식을 따르지만, RGB 색상을 렌더링하는 대신 feature descriptor을 렌더링
 
 $$
@@ -114,7 +186,7 @@ $$
 
 > $\hat{\text{d}}_{ij}^{uv}$: patch $P_{ij}$의 pixel 위치 $(u, v)$에서 포즈 $T_i$로 본 랜드마크 $l_j$에 대한 추정된 descriptor
 
- - descriptor과 밀도 grid를 학습하기 위해 descriptor 벡터 공간에서 $\hat{\text{d}}_{ij}^{uv}$가 GT descriptors $d_{ij}^{uv} \in \text{P}_{ij}$에 가능한 가까운 norm과 방향을 갖도록 보장하고자 함
+ - descriptor와 밀도 grid를 학습하기 위해 descriptor 벡터 공간에서 $\hat{\text{d}}_{ij}^{uv}$가 GT descriptors $d_{ij}^{uv} \in \text{P}_{ij}$에 가능한 가까운 norm과 방향을 갖도록 보장하고자 함
  - GT descriptors $d_{ij}^{uv} \in \text{P}_{ij}$는 patch에서 모든 $(u, v) \in {(0, 0), (0, 1), ..., (S, S)}$에 대해 $F$에 의해 추출됨
  - MSE와 cosine similarity loss를 사용하여 렌더링된 descriptor의 norm과 방향이 target feature에 가능한 가깝도록 함
  - patch $P_{ij}$의 smooth representation을 보장하기 위해 전체 variation regularization[34]를 추가
