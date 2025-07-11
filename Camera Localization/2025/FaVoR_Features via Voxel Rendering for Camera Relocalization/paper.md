@@ -2,12 +2,12 @@
 
 ---
 
-- Camera Relocalization
+- Camera Localization
 
 ---
 
 url
-- [paper](https://ieeexplore.ieee.org/abstract/document/10943362)
+ - [paper](https://ieeexplore.ieee.org/abstract/document/10943362)
 
 ---
 
