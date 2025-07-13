@@ -158,3 +158,238 @@ url
  - layer은 self-attention unit 1개와 cross-attention unit 1개의 연속으로 정의됨
 
 **Attention unit**
+
+각 유닛에서 MLP는 원본 이미지 $S \in {A, B}$로부터 메시지 $m_i^{I \leftarrow S}$를 받아 상태를 업데이트함  
+
+$$
+\displaystyle
+\begin{aligned}
+
+& \text{x}_i^I \leftarrow \text{x}_i^I + MLP ([\text{x}_i^I | m_i^{I \leftarrow S}])
+& (1)
+
+\end{aligned}
+$$
+
+> $[\cdot | \cdot]:$ 두 개의 벡터를 stack. 두 이미지의 모든 점에 대해 병렬로 계산됨
+
+ - self-attention unit에서 각 이미지 I는 동일한 이미지의 점에서 정보를 가져오므로 $S = I$.
+ - cross-attention unit에서 각 이미지는 다른 이미지와 $S = \{A, B\} \backslash I$에서 정보를 가져옴
+
+메시지는 이미지 $S$의 모든 상태 $j$의 가중 평균으로 attention mechanism으로 계산됨
+
+$$
+\displaystyle
+\begin{aligned}
+
+& m_i^{I \leftarrow S} = \sum_{j \in S} \text{Softmax}_{k \in S} (a_{ik}^{IS})_j \text{Wx}_j^S
+& (2)
+
+\end{aligned}
+$$
+
+> $W:$ projection matrix  
+> $a_{ij}^{IS}:$ 이미지 I와 S의 점 i와 j 사이의 attention score. 이 점수는 self와 cross attention unit에서 계산 방법이 다르다
+
+
+**Self-attention**
+
+각 point는 동일한 이미지의 모든 point에 주의를 기울임
+
+
+각 지점 $i$에 대해 현재 상태 $x_i$는 서로 다른 linear transformation을 통해 key vector $k_i$와 $q_i$로 분해됨
+이후 point $i$와 $j$ 사이의 attention 점수를 정의(이미지 I를 나타내는 위첨자 생략)
+
+$$
+\displaystyle
+\begin{aligned}
+
+& a_{ij} = q_i^T R(p_j - p_i) k_j
+& (3)
+
+\end{aligned}
+$$
+
+> $R(\cdot) \in \mathbb{R}^{d \times d}:$ point 간의 상대 위치에 대한 회전 encoding[64].
+
+ - 공간을 $d/2$개의 2D subspace로 나누고 각각을 학습된 기초 $b_k \in R^2$에 대한 projection에 따라 푸리에 feature을 따르는 각도로 회전
+
+$$
+\displaystyle
+\begin{aligned}
+
+& R(p) =
+\begin{pmatrix}
+\hat{\text{R}}(\text{b}_1^T \text{p}) & & 0  \\ 
+& \ddots & \\  
+0 & & \hat{\text{R}}(\text{b}_{d/2}^T \text{p})
+\end{pmatrix}
+
+, \hat{\text{R}}(\theta) = 
+\begin{pmatrix}
+cos \theta & -sin \theta \\
+sin \theta & cos \theta
+\end{pmatrix}
+
+& (4)
+
+\end{aligned}
+$$
+
+위치 인코딩
+ - 서로 다른 요소들을 해당 위치로 지정하게 해 줌
+ - projective camera geometry에서 시각 관측의 위치가 이미지 평면 내에서 카메라 이동에 대해 동등함
+    - 동일한 fronto-parallel plane(카메라 뷰에 해당하는 평면)에 있는 3D point에서 나온 2D points는 동일한 방식으로 이동함. 상대적 거리는 일정하게 유지됨.  
+    -> 점들의 절대 위치가 아닌 상대적인 위치만을 포착하는 인코딩이 필요
+ - 회전 인코딩은 모델이 위치 $i$에서 학습된 상대 위치로 재위치한 포인트 $j$를 검색할 수 있도록 함.
+ - 위치 인코딩은 값 $\text{v}_j$에 적용되지 않으므로 상태 $\text{x}_i$로 넘겨지지 않음
+ - 인코딩은 모든 레이어에 대해 동일하며 한 번 계산되어 캐시됨
+
+**Cross-attention**
+ - $I$의 각 point는 다른 이미지 $S$의 모든 point에 주의를 기울임
+ - 각 요소에 대해 key $\text{k}_i$를 계산하지만 쿼리는 없음. 이는 다음과 같이 점수를 표현할 수 있게 함
+
+$$
+\displaystyle
+\begin{aligned}
+
+& a_{ij}^{IS} = \text{k}_i^{I\top} \text{k}_j^S \stackrel{!}{=} a_{ji}^{SI}.
+& (5)
+
+\end{aligned}
+$$
+
+ - **bidirectional attention**
+    - $I \leftarrow S$와 $S \leftarrow I$ 메시지에 대해 유사성을 한 번만 검사하는 트릭
+    - $O(NMd)$ 시간복잡도. 비용이 많이 드는 단계인데 bidirectional로 해서 $/2$ 만큼 비용 절약
+    - 상대 위치가 이미지 간에 의미가 없으므로 추가적인 위치정보를 추가하지 않음
+
+### 3.2 Correspondence prediction
+
+모든 레이어에서 업데이트 된 상태를 고려하여 매칭을 예측하는 경량 헤드 설계
+
+**Assignment score(할당 점수, 또는 매칭 점수)**
+
+1. 두 이미지의 point 간의 pairwise score matrix $S \in \mathbb{R}^{M \times N}$을 계산
+
+$$
+\displaystyle
+\begin{aligned}
+
+& \text{S}_{ij} = \text{Linear}(\text{x}_i^A)^\top \text{Linear}(\text{x}_j^B)
+& \forall(i, j) \in A \times B 
+& (6)
+
+\end{aligned}
+$$
+
+> Linear $(\cdot):$ bias가 있는 학습된 linear transformation
+
+ - 이 점수는 각 point 쌍의 대응 관계(같은 3D point의 2D projection 간의 밀접한 정도)를 인코딩
+ - 각 점에 대해 매치 가능성 점수를 계산:
+
+$$
+\displaystyle
+\begin{aligned}
+
+& \sigma_i = \text{Sigmoid} (\text{Linear} (\text{x}_i)) \in [0,1]
+& (7)
+
+\end{aligned}
+$$
+
+ - 이 점수는 해당 point가 대응점을 가질 가능성을 인코딩
+ - 다른 이미지에서 나오지 않는 경우(예: 가려져 있는 경우), $\sigma_i \rightarrow 0$
+
+**Correspondences**
+
+유사성 및 일치 가능성 점수를 soft partial assignment matrix $\text{P}$에 결합
+
+$$
+\displaystyle
+\begin{aligned}
+
+& \text{P}_{ij} = \sigma_i^A \sigma_j^B \text{Softmax}_{k \in A} (\text{S}_{kj})_i \text{Softmax}_{k \in B} (\text{S}_{ik})_j
+& (8)
+
+\end{aligned}
+$$
+
+ - point 쌍 $(i, j)$는 두 point가 매치 가능성이 있다고 예측되고 두 이미지에서의 유사성이 다른 모든 점보다 높을 때 대응 관계를 생성
+ - $\text{P}_{ij}$가 임계값 $\tau$보다 크고 두 점의 행렬과 열에서 다른 모든 요소보다 큰 쌍을 선택
+
+
+### 3.3 Adaptive depth and width
+
+불필요한 계산을 피하고 추론 시간을 절약하는 두 가지 메커니즘
+1. 입력 이미지 쌍의 난이도에 따라 레이어 수를 줄임
+2. 확실하게 탈락한 point를 조기에 가지치기
+
+**Confidence classifier**
+
+입력 visual descriptor에 context를 추가
+ - 이미지 쌍이 쉽고(시각적 중첩이 많이 되어있고) 외관 변화가 적을 때 신뢰할 수 있음
+ - 이러한 경우 초기 레이어에서의 예측은 신뢰할 수 있고, 후반 레이어의 예측과 동일함
+ - 이 경우, 추론을 중단할 수 있음
+
+각 레이어의 끝에서, 각 point의 예측 assignment에 대한 신뢰도를 추론
+
+$$
+\displaystyle
+\begin{aligned}
+
+& c_i = \text{Sigmoid} (\text{MLP}(\text{x}_i)) \in [0, 1]
+& (9)
+
+\end{aligned}
+$$
+
+높은 값은 i의 표현이 신뢰할 수 있고 최종적임을 나타냄
+ - 확실하게 매칭되는 경우 / 매칭되지 않는 경우
+ - compact MLP는 최악의 경우 추론 시간의 2%를 추가하지만 대부분의 경우 더 많이 절약함
+
+**Exit criterion**
+
+ - 주어진 레이어 $\ell$에 대해, 한 point가 신뢰할 수 있다고 여겨지기 위한 조건은 $c_i > \lambda_\ell$.
+ - 모든 point의 충분한 비율 $\alpha$가 신뢰할 수 있는 경우, 추론을 중단
+
+$$
+\displaystyle
+\begin{aligned}
+
+& \text{exit} = \left( \frac{1}{N + M}  \sum_{I \in {A, B}} \sum_{i \in I} [[c_i^I > \lambda_\ell ]]  \right) > \alpha
+& (10)
+
+\end{aligned}
+$$
+
+ - [59]에서와 같이, classifier가 초기 layer에서 덜 확신함을 관찰  
+ -> 각 classifiere의 검증 정확도에 따라 layer 전반에 걸쳐 $\lambda_\ell$을 감소시킴
+ - 종료 임계값 $\alpha$는 정확도와 추론 시간 사이의 균형을 직접적으로 조절
+
+**Point pruning**
+
+ - 종료 기준이 충족되지 않은 경우, 확신이 있고 매칭이 불가능한 것으로 예측된 point는 후속 레이어에서 매칭에 도움이 될 가능성이 낮음
+ - 각 레이어에서 이를 제거하고 나머지 point만 다음 레이어로 전달
+ - attention의 quadratic 복잡성을 고려할 때 계산량을 크게 줄이고 정확도에 영향을 미치지 않음
+
+### 3.4 Supervision
+
+LightGlue를 두 단계로 훈련
+1. correspondence를 예측하도록 훈련
+2. confidence classifier을 훈련
+
+후자는 최종 레이어의 정확도나 훈련의 수렴에 영향을 미치지 않음
+
+**Correspondences**
+
+ - 두 개의 view 변환에서 추정된 실제 label을 사용하여 assignment matrix $\text{P}$를 감독(supervise)
+ - homography 또는 pixel 단위 깊이와 상대 자세가 주어지면, A에서 B로, 그리고 반대로 point들을 wrap.
+ - GT matches $M$은 두 이미지 모두에서 낮은 재투영 오차와 일관된 depth를 가진 point 쌍
+ - 일부 점 $\bar{A} \subseteq A$와 $\bar{B} \subseteq B$는 다른 모든 점들과 비교하여 재투영 또는 깊이 오차가 충분히 클 경우 매칭 불가능한 것으로 label이 지정됨.
+ - 각 층 $\ell$에서 예측된 할당의 log-likelihood를 최소화하여 LightGlue가 초기에 올바른 대응을 예측하도록 유도
+
+$$
+
+$$
+
