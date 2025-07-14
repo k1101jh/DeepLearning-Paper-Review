@@ -369,6 +369,10 @@ $$
 
 **Point pruning**
 
+![alt text](./images/Fig%204.png)
+
+> 
+
 - 종료 기준이 충족되지 않은 경우, 확신이 있고 매칭이 불가능한 것으로 예측된 point는 후속 레이어에서 매칭에 도움이 될 가능성이 낮음
 - 각 레이어에서 이를 제거하고 나머지 point만 다음 레이어로 전달
 - attention의 quadratic 복잡성을 고려할 때 계산량을 크게 줄이고 정확도에 영향을 미치지 않음
@@ -416,5 +420,57 @@ LightGlue는 SuperGlue에서 영감을 받았지만 정확성, 효율성, 훈련
 
 **Positional encoding**
 
+- SuperGlue
+   - MLP로 절대 위치를 인코딩하고 이를 초기에 descriptor과 융합
+   - layer을 거치면서 위치 정보를 잊어버리는 경향이 있음
+- LightGlue
+   - 이미지 간에 더 잘 비교할 수 있는 상대 인코딩에 의존
+   - 각 self-attention unit에 추가됨
+   - 더 깊은 layer의 정확도가 향상됨
+
+**Prediction head**
+
+- SuperGlue
+   - Sinkhorn 알고리즘을 사용하여 미분 가능한 최적 수송 문제를 해결하여 assignment를 예측
+      - 행 방향 및 열 방향 정규화의 많은 반복으로 구성
+      - 계산 및 메모리 비용이 많이 듦
+   - 일치할 수 없는 점을 거부하기 위해 쓰레기통 추가
+   - 쓰레기통이 모든 점의 유사성 점수를 얽히게 함
+      - 덜 최적의 훈련 동적을 초래
+- LightGlue
+   - 유사성과 매치 가능성을 분리
+      - 더 깨끗한 gradient 생성
+
+**Deep supervision**
+
+- SuperGlue
+   - 각 layer 후에 예측을 할 수 없고 마지막 레이어에서만 감독됨
+      - Sinkhorn 비용 때문
+- LightGlue
+   - 가벼운 head는 각 layer에서 할당을 예측하고 감독할 수 있게 함
+   - 수렴 속도를 높이고 임의의 레이어 후에 추론을 종료할 수 있게 함
+
+
+## 4. Details that matter
+
+**Recipe**
+
+- SuperGlue의 supervised training 설정을 따름
+   - 100만 개 이미지에서 샘플링한 synthetic homographies(합성된 대응 관계?)를 사용하여 모델을 사전 훈련
+   - 이러한 증강은 완전하고 noise-free 감독을 제공하지만 신중한 조정이 필요
+- 이후 MegaDepth 데이터셋으로 미세조정
+   - 196개의 관광 명소를 묘사한 100만개 crowd-sourced 이미지 포함
+   - 카메라 캘리브레이션과 제사는 SfM으로 복구됨
+   - dense depth는 다중 뷰 스테레오로 복구됨
+
+**Training tricks**
+
+![alt text](./images/Fig%205.png)
+
+> **Figure 5. 훈련이 쉬움**
+
+LightGlue 아키텍처의 세부 사항이 큰 영향을 미침(Fig 5 참조)
+- AUC-RANSAC과 AUC-DLT가 SuperGlue에 비해 모델 훈련에 필요한 자원을 줄임
+   - 훈련 비용을 줄이고 깊은 matcher을 많은 사람들이 활용하기 쉽게 만듦
 
 
