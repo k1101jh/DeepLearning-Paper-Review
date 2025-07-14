@@ -3,6 +3,7 @@
 ---
 
 - Camera Localization
+- Visual Positioning System
 
 ---
 
