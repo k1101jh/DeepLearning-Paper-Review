@@ -2,7 +2,7 @@
 
 ---
 
-- Camera Localization
+- Camera Relocalization
 - Visual Positioning System
 
 ---

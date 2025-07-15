@@ -1,8 +1,8 @@
 # Photo-SLAM: Real-time Simultaneous Localization and Photorealistic Mapping for Monocular, Stereo, and RGB-D Cameras
 
 
----
 
+---
 - Visual SLAM
 
 ---
@@ -24,16 +24,16 @@ neural rendering 및 SLAM 시스템의 통합은 최근 joint localization 및 p
  - 하지만 기존 방법은 implicit representations에 완전히 의존. 자원을 많이 소모하여 휴대용 장치에서 실행할 수 없음
 
 **Photo-SLAM**
- - hyper primitive map을 가진 새로운 SLAM 프레임워크
- - 위치 추정을 위해 명시적 기하학적 특징을 동시에 활용
- - 관찰된 환경의 texture 정보를 표현하기 위해 implicit photometric features를 학습
- - 기하학적 특징에 기반하여 hyper primitives map을 적극적으로 밀집화
- - multi-level features를 점진적으로 학습하여 photorealistic mapping 성능을 향상시키기 위해 Gaussian-Pyramid 기반의 훈련 방법을 추가로 도입
- - monocular, stereo, RGB-D 데이터셋을 사용한 광범위한 실험 결과는 Photo-SLAM이 online photorealistic mapping에서 현재 SOTA SLAM 시스템을 현저히 능가함을 입증
-    - PSNR이 30% 더 높음
-    - Replica dataset에서 렌더링 속도가 수백 배 더 빠름
-    - Jetson AGX Orin과 같은 임베디드 플랫폼에서 실시간 속도로 실행 가능
-    - 로봇 응용의 가능성을 보임
+- hyper primitive map을 가진 새로운 SLAM 프레임워크
+- 위치 추정을 위해 명시적 기하학적 특징을 동시에 활용
+- 관찰된 환경의 texture 정보를 표현하기 위해 implicit photometric features를 학습
+- 기하학적 특징에 기반하여 hyper primitives map을 적극적으로 밀집화
+- multi-level features를 점진적으로 학습하여 photorealistic mapping 성능을 향상시키기 위해 Gaussian-Pyramid 기반의 훈련 방법을 추가로 도입
+- monocular, stereo, RGB-D 데이터셋을 사용한 광범위한 실험 결과는 Photo-SLAM이 online photorealistic mapping에서 현재 SOTA SLAM 시스템을 현저히 능가함을 입증
+   - PSNR이 30% 더 높음
+   - Replica dataset에서 렌더링 속도가 수백 배 더 빠름
+   - Jetson AGX Orin과 같은 임베디드 플랫폼에서 실시간 속도로 실행 가능
+   - 로봇 응용의 가능성을 보임
 
 ## 1. Introduction
 
