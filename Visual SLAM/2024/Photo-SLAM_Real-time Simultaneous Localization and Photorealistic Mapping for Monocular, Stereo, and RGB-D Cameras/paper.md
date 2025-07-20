@@ -119,3 +119,183 @@ Photo-SLAM
 
 ## 3. Photo-SLAM
 
+### 3.1 Hyper Primitives Map
+
+Hyper primitives: SLAM에서 사용되는 고차원 표현 방식
+> Point clouds: $P \in \mathbb{R}^3$  
+> ORB features[26]: $O \in \mathbb{R}^{256}$  
+> Rotation: $\text{P} \in \mathbb{R}^3$  
+> Scaling: $\text{s} \in \mathbb{R}^3$  
+> Density: $\sigma \in \mathbb{R}^1$  
+> Spherical harmonic 계수: $\text{SH} \in \mathbb{R}^{16}$
+
+**ORB features**
+- 2D-to-2D 및 2D-to-3D 대응관계를 설정하는 역할을 함
+- 인접한 프레임 사이에서 충분한 2D-to-2D 대응관계를 기반으로 변환 행렬을 성공적으로 추정하면, 삼각 측량을 통해 hyper primitive map이 초기화되고 자세 추정이 시작됨
+- 추적하는 동안 localization component는 들어오는 이미지를 처리하고, 2D-to-3D 관계를 활용하여 현재 카메라 자세를 계산
+- 기하학 mapping componnet는 점진적으로 sparse hyper primitive를 생성하고 초기화
+- photorealistic component는 hyper primitives를 점진적으로 최적화하고 밀도를 높임
+
+### 3.2 Localization and Geometry Mapping
+
+- localization 및 기하학 mapping components는 다음 요소를 제공
+   - 입력 이미지의 효율적인 6-DoF 카메라 포즈 추정
+   - sparese 3D points
+- 최적화 문제는 Levenberg-Marquardt(LM) 알고리즘으로 해결되는 factor graph로 공식화됨
+
+**localization thread**
+- motion-only bundle 조정을 사용
+   - 카메라 방향 $\text{R} \in SO(3)$와 위치 $t \in \mathbb{R}^3$을 최적화하여 키포인트 $p_i$와 3D 점 $P^i$ 간의 재투영 오차를 최소화
+- $i \in \mathcal{X}$를 매칭 집합 $\mathcal{X}$의 인덱스라고 하면, LM으로 다음을 최적화 하려 함
+
+$$
+\displaystyle
+\begin{aligned}
+
+& {R, t} = \text{argmin}_{R, t} \sum_{i \in \mathcal{X}} \rho ( || \text{p}_i - \pi (\text{RP}_i + \text{t}) ||_{\sum_g}^2 )
+& (1)
+
+\end{aligned}
+$$
+
+> $\sum_g:$ keypoint의 scale-associated 공분산 행렬  
+> $\pi (\cdot):$ 3D에서 2D로의 투영 함수  
+> $\rho:$ 강건한 huber 비용 함수
+
+**geometry mapping thread**
+- 양쪽에서 볼 수 있는 점들 $\mathcal{P}_L$과 keyframes $\mathcal{K}_L$ 집합에 대해 local bundle adjustment 수행
+- keyframe은 입력 카메라 시퀀스에서 선택된 프레임.
+   - 좋은 시각 정보를 제공
+- 각 keyframe이 노드인 factor graph를 구성
+   - edge는 keyframe과 matched 3D point 간의 제약을 나타냄
+- error function의 1차 미분을 사용하여 keyframe pose와 3D point를 정제함으로써 reprojection 잔차를 반복적으로 최소화
+- $\mathcal{K}_L$에는 없지만 $\mathcal{P}_L$을 관찰하는 keyframe $\mathcal{K}_F$의 포즈를 고정
+- $\mathcal{K} = \mathcal{K}_L \cup \mathcal{K}_F$로 두고, $\mathcal{X}_k$를 keyframe k의 2D keypoint와 $\mathcal{P}_L$의 3D 점 간의 매칭 집합으로 둔다.
+- 최적화 과정의 목표: $\mathcal{K}$와 $\mathcal{P}_L$간의 기하학적 불일치를 줄이기
+- 최적화 과정:
+
+$$
+\displaystyle
+\begin{aligned}
+
+& {\text{P}_i, \text{R}_l, \text{t}_l | i \in \mathcal{P}_L, l \in \mathcal{K}_L} = \text{argmin}_{\text{P}_i, \text{R}_l, \text{t}_l} \sum_{k \in \mathcal{K}} \sum_{j \in \mathcal{X}_k} \rho (E(k, j)),
+
+& (2)
+
+\end{aligned}
+$$
+
+reprojection residual:
+
+$$
+\displaystyle
+\begin{aligned}
+
+& E(k, j) = || \text{p}_j - \pi (\text{R}_k \text{P}_j + \text{t}_k) ||_{\sum_g}^2
+
+\end{aligned}
+$$
+
+### 3.3 Photorealistic Mapping
+
+**photorealistic mapping thread**
+- geometry mapping thread에 의해 생성된 hyper primitives를 최적화
+- hyper primitives는 tile-based renderer에 의해 rasterized되어 keyframe pose와 일치하는 이미지를 합성할 수 있음
+- 렌더링 프로세스: 
+
+$$
+\displaystyle
+\begin{aligned}
+
+& C(\text{R, t}) = \sum_{i \in N} \text{c}_i \alpha_i \prod_{j=1}^{i-1} (1 - \alpha_i)
+& (3)
+
+\end{aligned}
+$$
+
+> $N:$ hyper primitives 개수  
+> $\text{c}_i:$ $\text{SH} \in \mathbb{R}^{16}$으로부터 변환된 색상  
+> $\alpha:$ $\sigma \cdot \mathcal{G}(\text{R}, \text{t}, \text{P}_i, \text{r}_i, \text{s}_i)$ 와 동일. $\mathcal{G}$는 3D gaussian splatting 알고리즘
+
+position $\text{P}$, rotation $\text{r}$, scaling $\text{s}$, 밀도 $\sigma$와 spherical harmonic 계수 $\text{SH}$에 대한 최적화는 렌더링 이미지 $I_r$과 실제 이미지 $I_{gt}$ 간의 photometric loss $\mathcal{L}$을 최소화하여 수행됨
+
+$$
+\displaystyle
+\begin{aligned}
+
+& \mathcal{L} = (1 - \lambda) | I_r - I_{gt} |_1 + \lambda (1 - \text{SSIM}(I_r, I_{gt}))
+& (4)
+
+\end{aligned}
+$$
+
+> $\text{SSIM} (I_r, I_{gt}):$ 두 이미지 간의 구조적 유사성  
+> $\lambda:$ 균형을 위한 가중치 계수
+
+### 3.3.1 Geometry-based Densification
+
+photorealistic mapping을 scene의 회귀 모델로 고려할 때, 더 많은 매개변수를 가진 더 밀집된 hyper primitives가 일반적으로 더 높은 렌더링 품질을 위한 장면의 복잡성을 더 잘 모델링 할 수 있음
+- 실시간 매핑을 위해 기하학 매핑 요소는 sparse hyper primitives만 수립
+- 기하학 매핑에 의해 생성된 조잡한 hyper primitives는 photorealistic mapping의 최적화 과정에서 밀집화되어야 함
+- [18]과 유사하게 큰 loss gradients를 가진 hyper primitives를 분할하거나 복제하는 것 되에도 추가적인 기하학 기반 밀집화 전략을 도입
+
+실험적으로, RGB-D가 아닌 상황에서 frame의 2D 기하학적 특징점(feature point) 중 30% 미만이 활성화되어 있고 3D 포인트와 매칭됨(Fig 4 참조)
+- frame에 공간적으로 분포된 2D 특징점들이 사실상 복잡한 텍스처를 가진 영역을 나타냄
+- 이러한 영역에는 더 많은 hyper primitives가 필요함
+
+photorealistic한 매핑을 위해 keyframe이 생성되는 시점에 비활성화된 2D 특징점을 기반으로 임시 hyper primitives를 추가로 생성
+- RGB-D 카메라를 사용하는 경우, 비활성화된 2D 특징점에 깊이 정보를 직접 투영하여 임시 hyper primitives를 생성 불가
+- monocular 카메라의 경우, 비활성화된 특징점의 깊이를 인접한 활성화된 2D 특징점들의 깊이를 해석하여 추정
+- stereo 카메라의 경우, stereo-matching 알고리즘을 통해 비활성화된 특징점의 깊이를 추정
+
+
+### 3.4 Gaussian-Pyramid-Based Learning
+
+**Progressive Training**
+- neural rendering에서 최적화 속도를 높이기 위해 사용되는 기술
+- 더 나은 렌더링 품질을 유지하면서 학습 시간을 줄이기 위한 방법들이 제안됨
+   - 기본 방법: 모델의 해상도와 파라미터 수를 점진적으로 증가시키기
+      - 예시:
+         - NSVF[20]와 DVGO[31]는 학습 중 feature grid 해상도를 점차 높이는 방식. 기존 방식보다 학습 효율이 크게 향상됨. 초기 단계의 저해상도 모델은 고해상도 모델을 초기화하는데 사용되며, 최종 추론 시에는 사용되지 않음(Fig 3a)
+         - NGLoD[32]는 다중 해상도의 특징을 향상시키기 위해 여러 개의 MLP를 인코더와 디코더로 점진적으로 학습시키며, 마지막 디코더만 유지하여 통합된 다중 해상도 특징을 디코딩(Fig 3b)
+         - Neuralangelo[19]는 학습 중 하나의 MLP만 유지하며, 점진적으로 서로 다른 수준의 해시 테이블을 활성화함으로써 대규모 장면 재구성에서 우수한 성능을 달성(Fig 3c)
+         - 3D Gaussian Splatting[18]도 이와 유사하게 3D 가우시안을 점진적으로 고밀도화하여 radiance field 렌더링에서 최고 수준 성능 발휘
+      - 이러한 방법들은 같은 학습 이미지를 활용하여 서로 다른 수준의 모델을 supervised training함
+   - 대안 방식
+      - BungeeNeRF[39]에서 사용된 네 번째 방법(Fig 3d)는 서로 다른 해상도의 이미지에 대해 서로 다른 모델을 적용
+         - 다중 해상도 학습 이미지들을 명시적으로 그룹화하여, 각 모델이 다양한 수준의 특징을 학습할 수 있도록 설계됨
+         - 이러한 방법은 모든 상황에 적용 가능한 일반적인 방식은 아니며, 다중 해상도 이미지가 제공되지 않는 대부분의 경우에는 사용이 불가
+
+**가우시안 피라미드 기반(GP) 학습(Fig. 3e)**
+- 다양한 장점을 최대한 활용하기 위해 제안한 새로운 점진적 학습 방식
+- 가우시안 피라미드는 이미지의 다양한 세부 수준을 포함한 다중 스케일 표현 방식(Fig 5)
+- 원본 이미지에 가우시안 블러링과 다운샘플링 작업을 반복적으로 적용함으로써 구성됨
+- 초기 학습 단계에서는 하이퍼 프리미티브들이 피라미드의 가장 높은 수준, 즉 레벨 n에 의해 감독됨
+- 학습 반복이 늘어남에 따라 하이퍼 프리미티브의 밀도를 높이는 동시에(Sec. 3.3.1 참조) 피라미드의 수준을 줄이고 새로운 정답(ground truth)을 얻음
+- 가우시안 피라미드의 최하단에 도달할 때까지 이어짐
+
+가우시안 피라미드의 n+1 수준을 활용한 최적화 과정:
+
+$$
+
+$$
+
+
+### 3.5 Loop Closure
+
+Loop Closure [11]
+- 누적된 오류와 드리프트 문제를 해결하는 데 핵심적인 역할
+- 이러한 문제는 위치 추정 및 기하학적 지도 작성 과정에서 발생할 수 있음
+- 루프가 닫혔다고 판단되면, 유사 변환(Similarity Transformation)을 통해 local keyframes과 hyper primitives를 보정할 수 있음
+- 보정된 카메라 포즈를 활용하면
+   - 광학 매핑(photorealistic mapping) 구성 요소가 시각적 유령 현상(ghosting)을 제거하고
+   - 주행 기반 위치 추정 오류(odometry drift)로 인한 왜곡을 줄임
+   - 전체 매핑 품질을 향상시킬 수 있음
+
+
+## 4. Experiment
+
+Photo-SLAM과 SOTA SLAM 및 real-time 3D 재구성 시스템과 비교
+- 단안, 스테레오, RGB-D 카메라 및 실내 및 야외 환경을 포함한 다양한 시나리오를 포함
+- Photo-SLAM의 성능을 다양한 하드웨어 구성에서 평가하여 효율성을 입증
+- 제안된 알고리즘의 효과성을 검증하기 위한 ablation study를 수행
