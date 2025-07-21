@@ -17,6 +17,15 @@ url
 주요 참고논문
 - [43]: [Conditional Variational Autoencoders for Probabilistic Pose Regression](https://ieeexplore.ieee.org/abstract/document/10802091) (IEEE/RSJ 2024)
 
+
+---
+
+요약
+
+- VAE를 사용하여 입력 이미지 $x_i$를 조건으로 넣어 카메라 포즈 $y_i$를 추정
+    - VAE가 해당 공간에 대해 훈련되어 있어야 함. 훈련되지 않은 이미지에 대해서는 잘못된 카메라 포즈를 추정
+
+
 ---
 
 목차
@@ -99,11 +108,11 @@ url
 
 이상적인 visual relocalization solution
 - 주어진 이미지 $x \in \mathbb{R}^{H \times W \times 3}$에 대해 진짜 카메라 자세 $y \in \text{SE(3)}$을 예측.
-> $(x, y) ~ p_{true}$. $(x, y)$는 $p_{true}$에서 샘플링
+> $(x, y) \sim p_{true}$. $(x, y)$는 $p_{true}$에서 샘플링
 - real-world distribution $p_{true}$는 경험적 분포 $p_{train}$을 형성하는 유한한 훈련 샘플 세트로만 모델링 할 수 있음
 - $p_{train}$의 성공적인 모델링은 $p_{true}$의 다른 unseen 경험적 분포 $p_{test}$에 대한 일반화를 의미
     - 실제로는 $p_{train}$과 $p_{test}$에서 query 간에 항상 모델 성능 격차가 존재
-- 훈련 후 테스트 샘플 $(x, y) ~ p_{true}$이 모델링된 분포 $p_{train}$에 얼마나 잘 부합하는지를 측정할 수 있는 visual relocalization 모델에 관심이 있음
+- 훈련 후 테스트 샘플 $(x, y) \sim p_{true}$이 모델링된 분포 $p_{train}$에 얼마나 잘 부합하는지를 측정할 수 있는 visual relocalization 모델에 관심이 있음
     - visual relocalization 작업을 분포 $p_{train}(y | x)$를 학습하는 것으로 정리
     - 이 조건부 분포에서 샘플링 = camera relocalization
     - 주어진 샘플 $(x, y)$에 대한 가능성 추정 = 모델링된 분포 $p_{train}$에 대한 일치 정도를 정량화
@@ -114,3 +123,15 @@ url
 - 이 신경망은 noise 분포 $p(\mathcal{z}) = \mathcal{N}(0, I)$로부터 샘플 $z \in \mathbb{R}^d를 카메라 포즈 $y \in \text{SE(3)} ~ p(y|x)$의 posterior distribution으로 변환
 - [43]에서 보인 것과 같이, 이러한 생성 네트워크는 장면의 이미지가 주어졌을 때 카메라 포즈를 재구성하는 conditional VAE pipeline의 decoder로 훈련될 수 있다.
 - 설계 원칙은 [43]을 참조
+
+**Setup and optimization**
+
+conditional VAE는 주어진 이미지 $x_i$에 대한 카메라 포즈 $y_i$를 재구성하기 위해 최적화된 인코더 $g_{\phi}(\cdot)$와 conditional decoder 네트워크 $f_{\theta}(\cdot)$으로 구성됨
+- 훈련 세트 $(x_i, y_i) \in \mathcal{D}_{train}$에서 이뤄짐
+- 인코더는 각 훈련 포즈 $y_i$를 Gaussian posterior $q(\mathcal{z} | y_i)$의 평균과 공분산으로 매핑.
+    - 실제 잠재 posterior 분포 $p(\mathcal{z} | y_i)$를 닮도록 설계됨
+- 디코더는 해당 이미지 $x_i$에 조건화되어 이 추정된 posetrior $\mathcal{z}_j \sim q(\mathcal{z} | y_i)$를 원래 포즈 $y_i$의 재구성 $\hat{y}_{i,j} \in \text{SE(3)}$으로 매핑
+
+~
+
+### 3.2 Likelihood estimation
