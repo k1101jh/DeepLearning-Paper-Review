@@ -3,13 +3,14 @@
 
 
 ---
+
 - Visual SLAM
 
 ---
 
-paper:
-- [CVPR 2024](https://openaccess.thecvf.com/content/CVPR2024/html/Huang_Photo-SLAM_Real-time_Simultaneous_Localization_and_Photorealistic_Mapping_for_Monocular_Stereo_CVPR_2024_paper.html)
-- [Arxiv](https://arxiv.org/abs/2311.16728)
+url:
+- [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Huang_Photo-SLAM_Real-time_Simultaneous_Localization_and_Photorealistic_Mapping_for_Monocular_Stereo_CVPR_2024_paper.html) (CVPR 2024)
+- [paper](https://arxiv.org/abs/2311.16728) (arXiv)
 
 ---
 
@@ -45,7 +46,6 @@ paper:
 의문점
 1. 새로운 프레임이 들어오면 Gaussian을 학습하는데, 고해상도로 학습중일 때 새로운 프레임이 들어와서 동일한 가우시안을 저해상도로 학습시키면 문제가 발생하는게 아닌가?  
 -> 관측 가능한 gaussian만을 최적화? 저해상도에서 사용되는 가우시안과 고해상도에서 사용되는 가우시안이 다른가?
-
 
 ---
 
@@ -101,7 +101,7 @@ neural rendering의 발전은 SLAM 파이프라인에 photorealistic view 재구
 > Photo-SLAM은 단안, 스테레오, RGB-D 카메라를 사용하여 장면의 high-fidelity 뷰를 재구성 할 수 있음  
 > 렌더링 속도는 최대 1000FPS
 
-![alt text](image.png)
+![alt text](./images/Fig%202.png)
 
 > **Figure 2.**  
 > Photo-SLAM은 localization, 명시적 geometry mapping, 암시적 photorealistic mapping, loop closure 구성 요소로 이루어짐  
@@ -208,9 +208,9 @@ $$
 \end{aligned}
 $$
 
-> $\sum_g:$ keypoint의 scale-associated 공분산 행렬  
-> $\pi (\cdot):$ 3D에서 2D로의 투영 함수  
-> $\rho:$ 강건한 huber 비용 함수
+> $\sum_g$: keypoint의 scale-associated 공분산 행렬  
+> $\pi (\cdot)$: 3D에서 2D로의 투영 함수  
+> $\rho$: 강건한 huber 비용 함수
 
 **geometry mapping thread**
 - 양쪽에서 볼 수 있는 점들 $\mathcal{P}_L$과 keyframes $\mathcal{K}_L$ 집합에 대해 local bundle adjustment 수행
@@ -264,8 +264,8 @@ $$
 $$
 
 > $N:$ hyper primitives 개수  
-> $\text{c}_i:$ $\text{SH} \in \mathbb{R}^{16}$으로부터 변환된 색상  
-> $\alpha:$ $\sigma \cdot \mathcal{G}(\text{R}, \text{t}, \text{P}_i, \text{r}_i, \text{s}_i)$ 와 동일. $\mathcal{G}$는 3D gaussian splatting 알고리즘
+> $\text{c}_i$: $\text{SH} \in \mathbb{R}^{16}$으로부터 변환된 색상  
+> $\alpha$: $\sigma \cdot \mathcal{G}(\text{R}, \text{t}, \text{P}_i, \text{r}_i, \text{s}_i)$ 와 동일. $\mathcal{G}$는 3D gaussian splatting 알고리즘
 
 position $\text{P}$, rotation $\text{r}$, scaling $\text{s}$, 밀도 $\sigma$와 spherical harmonic 계수 $\text{SH}$에 대한 최적화는 렌더링 이미지 $I_r$과 실제 이미지 $I_{gt}$ 간의 photometric loss $\mathcal{L}$을 최소화하여 수행됨
 
@@ -279,8 +279,8 @@ $$
 \end{aligned}
 $$
 
-> $\text{SSIM} (I_r, I_{gt}):$ 두 이미지 간의 구조적 유사성  
-> $\lambda:$ 균형을 위한 가중치 계수
+> $\text{SSIM} (I_r, I_{gt})$: 두 이미지 간의 구조적 유사성  
+> $\lambda$: 균형을 위한 가중치 계수
 
 ### 3.3.1 Geometry-based Densification
 
@@ -355,8 +355,8 @@ $$
 \end{aligned}
 $$
 
-> $I_r, \text{GP}(I_{gt}):$ 식 4.  
-> $\text{GP}^n(I_{gt}):$ Gaussian pyramid에서 level n에 있는 ground image
+> $I_r, \text{GP}(I_{gt})$: 식 4.  
+> $\text{GP}^n(I_{gt})$: Gaussian pyramid에서 level n에 있는 ground image
 
 - GP 학습이 photorealistic mapping 성능을 크게 향상시킴(특히 단안 카메라에서)
 

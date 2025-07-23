@@ -10,7 +10,7 @@
 
 url
 - [paper](https://link.springer.com/chapter/10.1007/978-3-031-95918-9_13) (SCIA 2025)
-- [paper](https://arxiv.org/pdf/2504.07260?) (arxiv 2025)
+- [paper](https://arxiv.org/pdf/2504.07260?) (arXiv 2025)
 
 ---
 
@@ -24,7 +24,13 @@ url
 
 - VAE를 사용하여 입력 이미지 $x_i$를 조건으로 넣어 카메라 포즈 $y_i$를 추정
     - VAE가 해당 공간에 대해 훈련되어 있어야 함. 훈련되지 않은 이미지에 대해서는 잘못된 카메라 포즈를 추정
-
+- likelihood 계산
+    - epistemic(인식적) 불확실성(모델이 샘플을 얼마나 잘 알 수 있는지에 대한 불확실성)을 정량화
+    - 중요도 샘플링 기법을 통해 근사
+    - 테스트 시점에서는 이미지 $x$만 사용 가능하고 실제 자세 $y$는 알 수 없음  
+    -> Monte Carlo 생성 $\hat{y}_i = f_\theta (z_i, x), z_i \sim \mathcal{N} (0, I) $을 사용하여 예상 $\log p(\hat{y}_i | x)$ 추정을 제안.
+    - 이 likelihood 측정은 $x$로 조건화된 인코더와 디코더 간의 일치를 정량화. VAE가 어떻게 암묵적으로 epistemic 불확실성을 포착하는지를 보임
+    - likelihood $\log p (\hat{y} | x)$를 관측 x에 대한 네트워크의 예측 자신감으로 해석
 
 ---
 
@@ -120,7 +126,7 @@ url
 ### 3.1 Learning a generative model
 
 주어진 이미지 $x \in \mathbb{R}^{H \times W \times C}$에 조건화된 신경망 $\mathcal{f}_\theta (\cdot)$을 훈련
-- 이 신경망은 noise 분포 $p(\mathcal{z}) = \mathcal{N}(0, I)$로부터 샘플 $z \in \mathbb{R}^d를 카메라 포즈 $y \in \text{SE(3)} ~ p(y|x)$의 posterior distribution으로 변환
+- 이 신경망은 noise 분포 $p(\mathcal{z}) = \mathcal{N}(0, I)$로부터 샘플 $z \in \mathbb{R}^d$를 카메라 포즈 $y \in \text{SE(3)} ~ p(y|x)$의 posterior distribution으로 변환
 - [43]에서 보인 것과 같이, 이러한 생성 네트워크는 장면의 이미지가 주어졌을 때 카메라 포즈를 재구성하는 conditional VAE pipeline의 decoder로 훈련될 수 있다.
 - 설계 원칙은 [43]을 참조
 
@@ -132,6 +138,69 @@ conditional VAE는 주어진 이미지 $x_i$에 대한 카메라 포즈 $y_i$를
     - 실제 잠재 posterior 분포 $p(\mathcal{z} | y_i)$를 닮도록 설계됨
 - 디코더는 해당 이미지 $x_i$에 조건화되어 이 추정된 posetrior $\mathcal{z}_j \sim q(\mathcal{z} | y_i)$를 원래 포즈 $y_i$의 재구성 $\hat{y}_{i,j} \in \text{SE(3)}$으로 매핑
 
-~
+파이프라인의 최적화 목표: Evidence lower bound(ELBO)
+- training sample의 likelihood로부터 다음을 도출:
+
+$$
+
+$$
+
+> $\phi, \theta$: 분포와 이들이 구현된 네트워크 가중치 간의 관계
+
+- $\phi$와 $\theta$를 사용하여 $\mathcal{D}_{train}$에 대해 ELBO를 최대화 = $p(y|x)를 모델링하는 네트워크 $g_\phi(\cdot)$와 $f_\theta(\cdot)$을 최적화
+- 가우시안 모델을 따르며, $q_\phi(z|y)$에서 몬테 카를로 샘플을 사용하여 재구성 가능성의 기댓값을 계산
+
+$$
+
+$$
+
+- 모든 샘플의 훈련을 위해 공유되는 homoscedastic $6 \times 6$ 공분산 행렬 $\sum$는 네트워크 가중치 $\theta$와 $\phi$와 함께 최적화됨
+- 재구성 오류를 예측에 대한 지역적 수정으로 간주하여 $y = \hat{y} exp(\xi^∧)$로 정의  
+-> 오류 벡터를 $\xi = \log (\hat{y}^{−1} y)^∨ \in \mathbb{R}^6$로 리 대수 $\mathfrak{se}(3)^1$에서 정의
+    - $\mathfrak{se}(3) \mapsto SE(3)$ 는 리 대수에서 리 군으로의 exponential map. log는 그 역
+    - 연산자 ^는 $\xi$를 리 대수 $\mathfrak{se}(3)$의 구성원으로 변환. ∨는 그 역
+- 접선 공간에서 오류를 정의하고 공유된 $\sum$를 학습하면 훈련 동안 카메라 자세의 다양한 자유도에 걸쳐 손실 가중치의 자동 조정이 가능해짐
+- 이 자동 조정은 [15]에서 영감을 받았으며 데이터셋마다 수행된 비최적 수동 조정의 필요성을 제거[9, 42, 43].
+    - [15]는 변환 및 회전 오류 구성 요소 간의 두 개의 손실 가중치 매개변수만 학습하는 것을 탐구
+    - 우리는 전체 공분산 행렬을 모델링하여 모든 여섯 개의 자유도로 이 접근 방식을 확장
+
+**Sample generation**
+
+- 디코더를 이미지 $x$에 대해 조건화하고 사전에서 샘플을 디코더를 통해 전달하여 $p(y | x)$에서 쉽게 샘플링할 수 있음
+- 이를 통해 $\mathcal{Y} = \{\hat{y}_i = f_\theta (z_i, x) | z_i \sim \mathcal{N}(0,I)\}$를 얻음(그림 2 왼쪽 점선 상자 참고)
+- 디코더는 각 이미지와 관련된 불확실한 포즈 모호성의 공간을 학습하며, 모호한 이미지의 경우 서로 다른 잠재 영역이 이미지의 다양한 카메라 포즈에 매핑되도록 적절하게 잠재 공간을 분할[43]
 
 ### 3.2 Likelihood estimation
+
+marginal likelihood 계산
+- epistemic(인식적) 불확실성(모델이 샘플을 얼마나 잘 알 수 있는지에 대한 불확실성)을 정량화
+- 중요도 샘플링 기법을 통해 근사:
+
+$$
+\displaystyle
+\begin{aligned}
+
+\log p(y|x) &= \log \int p_\theta (y | z, x) p(z | x) dz  & \\
+&= \log \int q_\phi(z | y) \frac{p_\theta(y | z, x)\, p(z)}{q_\phi(z | y)}\, dz & \\
+& = \log \mathbb{E}_{q_\phi(z | y)} \frac{p_\theta(y | z, x)\, p(z)}{q_\phi(z | y)} & (3) \\
+& \approx \log \frac{1}{M} \sum_{z_j} \frac{p_\theta(y | z_j, x)\, p(z_j)}{q_\phi(z_j | y)}
+
+\end{aligned}
+$$
+
+> $p(z | x) = p(z)$: 모든 관측값 $x$가 같은 prior distribution $p(z)$를 공유한다는 가정에서 발생
+
+- 테스트 시점에서는 이미지 $x$만 사용 가능하고 실제 자세 $y$는 알 수 없음  
+-> Monte Carlo 생성 $\hat{y}_i = f_\theta (z_i, x), z_i \sim \mathcal{N} (0, I) $을 사용하여 예상 $\log p(\hat{y}_i | x)$ 추정을 제안.
+- 이 likelihood 측정은 $x$로 조건화된 인코더와 디코더 간의 일치를 정량화. VAE가 어떻게 암묵적으로 epistemic 불확실성을 포착하는지를 보임
+- 두 네트워크는 훈련 분포를 기반으로 잠재 공간이 구조화되어 있음  
+-> 오직 분포 내 샘플에 대해서만 일치할 것(= 훈련한 샘플에 대해서만 예측 가능할 것)
+- likelihood $\log p (\hat{y} | x)$를 관측 x에 대한 네트워크의 예측 자신감으로 해석
+
+![alt text](./images/Fig%202.png)
+
+> **Figure 2. 포즈 추정과 인식적 불확실성 정량화를 위한 파이프라인.**  
+> conditional VAE로 장면을 모델링  
+> test-time 이미지 관측 $x$가 주어지면, decoder은 카메라 자세의 posterior distribution $p(y | x)$에서 포즈 $\hat{y}$를 샘플링하는 데 사용됨  
+> VAE 파이프라인을 통해 $\hat{y}$를 재구성하면 훈련 분포에 대한 테스트 샘플의 likelihood를 나타내는 $\log p(\hat{y} | x)$에 대한 추정을 얻음  
+> 이는 모델이 관찰 $x$에 대해 갖는 인식적 불확실성을 반영

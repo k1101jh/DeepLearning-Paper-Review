@@ -8,7 +8,55 @@
 ---
 
 url
- - [paper](https://ieeexplore.ieee.org/abstract/document/10943362)
+ - [paper](https://ieeexplore.ieee.org/abstract/document/10943362) (IEEE 2025)
+
+---
+
+요약
+
+
+- **Landmark Tracking**
+  - RGB 이미지 sequence를 입력받아 랜드마크 $\ell_i$를 찾아내고, 각 랜드마크의 track을 저장
+  - track이 주어지면, 랜드마크 위치를 삼각 측량
+  - $\ell$ 위치의 초기 추정치: 선형 transform 알고리즘을 사용하여 찾고, Levenberg-Marquardt 최적화 기법을 통해 reprojection 오류를 최소화하여 보정
+
+- **3.2 Voxel Creation**
+  - 각 track이 최소 길이보다 긴 경우, $\ell_j$를 중심으로 하는 새로운 voxel $V_j$를 생성  
+  - track과 연관된 랜드마크는 유용한 위치 정보를 제공하기 위해 여러 pose에서 볼 수 있어야 함  
+  -> 다양한 각도에서 descriptor을 얻을 수 있도록 설계
+  - 각 voxel $V_j$는 $R \times R \times R$ 해상도를 갖는 더 작은 하위 voxel로 구성된 grid를 포함
+  - grid의 각 node(정점)은 descriptor 크기의 벡터를 저장
+  - 각 voxel $V_j$는 descriptors grid와 동일한 해상도를 갖는 density grid와 연결되지만, $C$ 대신 크기 1의 node를 사용. density grid는 volume rendering 과정에 사용됨
+
+> Density grid:  
+> - 희소성 마스크 역할  
+> - 여기서는 voxel의 각 정점에 descriptor가 저장되므로, voxel의 어느 위치에 descriptor가 저장되었는지 확인하는 역할
+
+- **Descriptor Learning and Rendering**
+  - Descriptor Learning
+    - voxel이 생성되면, 관련된 track을 따라서 관찰된 descriptor patches를 렌더링하기 위해 시스템을 훈련할 수 있음
+    - 모든 patches와 poses $i \in S_j$에 대해, patch $P_{ij}$의 각 요소를 통해 지나가는 카메라 중심 $T_i$에서 광선을 추적
+    - 각 ray $r$은 voxel grid $V_j$ 및 관련된 density grid와 두 개의 point에서 교차함
+      - 카메라에 가까운 지점: $p_n$, 다른 지점: $p_f$
+    - 두 교차점 사이의 광선에서 $N$개의 샘플, $d_t \in \mathbb{R}^C$와 $\hat{\sigma}_t \in \mathbb{R}$ $(t = 1, ..., N)$을 샘플링하고, $V_j$와 density grid에서 각각 trilinear interpolation을 사용(3차원 공간이므로 3차원 보간 사용)
+    - 이 과정은 [25]에서 제안된 volume rendering 방식을 따르지만, RGB 색상을 렌더링하는 대신 feature descriptor을 렌더링
+    - descriptor와 밀도 grid를 학습하기 위해 descriptor 벡터 공간에서 $\hat{\text{d}}_{ij}^{uv}$가 GT descriptors $d_{ij}^{uv} \in \text{P}_{ij}$에 가능한 가까운 norm과 방향을 갖도록 보장하고자 함
+    - GT descriptors $d_{ij}^{uv} \in \text{P}_{ij}$는 patch에서 모든 $(u, v) \in {(0, 0), (0, 1), ..., (S, S)}$에 대해 $F$에 의해 추출됨
+    - 다른 voxel과 독립적으로 각 voxel에 학습 프로세스를 적용하여 학습 프로세스를 병렬화
+  - Descriptor Rendering
+    - 추정하고자 하는 query pose $T_q$에 대해 초기 추정 $\hat{T}_q$이 필요. 제공된다고 가정
+    - 포즈 $\hat{T_q}$ 와 장면 내 voxel 집합 $V = {V_0, V_1, ..., V_J}$가 주어지면, 주어진 query pose에서 볼 수 있는 모든 landmark의 descriptor을 렌더링 할 수 있음 (이 렌더링에는 깊이 정보의 부족으로 인해 가려진 point가 포함될 수 있음)
+    - 각 $V_j$에 대해 쿼리 카메라 포즈 $\hat{T_q}$에서 voxel grid 중심 $l_j$(랜드마크의 위치)로 광선을 추적
+    - 이후 방정식 (3, 4, 5)으로 광선을 따라 volumetric rendering을 수행하여 $\hat{T}_q$에서 보이는 예상 descriptor을 얻음
+
+- **2D-3D Matching and Pose Estimation**
+  - 모든 $\hat{T}_q$에서 보이는 descriptor가 렌더링되면, query 이미지 $I_q$와 함꼐 2D-3D 대응을 찾을 수 있음
+    - feature extractor은 일반적으로 query 이미지에서 희소 2D keypoint를 찾아 각 keypoint를 $F$[11, 49]에 의해 제공된 dense descriptor map과 연결
+    - 렌더링된 descriptor을 query 이미지에서 추출한 descriptor과 일치시키기 위해, 임계값 이상의 가장 높은 유사성 점수를 갖는 대응을 찾음.  
+    => 두 descriptor 세트 간의 유사성 행렬을 계산하고 임계값 처리를 한 후, 최대 유사성 응답을 갖는 descriptor 쌍만 고려
+  - 모든 rendering된 feature가 일치하고 가정된 2D-3D 대응이 가능해지면 PnP RANSAC을 사용해서 카메라 포즈를 결정
+    - feature 표현은 새로운 view로부터 descriptor을 렌더링 할 수 있게 하여 반복적인 Render + PnP-RANSAC 정제 절차를 사용할 수 있게 함
+    - 추정된 query pose $\hat{T}_q$가 $T_q$에 수렴함에 따라 렌더링된 descriptor은 query 이미지 descriptor의 외관과 점점 더 일치하게 되어 더 많은 대응을 나타냄(4. Results 참조)
 
 ---
 
@@ -114,7 +162,7 @@ sparse feature matching은 효율적이고 일반적인 경량 접근 방식
  - 랜드마크 $\ell_i \in \mathbb{R}^3$ 은 월드 frame에서 정의됨
  - $S_j$ = $\ell_j$를 포함하는 훈련 이미지의 index 집합($\ell_j$를 관찰하는 이미지들)일 떄, 각 이미지 $I_i$에 대해, $i \in S_j$인 경우, keypoint $k_{ij} \in \mathbb{R}^2$($\ell_j$가 $I_i$에 투영된)가 존재
  - $I_i$에서 월드 frame 카메라 포즈는 $T_i \in \text{SE}(3)$
- - $F$ = 주어진 이미지 $I_i$에 대해 keypoints와 dense descriptor map $D_i \in \mathbb{R}^{H \times W \times C}$를 제공하는 feature extractor.
+ - $F$ = 주어진 이미지 $I_i$에 대해 keypoints와 dense descriptor map $D_i \in \mathbb{R}^{H \times W \times C}$을 제공하는 feature extractor.
  - $C$ = descriptor channel 개수
  - $D_i$로부터 각 추출된 keypoint $k_{ij}를 중심으로 $S \times S$ 픽셀 크기의 패치 $P_{ij} \in \mathbb{R}^{S \times S \times C}$를 잘라냄
 
@@ -128,7 +176,7 @@ $$
 
  - 각 랜드마크 $\ell_j$에 대해, $\ell_j$를 포함하는 이미지 sequence의 카메라 포즈 $T_i$, keypoint 집합 $k_{ij}$, 해당하는 descriptor patch $P_{ij}$를 포함하는 track을 저장
  - track이 주어지면, world frame에서 랜드마크 위치 $\ell_j$를 삼각 측량
- - $\ell_j$의 초기 추정치 = 선형 tranform 알고리즘[15]를 사용하여 찾음. 
+ - $\ell_j$의 초기 추정치 = 선형 tranform 알고리즘[15]를 사용하여 찾음.  
  이후 Levenberg-Marquardt 최적화 기법을 통해 reprojection 오류를 최소화하여 보정
  - 이상치를 감안하여, 최적화 과정에서 robust cost를 적용[13]
  - 최적화의 수치적 안정성을 보장하기 위해, 카메라 프레임의 랜드마크 위치의 inverse depth 매개변수화를 사용
@@ -195,8 +243,7 @@ $$
  - 다른 voxel과 독립적으로 각 voxel에 학습 프로세스를 적용하여 학습 프로세스를 병렬화
 
 새로운 view에서 관찰된 장면의 voxel로부터 descriptor을 렌더링
- - 추정하고자 하는 query pose $T_q$에 대해 초기 추정 $\hat{T}_q$이  필요
- - 이 추정이 제공된다고 가정(robotics localization 시스템에서는 흔함)
+ - 추정하고자 하는 query pose $T_q$에 대해 초기 추정 $\hat{T}_q$이 필요. 이 추정이 제공된다고 가정(robotics localization 시스템에서는 흔함)
  - 포즈 $\hat{T_q}$ 와 장면 내 voxel 집합 $V = {V_0, V_1, ..., V_J}$가 주어지면, 주어진 query pose에서 볼 수 있는 모든 landmark의 descriptor을 렌더링 할 수 있음 (이 렌더링에는 깊이 정보의 부족으로 인해 가려진 point가 포함될 수 있음)
  - 각 $V_j$에 대해 쿼리 카메라 포즈 $\hat{T_q}$에서 voxel grid 중심 $l_j$(랜드마크의 위치)로 광선을 추적
  - 이후 방정식 (3, 4, 5)으로 광선을 따라 volumetric rendering을 수행하여 $\hat{T}_q$에서 보이는 예상 descriptor을 얻음
