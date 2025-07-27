@@ -4,7 +4,7 @@
 
 ---
 
-- Visual SLAM
+- Relative Camera Pose Estimation
 
 ---
 
