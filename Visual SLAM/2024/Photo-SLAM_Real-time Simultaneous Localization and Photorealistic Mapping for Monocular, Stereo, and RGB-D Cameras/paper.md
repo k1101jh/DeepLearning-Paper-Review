@@ -25,7 +25,7 @@ url:
       - Photorealistic: hyper primitive를 점진적으로 최적화하고 밀도를 높임
 
 - Geometry-based Densification
-   - 실험적으로, RGB-D가 아닌 상황에서 frame의 2D 기하학적 특징점(feature point) 중 30% 미만이 활성화되어 있고 3D 포인트와 매칭됨(Fig 4 참조)
+   - 실험적으로, RGB-D가 아닌 상황에서 frame의 2D feature point 중 30% 미만이 활성화되어 있고 3D 포인트와 매칭됨(Fig 4 참조)
       - frame에 공간적으로 분포된 2D 특징점들이 사실상 복잡한 텍스처를 가진 영역을 나타냄
       - 이러한 영역에는 더 많은 hyper primitives가 필요함
    - photorealistic한 매핑을 위해 keyframe이 생성되는 시점에 비활성화된 2D 특징점을 기반으로 임시 hyper primitives를 추가로 생성

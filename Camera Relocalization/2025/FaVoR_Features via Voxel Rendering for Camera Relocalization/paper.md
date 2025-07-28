@@ -38,19 +38,17 @@ url
     - 모든 patches와 poses $i \in S_j$에 대해, patch $P_{ij}$의 각 요소를 통해 지나가는 카메라 중심 $T_i$에서 광선을 추적
     - 각 ray $r$은 voxel grid $V_j$ 및 관련된 density grid와 두 개의 point에서 교차함
       - 카메라에 가까운 지점: $p_n$, 다른 지점: $p_f$
-    - 두 교차점 사이의 광선에서 $N$개의 샘플, $d_t \in \mathbb{R}^C$와 $\hat{\sigma}_t \in \mathbb{R}$ $(t = 1, ..., N)$을 샘플링하고, $V_j$와 density grid에서 각각 trilinear interpolation을 사용(3차원 공간이므로 3차원 보간 사용)
-    - 이 과정은 [25]에서 제안된 volume rendering 방식을 따르지만, RGB 색상을 렌더링하는 대신 feature descriptor을 렌더링
-    - descriptor와 밀도 grid를 학습하기 위해 descriptor 벡터 공간에서 $\hat{\text{d}}_{ij}^{uv}$가 GT descriptors $d_{ij}^{uv} \in \text{P}_{ij}$에 가능한 가까운 norm과 방향을 갖도록 보장하고자 함
-    - GT descriptors $d_{ij}^{uv} \in \text{P}_{ij}$는 patch에서 모든 $(u, v) \in {(0, 0), (0, 1), ..., (S, S)}$에 대해 $F$에 의해 추출됨
+    - 두 교차점 사이의 광선에서 $N$개의 샘플을 샘플링하고, $V_j$와 density grid에서 각각 trilinear interpolation을 사용(3차원 공간이므로 3차원 보간 사용)
+    - [25]의 volume rendering 방식을 따르지만, RGB 색상을 렌더링하는 대신 feature descriptor을 렌더링
     - 다른 voxel과 독립적으로 각 voxel에 학습 프로세스를 적용하여 학습 프로세스를 병렬화
   - Descriptor Rendering
     - 추정하고자 하는 query pose $T_q$에 대해 초기 추정 $\hat{T}_q$이 필요. 제공된다고 가정
-    - 포즈 $\hat{T_q}$ 와 장면 내 voxel 집합 $V = {V_0, V_1, ..., V_J}$가 주어지면, 주어진 query pose에서 볼 수 있는 모든 landmark의 descriptor을 렌더링 할 수 있음 (이 렌더링에는 깊이 정보의 부족으로 인해 가려진 point가 포함될 수 있음)
+    - 포즈 $\hat{T_q}$ 와 장면 내 voxel 집합이 주어지면, 주어진 query pose에서 볼 수 있는 모든 landmark의 descriptor을 렌더링 할 수 있음 (이 렌더링에는 깊이 정보의 부족으로 인해 가려진 point가 포함될 수 있음)
     - 각 $V_j$에 대해 쿼리 카메라 포즈 $\hat{T_q}$에서 voxel grid 중심 $l_j$(랜드마크의 위치)로 광선을 추적
-    - 이후 방정식 (3, 4, 5)으로 광선을 따라 volumetric rendering을 수행하여 $\hat{T}_q$에서 보이는 예상 descriptor을 얻음
+    - 이후 광선을 따라 volumetric rendering을 수행하여 $\hat{T}_q$에서 보이는 예상 descriptor을 얻음
 
 - **2D-3D Matching and Pose Estimation**
-  - 모든 $\hat{T}_q$에서 보이는 descriptor가 렌더링되면, query 이미지 $I_q$와 함꼐 2D-3D 대응을 찾을 수 있음
+  - 모든 $\hat{T}_q$에서 보이는 descriptor가 렌더링되면, query 이미지 $I_q$와 함께 2D-3D 대응을 찾을 수 있음
     - feature extractor은 일반적으로 query 이미지에서 희소 2D keypoint를 찾아 각 keypoint를 $F$[11, 49]에 의해 제공된 dense descriptor map과 연결
     - 렌더링된 descriptor을 query 이미지에서 추출한 descriptor과 일치시키기 위해, 임계값 이상의 가장 높은 유사성 점수를 갖는 대응을 찾음.  
     => 두 descriptor 세트 간의 유사성 행렬을 계산하고 임계값 처리를 한 후, 최대 유사성 응답을 갖는 descriptor 쌍만 고려
@@ -250,7 +248,7 @@ $$
 
 ### 3.4 2D-3D Matching and Pose Estimation
 
-모든 $\hat{T}_q$에서 보이는 descriptor가 렌더링되면, query 이미지 $I_q$와 함꼐 2D-3D 대응을 찾을 수 있음
+$\hat{T}_q$에서 보이는 descriptor가 렌더링되면, query 이미지 $I_q$와 함꼐 2D-3D 대응을 찾을 수 있음
  - feature extractor은 일반적으로 query 이미지에서 희소 2D keypoint를 찾아 각 keypoint를 $F$[11, 49]에 의해 제공된 dense descriptor map과 연결
  - 렌더링된 descriptor을 query 이미지에서 추출한 descriptor과 일치시키기 위해, 임계값 이상의 가장 높은 유사성 점수를 갖는 대응을 찾음.  
  => 두 descriptor 세트 간의 유사성 행렬을 계산하고 임계값 처리를 한 후, 최대 유사성 응답을 갖는 descriptor 쌍만 고려

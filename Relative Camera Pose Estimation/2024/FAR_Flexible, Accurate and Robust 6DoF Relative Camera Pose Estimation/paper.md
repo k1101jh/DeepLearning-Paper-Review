@@ -17,6 +17,29 @@ url:
 요약
 
 
+**이미지 사이의 상대 카메라 자세 추정**
+- 대응 관계를 찾고 기본 행렬을 해결하는 방법
+    - 높은 정확도 제공
+- 신경망을 사용하여 자세 직접 예측
+    - 겹침이 제한될 때 더 강력
+    - 절대 변환 스케일(absolute translation scale)을 추론할 수 있음
+    - 정확도가 감소함
+
+**FAR**
+
+![alt text](./images/Fig%203.png)
+
+1. dense feature을 입력으로 받음
+2. Pose Transformer에서 6DoF pose $\text{T}_t$와 이에 대한 relative weight $\text{w}$도 예측
+3. $\text{T}_t$와 solver로 예측한 pose $\text{T}_s$, weight $\text{w}$를 결합하여 포즈 추정값 $\text{T}_1$을 얻음
+4. $\text{T}_1$은 solver의 prior으로 사용되며 업데이트 된 solver 출력 $\text{T}_u$를 생성
+5. 이는 $\text{w}$를 통해 $\text{T}_t$와 결합되어 최종 출력 $\text{T}$를 얻음
+
+- 이 방법은 network가 데이터 상태에 따라 다르게 행동하도록 학습할 수 있게 함
+- 많은 고품질 correspondence가 있는 경우
+    - 고전적인 solver가 일반적으로 정확. prior은 solver에 미치는 영향이 거의 없어서 solver의 출력에 크게 의존(낮은 $\text{w}$)하도록 학습
+- 적고 저품질의 correspondence인 경우
+    - solver 성능이 떨어지므로 prior은 solver 출력에 강한 영향을 미치도록 transformer 예측(높은 $\text{w}$)에 더 의존하도록 함
 
 ---
 
@@ -141,7 +164,7 @@ url:
 ![alt text](./images/Fig%203.png)
 
 > **Figure 3. Overview**  
-> 밀집된 feature과 correspondence를 고려하여 FARdms transformer과 classical solver을 통해 카메라 자세 생성  
+> 밀집된 feature과 correspondence를 고려하여 FAR의 transformer과 classical solver을 통해 카메라 자세 생성  
 > 1. solver이 $\text{T}_s$ 생성  
 > 2. pose transformer은 가중치 w를 사용해서 $\text{T}_s$를 자신의 예측 $\text{T}_t$와 평균내어 Round 1 포즈 $\text{T}_1$을 생성  
 > 3. $\text{T}_1$는 classic solver의 prior로 제공되어 $\text{T}_u$ 생성  
