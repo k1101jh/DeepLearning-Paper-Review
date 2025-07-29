@@ -325,3 +325,197 @@ $$
 - 교차점의 기하학적 중앙값은 해석적으로 해결할 수 없고, 일반적으로 반복 최적화가 필요
     - 본 논문에서는 상대 자세 추정치에서 유도된 각 translation 방향까지의 카메라 중심에서의 제곱 거리의 합을 최소화하는 최소 자승법을 사용
     - 특이값 분해(SVD. Singular Value Decomposition)를 사용하여 해를 얻음
+
+
+## 4. Experiments
+
+**Training Data**
+
+- DUSt3R과 유사하게, 7개 공개 데이터셋에서 약 800만 개의 이미지 쌍을 처리
+- GT relative pose를 OpenCV 형식으로 변환
+- 각 이미지는 주요 점을 기준으로 중앙에서 잘리고 512 픽셀 너비로 크기가 조정됨
+
+![alt text](./images/Table%201.png)
+
+> **Table 1. Reloc3r의 훈련 데이터**  
+> 객체 중심, 실내외 환경 등 다양한 장면을 포함
+
+**Implementation details**
+
+- 24개의 인코더 블록, 12개의 디코더 블록을 사용
+- $h = 2$ convolutional layer로 구성된 pose regression head
+- self & cross-attention에서 메모리 사용량과 속도 개선
+    - memory-efficient attention 사용
+    - 훈련 중 GPU 메모리의 25% 절약
+    - 약 14%의 속도 향상을 달성
+- Reloc3r을 DUSt3R의 사전 훈련된 512-DPT 가중치로 초기화
+- Decoder 초기화에 두 번째 DUSt3R 디코더의 가중치를 사용
+    - 좌표 변환을 수행하기 위해 사전 훈련됨
+- 훈련 시
+    - batch size: 8
+    - 학습률: 1e-5에서 1e-7로 감소
+    - MI250x-40G GPU 8개 사용
+- Visual localization task
+    - 이미지 검색에 NetVLAD 적용
+    - 상위 10개의 유사 이미지 쌍 사용
+    - 검색된 이미지 쌍을 distance-based clustering, filtering, 기타 휴리스틱 없이 직접 사용하여 공간 분포를 향상시킴
+    - 평가 시: 24GB NVIDIA GeForce RTX 4090 GPU에서 수행
+    - 혼합 정밀도 fp16/fp32 사용
+
+### 4.1 Relative Camera Pose Estimation
+
+**pair-wise relative pose**
+
+![alt text](./images/Table%203.png)
+
+> **Table 3. 상대 카메라 포즈 추정**  
+> 제안 방법은 모든 pose regression 경쟁자보다 우월함  
+> 밑줄: 여러 데이터셋과 metric에서 경쟁자들과 비교해서 최고 성능 달성  
+> 제안 방법은 real-time으로 동작. Non-PR 방법 SOTA보다 약 50배 빠름
+
+- ScanNet1500, RealEstate10K, ACID 데이터셋 사용
+- 다양한 카메라 경로로 포착된 다양한 실내 및 실외 장면을 보임
+- ScanNet1500
+    - 실내 장면에 중점
+- RealEstate10K
+    - 실내외 장면
+- ACID
+    - 공중 촬영한 실외 데이터
+- evaluation test set은 훈련 데이터와 장면이 겹치지 않음
+- ACID는 훈련에 사용되지 않음
+- 세 가지 metric
+    - AUC@ 5/10/20
+        - 최소 회전 및 변환 각도 오류에 대한 임계값 $\tau=5/10/20$에서 자세 정확도의 곡선 아래 면적을 계산
+
+기존 Pose regression 방법이 이러한 데이터셋을 위해 설계된 것이 없음
+- 비-PR 방법과 본 논문의 접근 방식 비교
+- 현재 SOTA relative pose regression 방법(ExReNet[93, 116], Map-free[4])를 평가 (표 3.)
+- Reloc3r은 세 가지 데이터셋에서 다른 PR 방법보다 우수한 성능을 보임
+- 비-PR 방법과 비교했을 때, DUSt3R 보다 약 13% 더 높은 AUC@20 성능 제공
+- Reloc3r은 512 픽셀 해상도에서 42ms 추론 시간으로 실행됨
+    - NoPoSplat[122](>2000ms) 및 ROMA[34](300ms) 등 많은 비-PR 방법보다 빠르고 PR 방법과 동등함
+
+
+**multi-view relative pose**
+
+![alt text](./images/Table%202.png)
+
+> **Table 2. CO3Dv2 데이터셋에서 상대 자세 추정(multi-view)**  
+> 밑줄: 제안 방법이 모든 경쟁자 중에서 최고 성능을 달성  
+> *: 8프레임을 사용하여 평가
+
+- Co3dv2 데이터셋 사용
+    - inward-facing 카메라 경로로 캡처한 object-level scene으로 구성됨
+    - 시각적 대칭, 텍스처가 없는 객체, 이미지 간의 넓은 baseline(각도가 큰) 포함
+- 41개 범주 테스트셋에서 평가
+- 각 시퀀스에서 무작위로 10프레임을 샘플링하고 평가를 위해 45쌍을 형성
+- 세 가지 metric
+    - 15도 내의 상대 회전 (RRA@15)
+    - 15도 내의 상대 translation (RTA@15)
+    - mean avearage accuracy(mAA@30 또는 AUC@30)
+- 비교 대상
+    - PixSfM[59]
+    - VGGSfM[107]
+    - RelPose[127]
+    - RelPose++[57]
+    - PoseDiffusion[106]
+    - RayDiffusion[128]
+    - DUSt3R(PnP 사용) [111]
+    - MASt3R[51]
+    - PoseReg[106]
+    - RayReg[128]
+- DUSt3R 및 MASt3R과 유사하게 pair-wise 평가만 사용하여 평가를 위한 더 많은 맥락 정보를 가짐
+- Reloc3r은 여러 metric에서 SOTA를 달성
+- multi-view 설정 및 wide baselines에서 강인하고 정확하게 localizing
+
+
+### 4.2 Visual Localization
+
+![alt text](./images/Fig%203.png)
+
+> **Figure 3. 포즈 추정 결과 시각화**  
+> 7 Scenes 데이터셋의 Chess와 Cambridge Landmarks의 KingsCollege 시각화  
+> ExReNet[116]과 Map-free[4]의 결과와 비교  
+> Reloc3r의 포즈 추정 결과가 GT 포즈와 더 유사함
+
+7 Scenes 데이터셋과 cambridge landmarks를 사용하여 실험 수행
+- 7 Scenes
+    - 서로 다른 이동 궤적에서 캡처된 여러 비디오 시퀀스를 포함하는 7개의 실내 방 장면으로 구성
+- Cambridge Landmarks
+    - 6개의 장면을 특징으로 하는 교외 규모 야외 데이터셋
+    - 이전 접근 방식[15, 54, 101]을 따르며, 평가를 위해 6개 중 5개 장면 사용
+- 각 장면에 대한 median translation 및 rotation 오류 측정
+- 두 데이터셋 모두 훈련에 사용되지 않음
+
+**Indoor visual localization**
+
+![alt text](./images/Table%204.png)
+
+> **Table 4. 7 Scenes 데이터셋에서 Visual localization 결과**  
+> 미터와 각도 단위로 median pose error 보고  
+> $\dagger$로 표시된 경우는 추가 geometry solver와 feature matching을 결합한 하이브리드 포즈 추정 방법을 나타냄
+
+- 7 Scenes 데이터셋에서 SOTA Absolute Pose Regression(APR) 및 Relative Pose Regression(RPR) 방법과 Reloc3r 비교
+- RPR 방법의 두 가지 분류
+    - 동일한 데이터셋으로 모델을 훈련하고 평가한 'seen' 그룹
+    - 데이터셋으로 모델을 훈련하지 않은 'unseen' 그룹
+- EssNet[129], Relative PN[49], RelocNet[7] 과 같은 방법들이 unseen 데이터셋으로 평가할 때 상당한 성능 저하를 보임  
+-> 장면 일반화의 한계
+- 제안 방법은 'seen' 그룹 방법보다도 뛰어남. 평균 중간 오차 0.04m/1.02º를 달성
+- APR 방법과 비교할 때, Reloc3r은 장면 특정 훈련 없이도 비슷한 성능을 보여 강건성과 다양한 장면에 대한 적응 능력을 보임
+
+**Outdoor visual localization**
+
+![alt text](./images/Table%205.png)
+
+> **Table 5. Cambridge Landmark 데이터셋에서 Visual localization 결과**  
+> 미터와 각도 단위로 median pose error 보고  
+> $\dagger$로 표시된 경우는 추가 geometry solver와 feature matching을 결합한 하이브리드 포즈 추정 방법을 나타냄
+
+- Cambridge 데이터셋을 사용하여 모든 RPR 방법 평가
+- Reloc3r은 특정 장면에 대한 재훈련이나 미세 조정 없이 이전 RPR 방법을 초월. 모든 장면에서 일관된 개선을 달성
+    - 'unseen' 조건에서 Reloc3r은 이전 최첨단 RPR 방법인 ImageNet+NCM[129]에 비해 평균 포즈 오류를 절반으로 줄임
+    - 마지막 네 장면에서 평균 오류는 0.38m/0.52º
+    - 모든 APR 기반 방법보다 더 나은 평균 회전 오류를 보임
+
+
+### 4.3 Analyses
+
+![alt text](./images/Table%206.png)
+
+> **Table 6. assymetric network 아키텍처 및 metric scale을 통한 포즈 예측을 조사하는 절제 연구**
+
+![alt text](./images/Fig%204.png)
+
+> **Figure 4.**  
+> 윗줄: Efficient LoFTR의 매칭 결과  
+> 아랫줄: Reloc3r의 decoder에서 상위 3개의 cross attention 응답  
+> Reloc3r이 pose supervision으로만 훈련되었음에도 상관된 영역이 Efficient LoFTR의 상관된 영역보다 우수함
+
+**이미지 해상도**
+- 두 가지 해상도(224, 512)로 훈련하고 평가
+- DUSt3R과 유사하게, 더 높은 해상도는 정확도를 향상시키지만 런타임을 증가시킴
+
+**비대칭 네트워크 아키텍처와 비교 (표 6 참조)**
+- rkr branch에 별도의 decoder과 head를 사용하는 비대칭 버전의 Reloc3r-512를 훈련.
+- 더 많은 계산 자원을 필요로 하면서 기본 Reloc3r보다 성능이 떨어짐
+
+**Metric scale로 포즈 예측과 비교 (표 6 참조)**
+- metric pose를 출력으로 가진 Reloc3r-512를 훈련
+- metric scale이 없는 기본 설계가 효과적
+
+**Interesting findings (그림 4 참조)**
+- Reloc3r의 디코더의 일부 블록에서 cross-attention 응답을 시각화
+- 여러 층이 patch 대응을 맞추는 능력을 개발함
+
+**Limitations**
+- 실패 사례는 쿼리 이미지와 모든 검색된 데이터베이스 이미지가 완벽하게 일직선상에 있을 때 발생
+- motion averaging 방법을 사용하여 metric scale을 해결할 수 없는 degeneracy 문제를 초래
+
+## 5. 결론
+
+Reloc3r
+- 간단하면서도 효과적인 visual localization 프레임워크
+- minimalist motion averaging module과 relative pose regression network로 구성
+- 약 800만 개 이미지 쌍에 대한 대규모 훈련
+- 강력한 일반화 능력, 높은 효율성 및 정확한 포즈 추정
