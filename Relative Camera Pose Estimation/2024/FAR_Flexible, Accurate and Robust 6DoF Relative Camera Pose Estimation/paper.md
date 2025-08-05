@@ -43,6 +43,17 @@ url:
 
 ---
 
+**문제점 & 한계점**
+
+- 딥러닝 기반 포즈 추정 방법과 기존 포즈 추정 방법 같이 사용
+    - 파이프라인이 긺
+- 3D 공간 정보 활용 부재
+- Feature Extractor에 의존
+- 동적 객체에 대한 대처가 부족함
+- 느린 속도. 초당 3.3 iteration(1080Ti)
+
+---
+
 목차
 
 0. [Abstract](#abstract)
@@ -144,7 +155,7 @@ url:
 **목표**
 - 두 개의 겹치는 이미지를 기반으로 상대 카메라 포즈, translation scale 추정
 - 6DoF 자세는 $\text{T} \in \text{SE(3)}$으로 매개변수화 가능
-    - $text{R} \in \text{SO(3)}$ 및 $\text{t} \in \mathcal{R}^3$ 포함
+    - $\text{R} \in \text{SO(3)}$ 및 $\text{t} \in \mathcal{R}^3$ 포함
 - translation scale 예측에 초점
     - correspondence만으로는 해결 불가
     - 3D reconstruction이나 neural rendering 등 실제 응용 프로그램에 유용

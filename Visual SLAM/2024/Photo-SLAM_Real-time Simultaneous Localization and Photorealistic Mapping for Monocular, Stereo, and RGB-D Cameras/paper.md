@@ -49,6 +49,13 @@ url:
 
 ---
 
+**문제점 & 한계점**
+
+- Tracking 병목 존재(Rendering 성능이 크게 향상되어서 상대적으로 Tracking 성능이 낮아짐)
+    - 딥러닝 기반 pose estimation 방법 적용 고려
+
+---
+
 목차
 
 0. [Abstract](#abstract)
@@ -114,7 +121,7 @@ neural rendering의 발전은 SLAM 파이프라인에 photorealistic view 재구
    - 원본 이미지와 렌더링 이미지 간의 loss를 역전파하여 해당 매핑을 학습할 수 있도록 함
    - 이미지는 ray sampling 대신 3D Gaussian splatting을 사용하여 렌더링됨
 - 3D Gaussian splatting renderer
-   - view 재구성 비용이 줄어들 수 있지만, online incremental mapping을 위한 high-fidelity rendering 생성을 가능하게 하지는 않음. 특히 monocular 시나리오에서
+   - view 재구성 비용이 줄어들 수 있지만, online incremental mapping을 위한 high-fidelity rendering 생성을 가능하게 하지는 않음. monocular 시나리오에서 특히
 - dense depth 정보에 의존하지 않고 고품질 mapping을 달성하기 위해 geometry-based densification 전략과 Gaussian-Pyramid-based(GP) 학습 방법을 추가로 제안
    - GP 학습은 multi-level feature의 점진적 습득을 촉진하여 시스템의 매핑 성능을 효과적으로 향상시킴
 
