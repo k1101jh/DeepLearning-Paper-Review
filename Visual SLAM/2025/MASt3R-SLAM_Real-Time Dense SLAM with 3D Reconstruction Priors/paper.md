@@ -190,5 +190,34 @@ $$
 
 이 픽셀들이 기하학을 사용하여 매칭에 대한 좋은 추정을 제공하는 동안, MASt3R은 픽셀마다의 특징을 활용하는 것이 포즈 추정의 downstream 성능을 크게 향상시킴을 보임
 - 이전 단계에서 좋은 초기 결과를 얻었으므로, 지역 파치 윈도우에서 maximum feature 유사성으로 픽셀 위치를 업데이트하여 coarse-to-fine 이미지 기반 검색을 수행
+- 반복 projection 및 feature extraction 단계를 사용자 정의 CUDA 커널에서 구현
+    - 각 pixel에 대해 병렬 처리 가능
+    - 2ms 소요
+    - 그래프에서 edge를 구성하는 데 초기 projection 추정 없이 새로 추가된 모든 edge에 대해 몇 ms만 소요됨
+- 매치가 pose 추정에 의해 편향되지 않음
+    - MASt3R 출력에만 의존하므로 projection data association에 비전형적임 (3D 점을 투영하고 근처 점을 찾는 과정)
 
-이 픽셀들은 기하학을 사용하여 매치의 초기 추정치를 잘 제공하지만, MASt3R는 픽셀마다의 특징을 활용하는 것이 포즈 추정에 대한 하위 성능을 크게 향상시킨다는 것을 보여줍니다. 이전 단계에서 좋은 초기화를 얻었으므로, 우리는 지역 패치 윈도우에서 최대 특징 유사성으로 픽셀 위치를 업데이트하여 거칠게부터 세밀하게 이미지 기반 검색을 수행합니다. 우리는 반복 프로젝션 및 특징 정제 단계를 사용자 정의 CUDA 커널에서 구현하는데, 두 가지 모두 각 픽셀에 대해 병렬 처리 가능하기 때문입니다. 추적을 위해 이는 단지 2밀리초가 소요되며, 그래프에서 엣지를 구성하는 데는 초기 프로젝션 추정 없이 새로 추가된 모든 엣지에 대해 단지 몇 밀리초만 소요됩니다. 우리의 매치가 포즈 추정에 의해 편향되지 않음을 유의해야 하는데, 이는 오로지 MASt3R 출력에만 의존하므로 투사 데이터 연관관계에 비정상적입니다.
+### 3.3 Tracking and Pointmap Fusion
+
+현재 프레임 $\mathcal{I}^f$와 이전 keyframe $\mathcal{I}^k$간의 상대 변화 $\mathrm{T}_{kf}$를 추정
+- 네트워크를 한 번만 실행하여 $\mathrm{T}_{kf}$를 추정
+- 마지막 keyframe의 pointmap 추정치 $\tilde{\mathrm{X}}_k^k$가 있다고 가정
+- $\mathcal{I}^f$ 프레임에 대한 point는 $\mathcal{F}_M(\mathcal{I}^f, \mathcal{I}^k)$를 통해 얻을 수 있음
+- 포즈를 추정하기 위한 
+
+$$
+E_{\text{prior}}(T_{kf}) = \lambda_t \cdot \left\|\, \log(T_{kf}^{\text{pred}}{}^{-1} \cdot T_{kf}^{\text{current}}) \,\right\|^2
+
+
+$$
+
+
+$$
+w(q, \sigma^2) =
+\begin{cases}
+\frac{\sigma^2}{q}, & \text{if } q > q_{\text{min}} \\
+\infty, & \text{otherwise}
+\end{cases}
+$$
+
+### 3.4 Graph Construction and Loop Closure
