@@ -1,0 +1,215 @@
+# From Sparse to Dense: Camera Relocalization with Scene-Specific Detector from Feature Gaussian Splatting
+
+
+
+---
+
+- Camera Relocalization
+- Gaussian Splatting
+
+---
+
+url:
+- [paper](https://openaccess.thecvf.com/content/CVPR2025/html/Huang_From_Sparse_to_Dense_Camera_Relocalization_with_Scene-Specific_Detector_from_CVPR_2025_paper.html) (CVPR 2025)
+- [project page](https://zju3dv.github.io/STDLoc/)
+
+---
+요약
+
+---
+
+## Abstract
+
+**STDLoc**
+- Feature Gaussian을 활용하는 Full relocalization pipeline
+- 자세 정보에 의존하지 않고도 정확한 relocalization 가능
+- 이전 방식
+    1. 이미지 검색
+    2. feature matching
+- 새로운 sparse-to-dense localization 패러다임 제안
+- 새로운 matching-oriented gaussian sampling 전략과 scene-specific detector 도입
+    - 효율적이고 견고한 초기 자세 추정을 위해
+- 초기 위치 지정 결과를 기반으로 dense feature matching  
+-> query feature map을 gaussian feature field와 정렬하여 정확한 위치 지정을 가능하게 함
+- 위치 지정 정확도 및 재현율 측면에서 SOTA localization 방법 능가
+
+## 1. Introduction
+
+Camera Relocalization
+- 사전에 구축된 scene map과 비교하여 쿼리 이미지의 6DoF 카메라 자세를 추정
+
+Scene representation
+- 적절한 scene representation은 카메라 relocalization에 핵심적인 역할을 함
+- 전통 방법
+    - 사전 SfM으로 재구성된 희소 3D pointCloud 사용
+        - 각 3D 포인트는 하나 이상의 2D descriptors와 연결됨
+    - 쿼리 이미지에서 reliable local feature을 추출
+    - 추출한 feature을 reference 이미지 또는 직접 3D point cloud와 매칭
+    - PnP(Perspective-n-Point) 알고리즘을 사용하여 2D-3D 대응점 기반으로 6DoF 포즈 추정
+    - 장점: 풍부한 texture 환경에서 높은 정확도
+    - 한계: weak-texture 환경에서 feature 대응점 부족으로 정확도 저하
+        - Semi-dense / dense matching으로 완화 가능
+            - 매핑 단계에서 SfM 계산량이 과도하여 실용성 낮음
+        - mesh 활용 -> 깊이 정보는 제공 가능하지만 artifact 발생 시 위치 정확도에 심각한 영향을 줌
+
+- 딥러닝 기반 접근
+    - 장면 정보를 newral network에 인코딩
+    - APR(Absolute Pose Regression)[9, 20]
+        - 절대 포즈 직접 회귀
+        - 일반적으로 정확도 한계
+        - unseen view에 대한 정확도 저하
+    - SCR(Scene Coordinate Regression)
+        - 장면 좌표를 조밀하게 회귀
+        - 실내 weak-texture 환경에서 feature matching 기반 방법보다 정확도 높음
+        - 한계
+            - 네트워크 가중치에 장면 정보가 직접 인코딩
+                - 목표 장면 크기에 따라 네트워크 용량을 동적으로 조정 불가
+            - 대규모 실외 장면에서의 정확도는 상대적으로 제한됨
+
+~
+
+
+### 2.3 Radiance Field-Based Methods
+
+- 최근 연구 동향: NeRF[34]와 Gaussian Splatting[19, 21]을 사용한 활발한 연구 진행중
+- Inverse Rendering
+    - 역렌더링을 통해 카메라 포즈 직접 최적화
+    - iNeRF[64]
+        - 최초로 inverse rendering을 적용한 카메라 포즈 최적화 방법
+    - PNeRFLoc[68]
+        - 2D-3D feature matching으로 초기 포즈 추정
+            -> 새로운 view 합성을 활용해 포즈 정제
+    - NeRFMatch[69]
+        - NeRF 내부 특징을 활용한 정밀 2D-3D 매칭
+            -> 포토메트릭 오류 최소화로 포즈 최적화
+    - CROSSFIRE[37]
+        - 포토메트릭 정합 대신 volumetric rendering의 조밀 로컬 특징을 활용해 robustness 향상
+    - NeuraLoc[67]
+        - 상호 보완적인 특징 학습으로 정확한 2D-3D 대응 관계 수립
+    - Lens[36]
+        - NeRF를 이용해 추가 시점 합성하여 학습 데이터셋 확장
+- Gaussian 기반 localization
+    - NeRF보다 효율적
+    - 6DGS[2]
+        - 사전 포즈 없이 3DGS 모델에서 직접 6DoF 카메라 포즈 추정
+    - GSplatLoc[51]
+        - dense keypoint descriptors를 3DGS에 통합
+            -> 초기 포즈 추정 후 photometric warping loss 최적화
+    - LoGS[13]
+        - 이미지 검색과 PnP solver로 로컬 feature 매칭
+        - 이후 analysis-by-synthesis(분석 기반 합성)으로 정제
+    - GS-CPR[28]
+        - 3DGS로 고품질 이미지를 렌더링해 신경망 기반 방법의 정합 정확도 향상
+
+- 제안 방법의 차별점
+    - 완전한 localization 파이프라인 제안
+    - 새로운 Sparse-to-Dense 패러다임
+        1. 샘플링된 scene landmarks와 scene-specific detector을 사용해 효율적 초기 포즈 추정
+        2. feature gaussian이 제공하는 feature field를 활용하여 포즈 추가 정제
+    - 높은 포즈 추정 정확도
+    - 조명 변화나 weak-texture 환경에서도 강건한 성능 유지
+
+## 3. Method
+
+### 3.1 Feature Gaussian Training
+
+scene representation
+- feature field로 augment된 Gaussian primitive로 구성
+- 학습 가능한 속성 집합($\Theta$)
+    - $x_i$: 중심(Center)
+    - $q_i$: 회전(Rotation)
+    - $s_i$: 스케일(Scale)
+    - $\alpha_i$: 불투명도(Opacity)
+    - $c_i$: 색상(Color)
+    - $f_i$: 특징(Feature)
+- Feature 3DGS[70] 방식 기반으로 radiance field과 feature field를 공동 최적화
+- 모든 명시적 primitives기반 3DGS 변형에 적용 가능
+
+Gaussian Primitive
+- SfM(Structure-from-Motion) 포인트 클라우드로 Gaussian Primitive 초기화
+- Feature Map
+    - $F_t(I) \in \mathbb{R}^{D \times H' \times W'}$: 학습 이미지 $I \in \mathbb{R}^{3 \times H \times W}$에서 추출한 Dense Feature Map
+    - $D$: 로컬 특징의 차원 수
+- GT Feature Map $F_t(I)$:
+    - SuperPoint [14]와 같은 범용 로컬 특징 추출기로 획득할 수 있음
+
+렌더링 과정
+- Gaussian radiance field
+    - alpha blending 기법을 사용하여 색상 속성 $c$를 렌더링 RGB 이미지 $\hat{i}$로 변환
+    - 같은 방식으로 Feature 속성 $f$를 사용해 렌더링 Feature Map $\hat{F}_s$ 생성
+
+loss
+- Radiance Field Loss($L_{rgb}$)
+    - $L_1$ 손실 + D-SSIM 손실 조합:
+    $$
+    \displaystyle
+    \begin{aligned}
+    & \mathcal{L}_{rgb} = (1 - \lambda) \mathcal{L}_1(I, \hat{I}) + \lambda \mathcal{L}_{D-SSIM}(I, \hat{I}) \tag{1}
+    \end{aligned}
+    $$
+- Feature Field Loss ($L_f$)
+    - GT Feature Map과 렌더링 Feature Map 간 $L_1$ 거리:
+    $$
+    \displaystyle
+    \begin{aligned}
+    & \mathcal{L}_f = \mathcal{L}_1(F_t(I), \hat{F}_s) \tag{2}
+    \end{aligned}
+    $$
+- 최종 손실 ($L$)
+    - 두 손실을 가중합:
+    $$
+    \displaystyle
+    \begin{aligned}
+    & \mathcal{L} = \alpha \mathcal{L}_{rgb} + \beta \mathcal{L}_f \tag{3}
+    \end{aligned}
+    $$
+
+- $\lambda = 0.2, \alpha = 1.0, \beta = 1.0$ 사용
+- 훈련으로 얻은 Feature Gaussian scene을 $\mathcal{G}$로 표현
+
+### 3.2 Matching-Oriented Sampling
+
+- 장면 내 모든 Gaussian과 쿼리 특징을 모두 매칭하면 시간 소모가 큼
+- 모호한 Gaussian이 많으면 feature matching 정확도 저하 가능
+- 목표
+    - 수백만 개의 Gaussian primitive 중 매칭에 적합한 것만 선택
+    - 장면 전체에 균등 분포
+    - 여러 시점에서 인식 가능한 gaussian을 유지
+
+가우시안 품질 평가
+- 각 가우시안 $g_i$와 학습 이미지 $I$에 대해
+    - $g_i$의 중심을 $I$에 투영하여 2D 좌표 $(u_i, v_i)$ 획득
+    - feature map $F_t(I)$에서 해당 위치의 2D feature 추출  
+    -> Bilinear interpolation 사용: $F_t(I)[u_i, v_i]$
+    - Gaussian의 3D feature $f_i$와 2D feature 간 코사인 유사도 계산
+- $V_i$: $g_i$가 보이는 이미지들의 집합
+
+- 최종 점수 $s(g_i)$:
+
+$$
+\displaystyle
+\begin{aligned}
+& s(g_i) = \frac{1}{|\mathcal{V}_i|} \sum_{I \in \mathcal{V}_i} \langle f_i, F_t(I)[u_i, v_i] \rangle
+\tag{4}
+\end{aligned}
+$$
+
+- 점수가 높을수록 매칭 적합도가 높음
+
+점수 기반 단일 선택의 문제
+- 불균형한 공간 분포 발생
+    - 고텍스처 영역: Gaussian이 과밀 집적
+    - 저텍스처 영역: Gaussian이 희소, 매칭 성능 저하
+- 해결 방법
+    - downsampling
+        - Random/Farthest point sampling 진행
+        - 균등 분포 확보를 위해 고정 개수의 gaussian을 anchor로 sample
+        - 각 anchor마다, 공간 거리 기준 k nearset neighbor을 식별
+        - 해당 집합 중 점수가 가장 높은 gaussian 선택
+- 결과
+    - 원본 대비 gaussian 수 대폭 축소
+    - 최종 집합:
+        - 공간적으로 균등함
+        - 여러 시점에서 높은 인식률 보유
+    - 실험 결과 수천 개 수준의 gaussian만으로도 충분히 효과적인 localization 성능 달성
+    - sampled gaussian을 scene landmarks $\tilde{\mathcal{G}}$라고 함
