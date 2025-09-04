@@ -16,6 +16,15 @@ url:
 ---
 요약
 
+
+
+---
+
+문제점
+- Gaussian을 의도적으로 균등하게 분포시킴  
+-> 사실적인 map은 생성 불가. Gaussian Splatting의 의미가 퇴색됨
+
+
 ---
 
 ## Abstract
@@ -34,6 +43,11 @@ url:
 - 위치 지정 정확도 및 재현율 측면에서 SOTA localization 방법 능가
 
 ## 1. Introduction
+
+![alt text](./images/Fig%201.png)
+> **Figure 1. STDLoc: Sparse-to-Dense Localization**  
+> 장면 표현으로 Feature Gaussian을 활용하여 랜드마크에서 직접 2D-3D sparse matching을 지원  
+> dense matching을 통해 query feature map을 feature field에 정렬할 수 있음
 
 Camera Relocalization
 - 사전에 구축된 scene map과 비교하여 쿼리 이미지의 6DoF 카메라 자세를 추정
@@ -113,6 +127,11 @@ Scene representation
 
 ### 3.1 Feature Gaussian Training
 
+![alt text](./images/Fig%202.png)
+
+> **Figure 2.**  
+> Feature Gaussian은 radiance field loss $\mathcal{L}_{rgb}$와 feature field loss $\mathcal{L}_f$를 공동으로 최적화하도록 훈련됨
+
 scene representation
 - feature field로 augment된 Gaussian primitive로 구성
 - 학습 가능한 속성 집합($\Theta$)
@@ -169,7 +188,14 @@ loss
 
 ### 3.2 Matching-Oriented Sampling
 
-- 장면 내 모든 Gaussian과 쿼리 특징을 모두 매칭하면 시간 소모가 큼
+![alt text](./images/Fig%203.png)
+
+> **Figure 3. Matching-Oriented Sampling**  
+> 각 가우시안은 anchor sampling에 따라 매칭 점수가 할당됨  
+> 각 앵커에 대해, 공간적 거리 기준으로 k개의 가까운 가우시안이 식별되며, 그 중 가장 높은 점수를 가진 가우시안이 선택됨
+
+
+- 장면 내 모든 Gaussian과 쿼리 feature을 모두 매칭하면 시간 소모가 큼
 - 모호한 Gaussian이 많으면 feature matching 정확도 저하 가능
 - 목표
     - 수백만 개의 Gaussian primitive 중 매칭에 적합한 것만 선택
@@ -213,3 +239,109 @@ $$
         - 여러 시점에서 높은 인식률 보유
     - 실험 결과 수천 개 수준의 gaussian만으로도 충분히 효과적인 localization 성능 달성
     - sampled gaussian을 scene landmarks $\tilde{\mathcal{G}}$라고 함
+
+### 3.3 Scene-Specific Detector
+
+![alt text](./images/Fig%204.png)
+
+> **Figure 4. Scene-Specific Detector Training**  
+> 샘플된 랜드마크의 중심은 2D 이미지에 투영되어 scene-specific detector의 훈련을 guide함
+
+샘플링된 랜드마크와 dense feature map을 직접적으로 매칭하는 것은 불가능
+- dense feature map에는 많은 수의 feature이 있음
+- 하늘과 같은 유효하지 않은 영역의 feature은 매칭에 부적합함
+- 기존의 SuperPoint와 같은 detector은 장면에 무관한 사전 정의된 keypoint 검출
+    - Feature Gaussian 장면에서 샘플된 랜드마크와 잘 맞지 않음
+
+제안 방법
+- scene-specific feature detector $\mathcal{D}_\theta$
+    - 입력: 이미지 $I$로부터 추출된 feature map $F_t(I)$
+    - 출력: heatmap $\hat{K} \in \mathbb{R}^{1 \times H' \times W'}$
+        - 각 2D feature이 랜드마크일 확률을 나타냄
+
+$$
+\displaystyle
+\begin{aligned}
+
+& \hat{K} = D_{\theta}(F_t(I))
+& \tag{5}
+
+\end{aligned}
+$$
+
+네트워크 구조
+- $\mathcal{D}_\theta$는 얕은(shallow) convolutional neural network(CNN)으로 구성됨
+
+학습 방식
+- self-supervised 학습
+- 샘플링된 랜드마크 집합 $\tilde{\mathcal{G}}$의 각 gaussian 중심을 이미지 평면에 투영
+- 해당 픽셀 위치를 1로 설정하여 GT(ground truth) heatmap $K$ 생성
+- Binary Cross-Entropy Loss로 최적화
+
+$$
+\displaystyle
+\begin{aligned}
+
+& L_{\text{det}} = -K \log(\hat{K}) - (1 - K) \log(1 - \hat{K})
+& \tag{6}
+
+\end{aligned}
+$$
+
+추론
+- 생성된 heatmap $\hat{K}$에 Non-Maximum Suppression(NMS) 적용
+- 검출된 keypoint들이 균일하게 분포되도록 함
+
+### 3.4 Sparse-to-Dense Localization
+
+![alt text](./images/Fig%205.png)
+
+> **Figure 5. Feature Gaussian 기반 sparse-to-dense localization pipeline**
+
+Sparse-to-dense localization pipeline
+- sparse feature matching은 sampled landmark $\tilde{\mathcal{G}}$와 $\mathcal{D}_\theta$로 탐지한 sparse local feature로 구성됨
+- sparse matching을 통해 얻은 2D-3D correspondences 기반으로 initial camera pose는 PnP 알고리즘으로 계산 가능
+- dense feature map은 full Feature Gaussian $\mathcal{G}$로 렌더링 될 수 있음
+- 이후 coarse-to-fine dense feature matching으로 포즈 refine
+
+Sparse Stage
+- 입력: 쿼리 이미지 $I_q$
+- dense feature map $F_t(I_q)$ 추출
+- $\mathcal{D}_\theta$를 사용해 sparse local feature 검출
+- sparse local feature와 $\tilde{\mathcal{G}}$의 모든 랜드마크 간의 cosine similarity계산
+- 각 local feature에 대해 가장 유사도가 높은 landmark를 매칭으로 선택
+- 로컬 특징의 2D 좌표와 해당 랜드마크의 3D 중심 좌표를 2D-3D correspondences로 설정  
+-> sparse match set $\mathcal{M}_{sparse}$ 형성
+- PnP + RANSAC으로 초기 포즈 $\xi_{sparse}$ 추정
+
+Dense Stage
+- 초기 포즈 $\xi_{sparse}$를 사용해서 Feature Gaussian 장면 $\mathcal{G}$에서
+    - 고해상도 Dense feature map $\hat{F}_s$ 렌더링
+    - depth map $\hat{D}$ 렌더링
+- LoFTR[52] 방식을 참고하여 저해상도 $D \times H_f / 8 \times W_f / 8$에서 coarse matching
+- 이후 full 해상도 $D \times H_f \times W_f$에서 refine
+- 고해상도 feature map을 직접 렌더링 후, bilinear interpolation으로 저해상도 버전 생성
+- Coarse Matching
+    - 코사인 유사도로 coarse feature map 간 상관 행렬 $S_c$ 계산
+    - Dual-softmax op로 확률 행렬 $P_c$ 생성
+    - MNN 검색으로 coarse correspondence 집합 $\mathcal{M}_c$ 획득
+
+$$
+\displaystyle
+\begin{aligned}
+
+& P_c = \text{softmax}\left(\frac{1}{\tau} S_c\right)_{\text{row}} \cdot \text{softmax}\left(\frac{1}{\tau} S_c\right)_{\text{col}}
+& \tag{7}
+
+\end{aligned}
+$$
+
+> $\tau$: 온도 파라미터
+
+
+- Fine Matching
+    - 각 coarse correspondence 위치에서 $8 \times 8$ 패치 추출
+    - 동일한 방식으로
+        - correlation matrix $S_f$ 계산
+        - probability matrix $P_f$ 계산
+        - MNN 검색으로 refined matches $\mathcal{M}_f$ 획득
