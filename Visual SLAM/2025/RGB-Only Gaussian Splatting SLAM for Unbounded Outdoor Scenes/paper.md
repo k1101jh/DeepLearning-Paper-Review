@@ -94,6 +94,13 @@ SLAM
 
 ### A. SLAM System Overview
 
+![alt text](./images/Figure%201.png)
+> **Figure 1. SLAM System Pipeline**  
+> 각 프레임은 추적을 위한 RGB 이미지  
+> 현재와 이전 프레임은 자세 추정을 위한 pointmap 회귀 네트워크에 쌍으로 입력됨  
+> 이후 현재 가우시안 맵을 기반으로 자세 최적화 진행  
+> 중요 프레임에서는 매핑 수행
+
 Figure 1은 system overview를 제공
 
 ### B. Tracking
@@ -250,14 +257,63 @@ Figure 1은 system overview를 제공
     - frame-to-frame scale consistency를 보장
         - scale factor을 amp subsequent frame pointmap 좌표에서 사용할 수 있게 함
         - 정밀한 3D 매핑 및 위치 추적에 중요
-    - Sparse Subsampling        
+    - Sparse Subsampling
         - 모든 3D Gaussian point가 mapping에 기여하지 않음
         - hierarchical 구조를 사용해 3D 가우시안 포인트 수를 효과적으로 제어
         - 매핑 품질을 유지하고 처리 시간 단축
 
+### D. Mapping
 
+1. Keyframe Management
 
+키프레임 선택 전략
+- 충분한 viewpoint 중복성을 보장하면서 중복된 키프레임을 피해야 함
+- 모든 키프레임과 함께 가우시안 장면과 카메라 포즈를 공동 최적화하는 것은 불가능함
+    - 동일한 영역을 관찰하는 비중복 키프레임을 선택하기 위해 local keyframe window $W$를 관리하여 후속 매핑 최적화에 더 나은 multi-view 제약 조건을 제공
+- [2]에서의 키프레임 관리 전략을 채택
+    - 가시성을 기반으로 한 키프레임 선택
+    - 가장 최근 키프레임과 중복 평가를 통한 로컬 윈도우 관리
 
+2. Gaussian Map Optimization
+- Local Window BA
+    - 각 키프레임마다 관리 중인 로컬 키프레임 윈도우 $W$ 내에서 가우시안 속성과 카메라 포즈를 공동 최적화
+- photometric loss를 최소화하는 방식으로 최적화 수행
+- 문제점: 타원체가 과도하게 늘어나는 현상 발생 가능
+    - 이를 방지하기 위해 등방성 정규화(isotropic regularization) 적용
+    $$
+    \displaystyle
+    L_{iso} = \sum_{i=1}^{|G|} \| s_i - \tilde{s}_i \cdot \mathbf{1} \|_1
+    \tag{11}
+    $$
+    - scaling parameter $s_i$에 패널티를 적용하기 위하 mapping 최적화 작업은 다음과 같이 요약됨
+    $$
+    \displaystyle
+    \min_{\substack{T^k_{CW} \in SE(3) \\ \forall k \in W},\ \mathcal{G}} \sum_{k \in W} L^{k}_{pho} + \lambda_{iso} L_{iso}
+    $$
 
+3. Adaptive Learning Rate Adjustment
 
-## 4. 
+- 전통적인 실내 SLAM 데이터셋에서는 카메라가 작은 장면을 반복적으로 촬영  
+-> 누적 반복 횟수(N_{iter})가 커질수록 학습률이 점진적으로 감소
+- 본 연구의 실외 데이터는 동일 지역 재방문이 거의 없음
+- 직선 도로 주행 시에는 학습률이 서서히 감소하는 것이 좋지만, 경사로나 회전 구간에서는 새로운 장면 최적화를 위해 학습률을 높여야 함
+- 회전 각도 기반 적응형 학습률 조정 제안
+- 방법
+    1. 누적 반복 횟수 $N_{iter}$을 기준으로 기본 학습률 조정
+    2. 현재 키프레임 $R_1$과 이전 키프레임 $R_0$의 회전 행렬을 사용해 상대 회전행렬 계산: $R_{diff} = R_0^T R_1$
+    3. 회전 라디안 계산
+    $$
+    \displaystyle
+    \theta_{rad} = \cos^{-1} \frac{\mathrm{trace}(R_{diff}) - 1}{2}
+    $$
+    4. 라디안을 도($\theta$) 단위로 변환
+    5. 만약 $\theta > 2$면 누적 반복 횟수 조정
+    $$
+    \displaystyle
+    N^{new}_{iter} = N_{iter} \times \left( 1 - \frac{\theta}{90} \right)
+    $$
+    6. 회전이 90도에 도달하면 반복 횟수 리셋
+    7. 제곱근 조정을 통해 작은 각도 변화에도 학습률이 더 크게 증가하도록 함
+- 후반부 매핑 품질 향상됨
+
+## 4. Experiments
