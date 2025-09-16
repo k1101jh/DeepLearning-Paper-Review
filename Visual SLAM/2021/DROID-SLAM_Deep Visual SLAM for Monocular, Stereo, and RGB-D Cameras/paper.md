@@ -83,6 +83,13 @@ SLAM 접근 방식
 
 
 DROID SLAM
+
+![alt text](./images/Fig%201.png)
+
+> **Figure 1**
+> Droid-SLAM은 monocular, stereo, RGB-D 비디오에서 동작 가능  
+> 맵에서 localizing하는 동시에 dense 3D 맵을 구축
+
 - 딥러닝 기반의 새로운 SLAM
 - 장점
     - 높은 정확도
@@ -189,7 +196,13 @@ Correlation Lookup
 - 이 연산자는 피라미드의 각 상관관계 volume에 적용됨
 - 최종 특징 벡터: 각 level에서 얻은 결과를 concatenating해서 생성
 
-### Update Operator
+### 3.2 Update Operator
+
+![alt text](./images/Fig%202.png)
+
+> **Figure 2. update operator 그림**  
+> operator은 frame graph에서 edge처럼 동작  
+> flow의 수정값을 예측하고, DBA layer을 통해 depth와 pose의 업데이트로 변환
 
 SLAM 시스템의 핵심 구성 요소는 learned update operator
 - 구조: $3 \times 3$ convolutional GRU
@@ -237,3 +250,35 @@ $$
     - $\Pi_c$: 3D point를 이미지와 매핑하는 camera model
     - $\Pi_c^{-1}$: inverse depth map $\mathrm{d}$와 coordinate grid $\mathrm{p}_i$를 3D point cloud (formulas와 jacobians는 appendix에서 제공)를 매핑하는 inverse projection function
     - $\mathrm{p}_{ij}$: pixel $\mathrm{p}_i$가 추정된 포즈와 깊이를 통해 프레임 $j$로 매핑된 좌표 
+
+
+**Inputs**
+- correspondence field를 사용해 correlation volume 인덱싱
+- 각 edge $(i, j) \in \mathcal{E}$에 대해 $p_{ij}$를 이용해 correlation volume $C_{ij}$에서 correlation feature 조회
+- correspondence field로부터 카메라 모션에 의한 optical flow 계산
+    - $p_{ij} - p_j$ 사용
+- 이전 BA 결과의 residual을 flow field와 결합하여 네트워크가 이전 iteration의 피드백을 활용하도록 함
+- correlation features
+    - $p_{ij}$ 주변의 시각적 유사성 정보 제공
+    -> 네트워크가 유사한 이미지 영역을 정렬하도록 학습
+    - 하지만 correlation은 모호할 수 있음
+    -> flow는 motion fields의 smoothness를 활용해 강인성을 높이는 보완 정보 제공
+
+**Update**
+- correlation field와 flow features 각각을 2개의 convolution layer을 거쳐 GRU에 입력
+- context network에서 추출한 context feature을 GRU에 element-wise addition 방식으로 주입
+- ConvGRU는 작은 receptive field를 갖는 local operation
+- Global context 추출
+    - 이미지의 공간 차원에 대해 hidden state를 평균
+    - 이를 GRU의 추가 입력으로 사용
+    - SLAM에서 global context는 잘못된 correspondence(예: 큰 물체로 인한 오류)를 인식하고 제거하는데 중요
+- GRU는 업데이트된 hidden state $h^{(k + 1)}$을 생성
+- 깊이나 자세 업데이트를 직접 예측하는 대신, dense flow field 공간에서의 업데이트를 예측
+- hidden state를 2개의 convolution layer에 통과시켜 두 가지 출력 생성
+    1. Revision flow field $r_{ij} \in \mathbb{R}^{H \times W \times 2}$
+        - dense correspondence field의 오류를 보정하는 항. $p^*_{ij} = r_{ij} + p_{ij} $
+    2. Confidence map $w_{ij} \in \mathbb{R}_+^{H \times W \times 2}$
+- 동일한 source view  $i$를 공유하는 모든 feature에 대해 hidden state를 풀링하여 pixel-wise damping factor 예측.
+    - Softplus 연산으로 damping term이 양수가 되도록 보장.
+- 풀링된 feature로 8×8 mask를 예측  
+-> inverse depth 추정치 업샘플링에 사용.
