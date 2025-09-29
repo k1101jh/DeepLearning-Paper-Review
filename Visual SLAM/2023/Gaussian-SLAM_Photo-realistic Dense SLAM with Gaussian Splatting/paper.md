@@ -107,4 +107,106 @@ $$
 \tag{2}
 $$
 
-> $J \in \mathbb{R}^{2 \times 3}$: affine transformation  
+> $J \in \mathbb{R}^{2 \times 3}$: affine transformation
+
+한 채널 $ch$에서 픽셀 $i$에 영향을 주는 $m$개의 정렬된 가우시안을 이용해 색상 $C$는 다음과 같이 렌더링됨
+
+$$
+\displaystyle
+C_i^{ch} = \sum_{j \le m} C_j^{ch} \cdot \alpha_j \cdot T_j
+, \quad \text{with}\quad 
+T_j = \prod_{k < j} (1 - \alpha_k)
+\tag{3}
+$$
+
+$\alpha_j$:
+
+$$
+\displaystyle
+\alpha_j = o_j \cdot \exp(-\sigma_j)
+\quad \text{and} \quad 
+\sigma_j = \frac{1}{2} \Delta_j^{T} \Sigma_{j}^{I-1} \Delta_j
+$$
+
+> $\Delta_j \in \mathbb{R}^2$: 픽셀 좌표와 2D로 splatted된 가우시안의 평균(중심) 간의 offset
+
+- 3D Gaussian의 파라미터는 렌더링 이미지와 학습 이미지 간의 photometric loss를 최소화하도록 반복적으로 업데이트됨
+- 최적화동안, 색상 $C$는 direction-based color variations를 모델링하기 위해 spherical harmonics $SH \in \mathbb{R}^{15}$로 인코딩됨
+- 공분산은 다음과 같이 분해됨. $\Sigma = R S S^T R^T$ ($R \in \mathbb{R}^{3 \times 3}, S = \text{diag}(s) \in \mathbb{R}^{3 \times 3}$)
+    - rotation과 scale은 gradient 기반 최적화 중 공분산의 positive semi-definite 성질을 보존하도록 설계됨
+
+### 3.2 3D Gaussian-based Map
+
+- 입력을 chunk(sub-maps) 단위로 처리
+    - catastrophic forgetting과 overfitting을 피하기 위함
+- 각 sub-map은 이를 관측하는 여러 keyframe을 포함하며 별도의 3D gaussian point cloud로 표현됨
+- sub-map의 gaussian point cloud $P^s$는 $N$개의 3D Gaussian 모임으로 정의됨
+$$
+P^s = \{ G(\mu_i^s, \Sigma_i^s, o_i^s, C_i^s) \mid i = 1, \ldots, N \}
+\tag{5}
+$$
+
+**Sub-map 초기화**
+- sub-map 시작은 첫 프레임에서 시작하며 새로운 keyframe이 들어올 때마다 점진적으로 커짐
+- 탐색 영역이 커질수록, unseen regions를 커버하고 GPU 메모리에 모든 가우시안을 저장하는 상황을 피하기 위해 새로운 sub-map 필요
+- 새로운 sub-map을 생성할 때 고정된 interval을 사용하는 대신 카메라 움직임에 의존하는 초기화 전략 사용
+    - 두 가지 경우
+        - 현재 프레임이 활성 submap의 첫 번째 프레임에 대해 추정한 변위가 미리 정의된 임계값 $d_{thre}$를 초과하는 경우
+        - 추정된 오일러 각이 $\theta_{thre}$를 초과하는 경우
+    - 항상 활성 sub-map만 처리
+    - 계산 비용을 제한하고, 더 큰 장면을 탐색하면서 최적화가 빠르게 유지되도록 함
+
+**Sub-map 구축**
+- 각 새로운 keyframe은 장면에서 새로 관찰된 부분을 반영하기 위해 활성 sub-map에 3D 가우시안을 추가할 수 있음
+- 현재 keyframe의 자세 추정이 완료된 후, keyframe의 RGBD 측정값으로부터 dense point-cloud가 계산됨
+- 각 sub-map의 시작에서는 새로운 가우시안을 추가하기 위해 color gradient가 높은 영역에서 keyframe point cloud에서 $M_u$와 $M_c$ point를 균일하게 샘플링
+- sub-map의 다음 keyframes에 대해서는 렌더링된 알파 값이 기준 $\alpha_n$보다 낮은 영역에서 $M_k$ point를 균일하게 샘플링
+    - 3D 가우시안이 sparese하게 커버된 영역에서도 맵을 확장할 수 있음
+- 새로운 gaussian은 현재 sub-map에서 탐색 반경 $\rho$ 내에 이웃이 없는 샘플 포인트를 사용하여 sub-map에 추가됨
+- 새로운 가우시안은 anisotropic(비등방성)이며, 활성 sub-map 내의 nearest neighbor distance를 기준으로 규모가 정의됨
+- 이러한 densification 전략은 최적화 중 gradient 값을 기반으로 새로운 가우시안을 추가하고 가지치기한 [25]와는 크게 다름
+- 가우시안 수에 대한 세밀한 제어를 제공
+
+**Sub-map 최적화**
+- 활성 sub-map의 모든 가우시안은 새로운 가우시안이 sub-map에 추가될 때마다 loss(12)를 최소화하도록 고정된 횟수만큼 반복하여 공동 최적화
+- [25]에서 최적화동안 가우시안을 복제하거나 가지치기하는 대신, 깊이 센서에서 얻은 기하학적 밀도를 유지하고, 계산 시간을 줄이며 가우시안 수를 더 잘 제어함
+- 활성 sub-map을 최적화하여 그 모든 keyframe의 깊이와 색상을 렌더링함
+- 최적화를 빠르게 하기 위해 spherical harmonics 함수를 사용하지 않고 RGB 색상을 직접 최적화
+- Gaussian splatting[25]에서는 scene 표현이 모든 학습 view에 걸쳐 여러 번 반복 최적화됨
+    - 이러한 접근 방식은 속도가 중요한 SLAM 환경에는 적합하지 않음
+    - 모든 keyframe에 대해 동일한 횟수로 반복 최적화를 수행하면 과소적합이 발생하거나 최적화에 과도한 시간이 소요됨
+    - 활성 sub-map의 keyframe만 최적화하고 새로운 keyframe에는 최소 40%의 반복을 사용
+
+### 3.3 Geometry and Color Encoding
+
+Gaussian Splatting은 이미지 렌더링에는 우수하지만, 직접적인 depth supervision이 없기 때문에 렌더링 된 depth maps는 정확도가 제한적
+- 추가적인 depth loss를 통해 문제 해결
+- $m$개의 ordered Gaussian에 의해 영향을 받는 $i$번째 픽셀에서 깊이
+$$
+\displaystyle
+D_i = \sum_{j \le m} \mu_{z,j} \cdot \alpha_j \cdot T_j
+\tag{6}
+$$
+> $\mu_j^z$: 3D 가우시안 평균의 z 성분  
+
+- 관측된 depth로 3D gaussian parameter을 업데이트하기 위해 3D 가우시안의 평균, 공분산, opacity에 대한 depth loss의 gradient를 계산
+- Gaussian $j$의 평균 업데이트를 위한 gaussian 계산
+$$
+\displaystyle
+\frac{\partial L_\text{depth}}{\partial \mu_j}
+= \frac{\partial L_\text{depth}}{\partial D_i}
+  \;\frac{\partial D_i}{\partial \alpha_j}
+  \;\frac{\partial \alpha_j}{\partial \mu_j}
+\tag{7}
+$$
+
+- $\displaystyle \frac{\partial L_{\text{depth}}}{\partial D_i}$: 식 (9)를 사용하여 pytorch autograd로 자동 계산
+- $\displaystyle \frac{\partial \alpha_j}{\partial \mu_j}$: [25]와 동일하게 유도
+- $\displaystyle \frac{\partial D_i}{\partial \alpha_j}$:
+$$
+\displaystyle
+\frac{\partial D_i}{\partial \alpha_j}
+= \mu_{z,j} \cdot T_j
+  \;-\;\frac{\sum_{u > j} \mu_{z,u}\,\alpha_u\,T_u}{1 - \alpha_j}
+\tag{8}
+$$
