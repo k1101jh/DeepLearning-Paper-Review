@@ -4,6 +4,7 @@
 ---
 
 - RGBD SLAM
+- Gaussian Splatting
 
 ---
 
@@ -54,7 +55,7 @@ Gaussian-SLAM 시스템 개요
     - 고품질 사진 같은 실시간 렌더링
     - RGBD 입력만으로 매핑 및 카메라 트래킹
 
-- 그림 1에는 Gaussian-SLAM이 재현해 내는 고충실도 렌더링 예시가 제시되어 있습니다.
+- 그림 1에는 Gaussian-SLAM이 재현해 내는 고충실도 렌더링 예시가 제시되어 있음
 
 주요 기여
 - 3D 가우시안 기반 장면 표현을 활용해 실제 환경에서 SOTA 렌더링 결과를 얻는 밀집 RGBD SLAM 기법 제안
@@ -71,8 +72,10 @@ Gaussian-SLAM 시스템 개요
 ![alt text](./images/Fig%202.png)
 
 > **Fig 2. Gaussian-SLAM Architecture**  
-> 모든 input keyframe에 대해 camera pose는 active sub-map에 대해 depth와 color loss를 추정  
-> 추정된 camera pose가 주어졌을 때, RGBD 프레임은 3D로 변환되고 color gradient에 subsample된 
+> 모든 input keyframe에 대해 camera pose는 active sub-map과의 depth와 color loss를 사용하여 추정됨  
+> 추정된 camera pose가 주어졌을 때, RGBD 프레임은 3D로 변환되고 color gradient와 rendered alpha mask를 기준으로 subsampling됨  
+> subsampling된 point cloud에서 active sub-map의 저밀도 영역에 위치한 point는 새로운 3D 가우시안을 초기화하는데 사용됨  
+> 생성된 sparese 3D 가우시안은 active sub-map의 가우시안 point cloud에 추가되고, 이 sub-map의 모든 기여 keyframe에서 얻은 depth map 및 색상 이미지와 함께 공동으로 최적화됨
 
 효율적인 맵 구축
 - sequential single-camera RGBD 데이터 처리 시 계산량을 상한
@@ -114,7 +117,7 @@ $$
 $$
 \displaystyle
 C_i^{ch} = \sum_{j \le m} C_j^{ch} \cdot \alpha_j \cdot T_j
-, \quad \text{with}\quad 
+, \quad \text{with}\quad
 T_j = \prod_{k < j} (1 - \alpha_k)
 \tag{3}
 $$
@@ -124,7 +127,7 @@ $\alpha_j$:
 $$
 \displaystyle
 \alpha_j = o_j \cdot \exp(-\sigma_j)
-\quad \text{and} \quad 
+\quad \text{and} \quad
 \sigma_j = \frac{1}{2} \Delta_j^{T} \Sigma_{j}^{I-1} \Delta_j
 $$
 
@@ -151,9 +154,10 @@ $$
 - 탐색 영역이 커질수록, unseen regions를 커버하고 GPU 메모리에 모든 가우시안을 저장하는 상황을 피하기 위해 새로운 sub-map 필요
 - 새로운 sub-map을 생성할 때 고정된 interval을 사용하는 대신 카메라 움직임에 의존하는 초기화 전략 사용
     - 두 가지 경우
-        - 현재 프레임이 활성 submap의 첫 번째 프레임에 대해 추정한 변위가 미리 정의된 임계값 $d_{thre}$를 초과하는 경우
-        - 추정된 오일러 각이 $\theta_{thre}$를 초과하는 경우
-    - 항상 활성 sub-map만 처리
+        - 현재 프레임이 active sub-map의 첫 번째 프레임에 대해
+            - 추정한 변위가 임계값 $d_{thre}$를 초과하는 경우
+            - 추정된 오일러 각이 $\theta_{thre}$를 초과하는 경우
+    - 항상 active sub-map만 처리
     - 계산 비용을 제한하고, 더 큰 장면을 탐색하면서 최적화가 빠르게 유지되도록 함
 
 **Sub-map 구축**
@@ -172,7 +176,7 @@ $$
 - [25]에서 최적화동안 가우시안을 복제하거나 가지치기하는 대신, 깊이 센서에서 얻은 기하학적 밀도를 유지하고, 계산 시간을 줄이며 가우시안 수를 더 잘 제어함
 - 활성 sub-map을 최적화하여 그 모든 keyframe의 깊이와 색상을 렌더링함
 - 최적화를 빠르게 하기 위해 spherical harmonics 함수를 사용하지 않고 RGB 색상을 직접 최적화
-- Gaussian splatting[25]에서는 scene 표현이 모든 학습 view에 걸쳐 여러 번 반복 최적화됨
+- Gaussian splatting[25]에서는 scene 표현이 모든 training view에 걸쳐 여러 번 반복 최적화됨
     - 이러한 접근 방식은 속도가 중요한 SLAM 환경에는 적합하지 않음
     - 모든 keyframe에 대해 동일한 횟수로 반복 최적화를 수행하면 과소적합이 발생하거나 최적화에 과도한 시간이 소요됨
     - 활성 sub-map의 keyframe만 최적화하고 새로운 keyframe에는 최소 40%의 반복을 사용
@@ -188,6 +192,7 @@ D_i = \sum_{j \le m} \mu_{z,j} \cdot \alpha_j \cdot T_j
 \tag{6}
 $$
 > $\mu_j^z$: 3D 가우시안 평균의 z 성분  
+> $T$: (3)과 동일. $T_j = \prod_{k < j} (1 - \alpha_k)$. 렌더링 시, pixel i에 해당하는 j번째 가우시안 이전의 alpha값들의 곱
 
 - 관측된 depth로 3D gaussian parameter을 업데이트하기 위해 3D 가우시안의 평균, 공분산, opacity에 대한 depth loss의 gradient를 계산
 - Gaussian $j$의 평균 업데이트를 위한 gaussian 계산
@@ -207,6 +212,89 @@ $$
 \displaystyle
 \frac{\partial D_i}{\partial \alpha_j}
 = \mu_{z,j} \cdot T_j
-  \;-\;\frac{\sum_{u > j} \mu_{z,u}\,\alpha_u\,T_u}{1 - \alpha_j}
+  -\frac{\sum_{u > j} \mu_{z,u}\,\alpha_u\,T_u}{1 - \alpha_j}
 \tag{8}
 $$
+
+- 공분산과 opacity에 대한 gradient는 유사하게 계산됨
+    - $\frac{\partial L_{depth}}{\partial D_i}$를 제외하고, 모든 gradient는 통합 rendering pipeline의 최적화 속도를 유지하기 위해 CUDA에서 명시적으로 계산됨
+- depth supervision을 위해, 다음 손실을 사용
+$$
+\displaystyle
+L_{depth} = |\hat{D} - D|_1
+\tag{9}
+$$
+> $D, \hat{D}$: ground-truth와 reconstructed depth maps. 상대적인 값
+
+color supervision을 위해 $L_1$ loss와 $\text{SSIM}$[68] loss의 weighted combination 을 사용
+
+$$
+\displaystyle
+L_{color} = (1 - \lambda) \cdot |\hat{I} - I|_1 + \lambda(1 - \text{SSIM}(\hat{I}, I))
+$$
+> $I, \hat{I}$: 원본 이미지, 렌더링 이미지  
+> $\lambda = 0.2$
+
+- seeding이 sparse하게 되었을 경우, 몇몇 3D Gaussian은 종종 너무 길 수 있음
+    - sub-map $K$를 최적화 할 때 isotropic regularization term $L_{reg}$ 추가
+    $$
+    \displaystyle
+    L_{reg} = \frac{\Sigma_{k\in K} |s_k - \bar{s}_k|_1}{|K|}
+    \tag{11}
+    $$
+    > $s_k \in \mathbb{R}^3$: 3D Gaussian의 scale  
+    > $\bar{s}_k$: mean sub-map scale  
+    > $|K|$: sub-map에 있는 가우시안의 수
+
+- 최종 loss:
+$$
+\displaystyle
+L = \lambda_{color} \cdot L_{color} + \lambda{depth} \cdot L_{depth} + \lambda_{reg} \cdot L_{reg}
+\tag{12}
+$$
+
+### 3.4 Tracking
+
+- 매핑된 장면을 기반으로 frame-to-model tracking 수행
+    - 현재 카메라의 pose $T_i$를 일정한 속도 가정으로 초기화
+$$
+T_i = T_{i - 1} + (T_{i - 1} - T_{i - 2})
+\tag{13}
+$$
+
+> pose $T_i = {q_i, t_i}$: quaternion, translation vector
+
+- 카메라 자세를 추정하기 위해 프레임 $i - 1$과 $i$ 사이의 상대 카메라 자세 $T_{i - 1, i}$에 대한 tracking loss $L_{tracking}$을 최소화
+$$
+\displaystyle
+\argmin_{T_{i - 1, i}} L_{tracking} \left( \hat{I}(T_{i-1, i}), \hat{D}(T_{i-1, i}), I_i, D_i, \alpha \right)
+\tag{14}
+$$
+
+> $\hat{I}(T_{i - 1, i}), \hat{D}(T_{i - 1, i})$: 상대 transformation $T_{i - 1, i}$로 transform된 sub-map의 rendered color and depth
+
+- 이전에 관찰되지 않았거나 잘 복원되지 않은 영역의 픽셀로 tracking loss가 오염되지 않도록 soft alpha와 error masking을 도입
+    - soft alpha mask $M_{alpha}$: 활성 sub-map에서 직접 렌더링된 alpha map의 다항식(polynomial)
+    - Error boolean mask $M_{inlier}$: 색상과 깊이 오류가 frame-relative error threshold보다 큰 모든 픽셀을 제거
+$$
+\displaystyle
+L_{tracking} = \Sigma M_{inlier} \cdot M_{alpha} \cdot (\lambda_c |\hat{I} - I|_1 + (1 - \lambda_c) |\hat{D} - D|_1)
+\tag{15}
+$$
+
+- 이 가중치는 누적된 alpha 값이 1에 가깝고 렌더링 품질이 높은 잘 복원된 영역이 최적화를 안내(guide)하도록 보장
+- 최적화동안 모든 3D 가우시안 파라미터는 고정됨
+
+## 4. Experiments
+
+## 5. Conclusion
+
+**Gaussian-SLAM**
+- 장면 표현으로 3D gaussian splatting을 기반으로 한 조밀한 SLAM 시스템
+- 전례 없는 재렌더링 기능 지원
+- 제안사항
+    - 3D 가우시안의 효율적인 초기화 및 온라인 최적화
+    - 더 나은 확장성을 위한 sub-map 내 구성
+    - frame-to-model tracking 알고리즘을 위한 효과적인 전략
+- Point-SLAM과 같은 기존 SOTA 신경망 기반 SLAM과 비교했을 때, 합성 및 실제 데이터셋에서 더 나은 렌더링 결과를 얻으면서 더 빠른 추적 및 매핑을 달성
+- 다양한 데이터셋에서 Gaussian-SLAM이 렌더링, 카메라 위치 추정, 장면 재구성에서 최상의 결과를 제공함을 입증
