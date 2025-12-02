@@ -146,10 +146,87 @@ $$
 \end{aligned}
 $$
 
-tracking process
-
-~
-
-
+- tracking process에서 과도하게 제한된 loss 함수를 사용 시
+    - 카메라 포즈 정확도 저하 가능
+    - 처리 시간이 증가할 수 있음
+- tracking용 loss 함수는 RGB loss와 depth loss의 가중 합만을 기반으로 구성
+$$
+\displaystyle
+\begin{aligned}
+\mathcal{L}_{tracking} = \sum_{p \in P_T} (\lambda_{c_t}\mathcal{L}_c (p) + \lambda_{d_t}\mathcal{L}_d (p))
+\end{aligned}
+$$
+> $P_T$: 3D Gaussian map의 잘 최적화된 부분을 렌더링 했을 때 픽셀. visibility silhouette $Sil(p)$가 0.99 이상인 부분
 
 ### 3-C Semantic-informed Bundle Adjustment
+
+기존의 radiance field-based semantic SLAM 시스템
+- 최신 input RGB-D frame을 활용하여 포즈 추정을 위한 RGB & depth loss를 계산
+- 이 SLAM 시스템의 장면 표현은 추정된 포즈와 최신 프레임을 사용하여 최적화됨
+- 단일 프레임 제약만으로 포즈 최적화 의존 시
+    - 전역 제약 조건이 없어 추적 과정에서 누적 드리프트 발생 가능
+- 장면 표현을 최적화하기 위해 단일 프레임 정보만 사용 시
+    - 의미론적 수전에서 장면의 전역적 일관성 없는 업데이트 발생 가능
+
+**semantic-informed Bundle Adjustment**
+- 다중 view 제약과 semantic association을 활용하여 3D 가우시안 표현과 카메라 자세 공동 최적화
+- multi-view 의미론적 일관성을 활용하여 제약 조건 설정
+    - 렌더링 된 semantic 특징이 추정된 상대 자세 변환 $T_i^j$를 이용해 co-visible frame $j$ 에 warp 됨
+    - $\mathcal{L}_{sem}$을 얻기 위해 프레임 $j$에서 렌더링된 semantic feature $\mathcal{G}(T_j, e)$ 로 loss를 구성
+    $$
+    \displaystyle
+    \begin{aligned}
+    \mathcal{L}_{BA-sem} = \sum_{i=1}^{N-1} \sum_{j=i+1}^N (|T_i^j \cdot \mathcal{G}(T_i, e) - \mathcal{G}(T_j, e)|)
+    \tag{9}
+    \end{aligned}
+    $$
+    > $\mathcal{G}(T_i, e)$: 카메라 포즈 $T_i$를 사용한 3D gaussian $\mathcal{G}$의 semantic embedding
+    - 기하학&시각적 일관성 달성을 위해 rendered RGB와 depth를 co-visible frames에 warp하여 loss 구성
+    $$
+    \displaystyle
+    \begin{aligned}
+    \mathcal{L}_{BA-rgb} = \sum_{i=1}^{N-1} \sum_{j=i+1}^N (|T_i^j \cdot \mathcal{G}(T_i, c) - \mathcal{G}(T_j, c)|)
+    \\
+    \mathcal{L}_{BA-depth} = \sum_{i=1}^{N-1} \sum_{j=i+1}^N (|T_i^j \cdot \mathcal{G}(T_i, d) - \mathcal{G}(T_j, d)|)
+    \tag{10}
+    \end{aligned}
+    $$
+- 전체 loss
+$$
+\displaystyle
+\begin{aligned}
+\mathcal{L}_{BA} = \lambda_e \mathcal{L}_{BA-sem} + \lambda_c \mathcal{L}_{BA-rgb} + \lambda_d \mathcal{L}_{BA-depth}
+\tag{11}
+\end{aligned}
+$$
+
+## 4. Experiments
+
+### 4-A Experimental Setup
+
+**Datasets**
+
+- Replica[36]
+    - 8개 scene 사용
+- ScanNet[37]
+    - 5개 scene 사용
+
+**Metrics**
+
+- reconstruction
+    - Depth L1(cm)
+- tracking accuracy
+    - ATE RMSE(cm)
+- rendering performance
+    - PSNR(dB)
+    - SSIM
+    - LPIPS
+- semantic segmentation
+    - mIoU(%)
+
+![alt text](./images/Fig%203.png)
+> **Figure 3. **
+
+
+![alt text](./images/Fig%204.png)
+> **Figure 4. **
