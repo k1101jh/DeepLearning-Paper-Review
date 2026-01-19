@@ -234,3 +234,20 @@ $$
     - 3D 위치와 크기를 추가로 조정
 - local gaussian 편집 방식은 시간 효율적
 - 세밀한 mask modeling 덕분에 간섭 없이 여러 local 편집을 동시에 지원하거나 전체 global 3D 장면 표현을 재학습할 필요 없음
+
+
+## 4. Experiments
+
+### 4.1 Dataset and Experiment Setup
+
+
+
+## 6. Appendix
+
+### 6.1 Supplementary Experiments
+
+LERF-Mask 데이터셋에서 SA3D[4]와 open world 3D segmentation의 분할 결과 비교
+- Gaussian Grouping은 segmentation 효율성에서 큰 장점을 보임
+    - 3D 장면의 모든 객체를 9분몬에 jointly segment
+    - SA3D는 3D voxel grid에서 inverse rendering 설계 때문에 객체마다 35분 소요
+    

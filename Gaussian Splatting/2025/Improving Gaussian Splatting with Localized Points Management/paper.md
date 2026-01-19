@@ -4,7 +4,7 @@
 
 ---
 
-- RGBD SLAM
+- Gaussian Splatting
 
 ---
 
