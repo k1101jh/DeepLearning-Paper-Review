@@ -1,27 +1,31 @@
 # Honeybee: Locality-enhanced Projector for Multimodal LLM
 
+## 📌 Metadata
 ---
-
-- LLM
-- MLLM
-
----
-
-Cha Junbum et al.  
-Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2024.  
-url: https://openaccess.thecvf.com/content/CVPR2024/html/Cha_Honeybee_Locality-enhanced_Projector_for_Multimodal_LLM_CVPR_2024_paper.html
+분류
+- Multimodal LLM
 
 ---
+url:
+- [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Cha_Honeybee_Locality-enhanced_Projector_for_Multimodal_LLM_CVPR_2024_paper.html) (CVPR 2024)
 
-목차
+---
+- **Authors**: Junbum Cha, Wooyoung Kang, Jonghwan Mun, Byungseok Roh
+- **Venue**: CVPR 2024
 
-0. [Abstract](#abstract)
-1. [Introduction](#1-introduction)
-2. Related Works (생략)
-3. [Method](#3-method)
-4. [Hidden Recipe for visual Instruction Tuning](#4-hidden-recipe-for-visual-instruction-tuning)
-5. [Experiments](#5-experiments)
-6. [Conclusion](#6-conclusion)
+---
+
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Honeybee: Locality-enhanced MLLM](#3-honeybee-locality-enhanced-mllm)
+  - [3.1 Overview](#31-overview)
+  - [3.2 Locality-enhanced Projector](#32-locality-enhanced-projector)
+  - [3.3 Training](#33-training)
+- [4. Hidden Recipe for Visual Instruction Tuning](#4-hidden-recipe-for-visual-instruction-tuning)
+- [5. Experiments](#5-experiments)
+- [6. Conclusion](#6-conclusion)
 
 ---
 

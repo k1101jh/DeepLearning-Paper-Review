@@ -1,21 +1,32 @@
 # Knowledge Distillation: A Survey
 
+## 📌 Metadata
 ---
-
+분류
 - Knowledge Distillation
+- Model Compression
 - Survey
 
 ---
+url:
+- [paper](https://link.springer.com/article/10.1007/s11263-021-01453-z) (IJCV 2021)
+- [arXiv](https://arxiv.org/abs/2006.05525)
 
-paper: https://link.springer.com/article/10.1007/s11263-021-01453-z  
-[arxiv](https://arxiv.org/abs/2006.05525)
+---
+- **Authors**: Jianping Gou, Baosheng Yu, Stephen J. Maybank, Dacheng Tao
+- **Venue**: IJCV 2021
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Knowledge Categories](#2-knowledge-categories)
+- [3. Distillation Algorithms](#3-distillation-algorithms)
+- [4. Teacher-Student Architectures](#4-teacher-student-architectures)
+- [5. Applications](#5-applications)
+- [6. Challenges and Future Directions](#6-challenges-and-future-directions)
+- [7. Conclusion](#7-conclusion)
 
 ---
 

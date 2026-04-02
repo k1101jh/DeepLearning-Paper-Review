@@ -1,19 +1,24 @@
 # Deep learning for monocular depth estimation: A review
----
 
+## 📌 Metadata
+---
+분류
 - Depth Estimation
+- Review
+
+---
+url:
+- [paper](https://www.sciencedirect.com/science/article/abs/pii/S0925231220320014) (Neurocomputing 2021)
+
+---
+- **Authors**: Yue Ming, Xuyang Meng, Chunxiao Fan, Hui Yu
+- **Venue**: Neurocomputing 2021
 
 ---
 
-url: https://www.sciencedirect.com/science/article/abs/pii/S0925231220320014
-https://pure.port.ac.uk/ws/portalfiles/portal/26286067/Deep_Learning_for_Monocular_Depth_Estimation_A_Review_pp.pdf
+## 📑 Table of Contents
+- [Abstract](#abstract)
 
----
-
-목차
-
-0. [Abstract](#abstract)
-1. 
 
 ---
 

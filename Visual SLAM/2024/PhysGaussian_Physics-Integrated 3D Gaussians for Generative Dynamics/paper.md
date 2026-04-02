@@ -12,7 +12,7 @@
 
 ---
 url:
-- [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Xie_PhysGaussian_Physics-Integrated_3D_Gaussians_for_Generative_Dynamics_CVPR_2024_paper.html)
+- [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Xie_PhysGaussian_Physics-Integrated_3D_Gaussians_for_Generative_Dynamics_CVPR_2024_paper.html) (CVPR 2024)
 - [project](https://xpandora.github.io/PhysGaussian/)
 - [github](https://github.com/XPandora/PhysGaussian)
 ---

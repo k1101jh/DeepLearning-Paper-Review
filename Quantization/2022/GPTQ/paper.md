@@ -1,19 +1,33 @@
 # GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers
 
+## 📌 Metadata
 ---
+분류
 - Quantization
----
-
-Elias Frantar et al.
-arxiv. 2022.
-url: https://arxiv.org/abs/2210.17323
+- LLM Compression
+- Post-Training Quantization (PTQ)
 
 ---
+url:
+- [paper](https://arxiv.org/abs/2210.17323) (ICLR 2023)
+- [github](https://github.com/IST-DASLab/gptq)
 
-목차
+---
+- **Authors**: Elias Frantar, Saleh Ashkboos, Torsten Hoefler, Dan Alistarh
+- **Venue**: ICLR 2023
 
-0. [Abstract]
+---
 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Background](#3-background)
+- [4. The GPTQ algorithm](#4-the-gptq-algorithm)
+  - [Step 1. Arbitrary Order Insight](#step-1-arbitrary-order-insight)
+  - [Step 2. Lazy Batch-Updates](#step-2-lazy-batch-updates)
+- [5. Experiments](#5-experiments)
+- [6. Conclusion](#6-conclusion)
 
 ---
 

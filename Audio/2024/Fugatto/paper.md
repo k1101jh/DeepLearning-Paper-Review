@@ -1,10 +1,13 @@
-# Fugatto 1
+# Fugatto 1: Foundational Generative Audio Transformer Opus 1
+
+## 📌 Metadata
+---
+분류
+- Audio Generation
+- Foundation Model
 
 ---
-- Audio
----
-
-
-url: https://d1qx31qr3h6wln.cloudfront.net/publications/FUGATTO.pdf
+url:
+- [paper](https://openreview.net/forum?id=B2Fqu7Y2cd)
 
 ---

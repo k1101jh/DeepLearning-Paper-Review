@@ -147,9 +147,46 @@ $$
     \tag{2}
     \end{aligned}
     $$
+    > $f_i(p)$: 식 1에 의해 계산됨  
+    > $\mu, r$: pixel-space에서 뿌려진 2D Gaussian의 값
+    $$
+    \displaystyle
+    \begin{aligned}
+    \mu^{2D} = K \frac{E_t \mu}{d} \quad r^{2D} = \frac{fr}{d}, \quad \rm{where} \quad d = (E_t \mu)_z
+    \tag{3}
+    \end{aligned}
+    $$
+    > $K$: (unknown) 카메라 intrinsic  
+    > $E_t$: t frame에서 카메라의 extrinsic matrix  
+    > $f$: (known) focal length  
+    > $d$: $i^{th}$ 가우시안의 depth(카메라 좌표계에서)
+- 렌더링 depth:
+    - input depth map과 비교 가능
+    - 3D map에 대한 기울기 반환
+    $$
+    \displaystyle
+    D(p) = \Sigma_{i=1}^{n} d_i f_i(p) \prod_{j=1}^{i-1} (1 - f_j(p))
+    \tag{4}
+    $$
+- 실루엣 이미지:
+    - 픽셀이 현재 맵의 정보를 포함하고 있는지 여부 확인
+    $$
+    \displaystyle
+    S(p) = \Sigma_{i=1}^{n} f_i(p) \prod_{j=1}^{i-1} (1 - f_j(p))
+    \tag{5}
+    $$
 
 **SLAM System**
+
+- 가정:
+    - 3D Gaussian으로 구성된 맵이 있다고 가정
+    - 카메라 프레임은 1부터 t까지
+    - 새로운 RGB-D 프레임 t+1이 주어졌을 겅우를 고려
+
 1. **Camera Tracking**
+- 이미지 & depth 재구성 error 최소화
+- 
+
 2. **Gaussian Densification**
 3. **Map Update**
 
@@ -158,6 +195,20 @@ $$
 **Camera Tracking**
 
 **Gaussian Densification**
+- tracking 이후 정확하게 추정된 카메라 포즈를 얻음
+- depth image가 있으면 가우시안이 있어야 할 위치에 대한 추정치를 알 수 있음
+- 가우시안이 이미 존재하는 곳에는 추가하고 싶지 않음
+- 어떤 픽셀을 조밀하게 해야 할지를 결정하기 위해 densification mask 생성
+$$
+\displaystyle
+M(p) = \big( S(p) < 0.5 \big) + \big( D_{GT}(p) < D(p) \big) \big( L_1(D(p)) > \lambda \rm{MDE} \big)
+\tag{9}
+$$
+- map이 적절하게 조밀하지 않은 곳을 보임
+- 또는 현재 추정된 geometry의 앞에 새로운 geometry가 있어야 하는 곳을 나타냄
+    - (예: 예측 depth 앞에 gt depth가 있고, depth error가 Median Depth Error(MDE)보다 $\lambda$ 배 큰 경우)
+    - $\lambda$는 경험적으로 50으로 설정
+- 마스크의 각 픽셀마다 새로운 gaussian 추가
 
 **Gaussiaan Map Updating**
 

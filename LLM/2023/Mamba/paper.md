@@ -1,22 +1,32 @@
 # Mamba: Linear-Time Sequence Modeling with Selective State Spaces
 
+## 📌 Metadata
 ---
-
-- LLM
-- SSM
-
----
-
-Albert Gu, Tri Dao  
-arxiv. 2023.  
-url: https://arxiv.org/abs/2312.00752
+분류
+- Large Language Models
+- State Space Models (SSM)
+- Sequence Modeling
 
 ---
+url:
+- [paper](https://arxiv.org/abs/2312.00752) (arXiv 2023)
+- [github](https://github.com/state-spaces/mamba)
 
-목차
+---
+- **Authors**: Albert Gu, Tri Dao
+- **Venue**: arXiv 2023
 
-0. [Abstract](#abstract)
-1. 
+---
+
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. State Space Models](#2-state-space-models)
+- [3. Selective State Space Models](#3-selective-state-space-models)
+- [4. Mamba Architecture](#4-mamba-architecture)
+- [5. Hardware-aware Algorithms](#5-hardware-aware-algorithms)
+- [6. Experiments](#6-experiments)
+- [7. Conclusion](#7-conclusion)
 
 ---
 

@@ -1,28 +1,44 @@
 # A Survey of Quantization Methods for Efficient Neural Network Inference
 
+## 📌 Metadata
 ---
-
+분류
 - Quantization
+- Model Compression
 - Survey
 
 ---
+url:
+- [paper](https://arxiv.org/abs/2103.13630) (arXiv 2021)
 
-Amir Gholami et al.  
-arxiv. 2021.  
-url: https://arxiv.org/abs/2103.13630
+---
+- **Authors**: Amir Gholami, Sehoon Kim, Zhen Dong, Zhewei Yao, Michael W. Mahoney, Kurt Keutzer
+- **Venue**: arXiv 2021
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. [Introduction](#1-introduction)
-2. [양자화의 일반적인 역사](#2-양자화의-일반적인-역사)
-3. [양자화의 기본 개념](#3-양자화의-기본-개념)
-4. [고급 개념: 8비트 미만의 양자화](#4-고급-개념-8비트-미만의-양자화)
-5. [양자화 및 하드웨어 프로세서](#5-양자화-및-하드웨어-프로세서)
-6. [양자화 연구의 미래 방향](#6-양자화-연구의-미래-방향)
-7. [요약 및 결론](#7-요약-및-결론)
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. General History of Quantization](#2-일반적인-역사)
+- [3. Basic Concepts of Quantization](#3-양자화의-기본-개념)
+  - [A. Problem Definition and Notation](#a-문제-정의-및-표기법)
+  - [B. Uniform Quantization](#b-uniform-quantization)
+  - [C. Symmetric and Asymmetric Quantization](#c-symmetric-and-asymmetric-quantization)
+  - [D. Range Calibration Algorithms: Static vs Dynamic](#d-range-calibration-algorithms-static-vs-dynamic-quantization)
+  - [E. Quantization Granularity](#e-quantization-granularity양자화-세분성)
+  - [F. Non-uniform Quantization](#f-non-uniform-quantization)
+  - [G. Fine-tuning Methods](#g-fine-tuning-methods)
+- [4. Advanced Concepts: Sub-8-bit Quantization](#4-고급-개념-8비트-미만의-양자화)
+  - [A. Simulated and Integer-only Quantization](#a-simulated-and-integer-only-quantization)
+  - [B. Mixed-Precision Quantization](#b-mized-precision-quantization)
+  - [C. Hardware Aware Quantization](#c-hardware-aware-quantization)
+  - [D. Distillation-Assisted Quantization](#d-distillation-assisted-quantization)
+  - [E. Extreme Quantization](#e-extreme-quantization)
+  - [F. Vector Quantization](#f-vector-quantization)
+- [5. Quantization and Hardware Processors](#5-양자화-및-하드웨어-프로세서)
+- [6. Future Directions](#6-양자화-연구의-미래-방향)
+- [7. Summary and Conclusion](#7-요약-및-결론)
 
 ---
 

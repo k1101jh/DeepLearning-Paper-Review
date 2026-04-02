@@ -36,31 +36,31 @@
 ### 💬 Natural Language & Multi-modal
 | 분야 | 주제 | 연도 |
 | :--- | :--- | :--- |
-| [**LLM**](./LLM) | Large Language Models, Transformers | 2023 - 2024 |
-| [**RAG**](./RAG) | Retrieval-Augmented Generation | 2024 |
+| [**LLM**](./LLM) | Large Language Models, Transformers, Instruction Tuning | 2023 - 2024 |
+| [**RAG**](./RAG) | Retrieval-Augmented Generation, GraphRAG | 2024 |
 
 ### ⚡ Model Efficiency & Optimization
 | 분야 | 주제 | 연도 |
 | :--- | :--- | :--- |
-| [**Knowledge Distillation**](./Knowledge%20Distillation) | Model Compression, Teacher-Student | 2021 - 2023 |
-| [**Low-rank Adaptation**](./Low-rank%20Adaptation%20&%20Factorization) | LoRA, Parameter-Efficient Tuning | 2023 |
-| [**Quantization**](./Quantization) | Model Compression & Efficiency | 2021 - 2023 |
+| [**Knowledge Distillation**](./Knowledge%20Distillation) | Model Compression, Teacher-Student, Survey | 2021 - 2023 |
+| [**Low-rank Adaptation**](./Low-rank%20Adaptation%20&%20Factorization) | LoRA, QLoRA, Parameter-Efficient Tuning | 2021 - 2023 |
+| [**Quantization**](./Quantization) | Model Compression, PTQ, QAT, AWQ, BitNet | 2021 - 2024 |
 | [**Reparameterization**](./Reparameterization) | Structural Reparam, Training vs Inference | 2023 - 2024 |
 
 ### 🔍 Fundamental Computer Vision
 | 분야 | 주제 | 연도 |
 | :--- | :--- | :--- |
-| [**Attention**](./Attention) | Self-Attention, Cross-Attention | 2023 |
+| [**Attention**](./Attention) | Self-Attention, FlashAttention | 2022 |
 | [**Classification**](./Classification) | Image Recognition | 2023 - 2024 |
-| [**Depth Estimation**](./Depth%20Estimation) | Monocular/Stereo Depth | 2023 - 2024 |
-| [**Detection**](./Detection) | Object Detection | 2023 - 2024 |
+| [**Depth Estimation**](./Depth%20Estimation) | Monocular/Stereo Depth, Review | 2021 - 2024 |
+| [**Detection**](./Detection) | Object Detection, Q-DETR | 2023 - 2024 |
 | [**Segmentation**](./Segmentation) | Semantic, Instance, Panoptic | 2024 |
 | [**Vision Transformer**](./Vision%20Transformer) | ViT, FastViT, Attention Mechanisms | 2020 - 2023 |
 
 ### 🔉 Others
 | 분야 | 주제 | 연도 |
 | :--- | :--- | :--- |
-| [**Audio**](./Audio) | Audio Synthesis, Recognition | 2023 |
+| [**Audio**](./Audio) | Audio Synthesis, Fugatto | 2024 |
 
 ---
 

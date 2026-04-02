@@ -1,22 +1,32 @@
 # Q-DETR: An Efficient Low-Bit Quantized Detection Transformer
 
+## 📌 Metadata
 ---
-
-- Quantization
-- Detection
-
----
-
-Sheng Xu et al.  
-CVPR. 2023.  
-url: https://openaccess.thecvf.com/content/CVPR2023/html/Xu_Q-DETR_An_Efficient_Low-Bit_Quantized_Detection_Transformer_CVPR_2023_paper.html?ref=blog.roboflow.com
+분류
+- Object Detection
+- Model Quantization
+- Transformer
 
 ---
+url:
+- [paper](https://openaccess.thecvf.com/content/CVPR2023/html/Xu_Q-DETR_An_Efficient_Low-Bit_Quantized_Detection_Transformer_CVPR_2023_paper.html) (CVPR 2023)
 
-목차
+---
+- **Authors**: Sheng Xu, et al.
+- **Venue**: CVPR 2023
 
-0. [Abstract](#abstract)
-1. 
+---
+
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. The Challenge of Quantizing DETR](#3-the-challenge-of-quantizing-detr)
+  - [3.1 Quantized DETR baseline](#31-quantized-detr-baseline)
+  - [3.2 Challenge Analysis](#32-challenge-analysis)
+- [4. Q-DETR Method](#4-q-detr-method)
+- [5. Experiments](#5-experiments)
+- [6. Conclusion](#6-conclusion)
 
 ---
 

@@ -1,26 +1,32 @@
 # Large Language Models are Temporal and Causal Reasoners for Video Question Answering
 
+## 📌 Metadata
 ---
-- LLM
----
-
-Ko Dohwan et al.
-arxiv. 2023.
-url: https://doi.org/10.48550/arXiv.2310.15747
+분류
+- Video Question Answering
+- Large Language Models
 
 ---
-짧은 요약
+url:
+- [paper](https://doi.org/10.48550/arXiv.2310.15747) (arXiv 2023)
+
+---
+- **Authors**: Dohwan Ko, Ji Lee, Woo-Young Kang, Byungseok Roh, Hyunwoo Kim
+- **Venue**: arXiv 2023
 
 ---
 
-목차
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Method](#3-method)
+  - [3.1 LLaMA-VQA](#31-llama-vqa)
+  - [3.2 Flipped-VQA](#32-flipped-vqa)
+- [4. Experiments](#4-experiments)
+- [5. Conclusion](#5-conclusion)
 
-0. [Abstract](#abstract)
-1. [Introduction](#1-introduction)
-2. Related Works (생략)
-3. [Method](#3-method)
 ---
-
 
 ## Abstract
 

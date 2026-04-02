@@ -1,26 +1,40 @@
 # BitNet: Scaling 1-bit Transformers for Large Language Models
 
+## 📌 Metadata
 ---
-
+분류
 - Quantization
+- 1-bit Transformer
+- Efficient LLM
+
+---
+url:
+- [paper](https://arxiv.org/abs/2310.11453) (arXiv 2023)
+- [github](https://github.com/microsoft/unilm/tree/master/bitnet)
+
+---
+- **Authors**: Hongyu Wang, Shuming Ma, Li Dong, Shaohan Huang, Huaizhuan Wang, Lingxiao Ma, Fan Yang, Ruiping Wang, Yi Wu, Furu Wei
+- **Venue**: arXiv 2023
 
 ---
 
-Hongyu Wang et al.  
-arxiv. 2023.  
-url: https://arxiv.org/abs/2310.11453
-
----
-
-목차
-
-0. [Abstract](#abstract)
-1. [Introduction](#1-introduction)
-2. [BitNet](#2-bitnet)
-3. [FP16 Transformer와 비교](#3-fp16-transformer와-비교)
-4. [Post-training quantization과 비교](#4-post-training-quantization과-비교)
-5. [절제 연구](#5-절제-연구)
-6. [결론 및 향후 연구](#6-결론-및-향후-연구)
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. BitNet](#2-bitnet)
+  - [2.1 BitLinear](#21-bitlinear)
+  - [2.2 Model Training](#22-model-training)
+  - [2.3 Computational Efficiency](#23-computational-efficiency)
+- [3. Comparison with FP16 Transformer](#3-fp16-transformer와-비교)
+  - [3.1 Setup](#31-setup)
+  - [3.2 Inference-Optimal Scaling Law](#32-inference-optimal-scaling-law)
+  - [3.3 Downstream Task Results](#33-downstream-tasks에-대한-결과)
+  - [3.4 Stability Tests](#34-안정성-테스트)
+- [4. Comparison with Post-training Quantization](#4-post-training-quantization과-비교)
+  - [4.1 Setup](#41-setup)
+  - [4.2 Results](#42-results)
+- [5. Ablation Study](#5-절제-연구)
+- [6. Conclusion and Future Work](#6-결론-및-향후-연구)
 
 ---
 

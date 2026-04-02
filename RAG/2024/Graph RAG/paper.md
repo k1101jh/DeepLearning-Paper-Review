@@ -1,17 +1,27 @@
-# From Local to Global: A Graph RAG Approach to Query-Focused Summarization
+# From Local to Global: A Graph RAG Approach to Query-Focused Summarization (GraphRAG)
+
+## 📌 Metadata
+---
+분류
+- Retrieval-Augmented Generation (RAG)
+- Graph Neural Networks
+- Knowledge Graph
+
+---
+url:
+- [paper](https://arxiv.org/abs/2404.16130) (arXiv 2024)
+- [project](https://microsoft.github.io/graphrag/)
+
+---
+- **Authors**: Darren Edge, Ha Trinh, Newman Cheng, Joshua Bradley, Alex Chao, Apurva Mody, Steven Truitt, Dasha Metropolitansky, Robert Osazuwa Ness, Jonathan Larson
+- **Venue**: arXiv 2024
 
 ---
 
-## Metadata
-- **Title**: From Local to Global: A Graph RAG Approach to Query-Focused Summarization
-- **Authors**: Darren Edge et al.
-- **Venue**: Arxiv, 2024
-- **Links**:
-  - [Paper](https://arxiv.org/abs/2404.16130)
-- **Tags**: RAG
+## 📑 Table of Contents
+- [Abstract](#abstract)
+
 
 ---
 
-참고
-https://microsoft.github.io/graphrag/
-https://brunch.co.kr/@b2439ea8fc654b8/38
+## Abstract
