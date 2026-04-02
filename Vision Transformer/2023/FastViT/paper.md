@@ -1,17 +1,14 @@
 # FastViT: A Fast Hybrid Vision Transformer using Structural Reparameterization
----
-
-- Hand pose estimation
-- Vision Transformer
 
 ---
 
-- Pavan Kumar Anasosalu Vasu et al.
-- ICCV 2023
-- url: https://openaccess.thecvf.com/content/ICCV2023/html/Vasu_FastViT_A_Fast_Hybrid_Vision_Transformer_Using_Structural_Reparameterization_ICCV_2023_paper.html
-
----
-
+## Metadata
+- **Title**: FastViT: A Fast Hybrid Vision Transformer using Structural Reparameterization
+- **Authors**: Pavan Kumar Anasosalu Vasu et al.
+- **Venue**: ICCV 2023
+- **Links**:
+  - [Paper](https://openaccess.thecvf.com/content/ICCV2023/html/Vasu_FastViT_A_Fast_Hybrid_Vision_Transformer_Using_Structural_Reparameterization_ICCV_2023_paper.html)
+- **Tags**: Hand pose estimation, Vision Transformer
 
 ---
 

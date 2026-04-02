@@ -2,21 +2,39 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Camera Calibration
+- RGB-D Calibration
+
+---
+url:
+- [Springer (Autonomous Robots)](https://link.springer.com/article/10.1007/s10514-020-09941-w)
+
+---
+- **Authors**: Liang Yang, Ivan Dryanovski, Roberto G. Valenti, George Wolberg & Jizhong Xiao
+- **Venue**: Autonomous Robots (Springer)
 
 ---
 
-url: https://link.springer.com/article/10.1007/s10514-020-09941-w  
-https://opg.optica.org/oe/fulltext.cfm?uri=oe-28-13-19058&id=432581
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Mathematical Analysis](#2-mathematical-analysis)
+- [3. Calibration Approach](#3-calibration-approach)
+  - [3.4 Depth Error Correction](#34-depth-error-correction)
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## ⚡ 요약 (Summary)
+- **Problem**: 저가형 RGB-D 카메라는 제조 시 제공되는 기본 보정 정보(Internal/External Parameters)의 정확도가 낮아, 정밀한 3D 재구성이나 실내 매핑에 바로 사용하기 어려움.
+- **Idea**: 구(Sphere) 타겟의 기하학적 특성을 활용하여 컬러(RGB)와 깊이(Depth) 센서 간의 좌표계를 정밀하게 일치시키고, 센서 고유의 깊이 측정 오류를 보정하는 통합 프레임워크 제안.
+- **Result**: 기존 체커보드 기반 방식보다 사용자 편의성이 높고 보정 정확도가 우수하며, 실제 실내 환경 매핑 시 궤적 추정 오차를 유의미하게 감소시킴.
 
 ---
+
+## 📖 Paper Review
 
 ## Abstract
 

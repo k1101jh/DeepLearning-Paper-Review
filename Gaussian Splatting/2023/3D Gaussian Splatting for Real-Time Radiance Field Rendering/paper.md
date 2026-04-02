@@ -1,20 +1,38 @@
 # 3D Gaussian Splatting for Real-Time Radiance Field Rendering
 
-
-
 ---
 
+## 📌 Metadata
+---
+분류
 - Gaussian Splatting
-- Rendering
+- Radiance Field
 
 ---
-
 url:
 - [paper](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/3d_gaussian_splatting_high.pdf) (SIGGRAPH 2023)
-- [project page](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/)
+- [project](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/)
+---
+- **Authors**: Bernhard Kerbl, Georgios Kopanas, Thomas Leimkühler, George Drettakis
+- **Venue**: SIGGRAPH 2023
 
 ---
-요약
+
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [3. OVERVIEW](#3-overview)
+- [4. Differentiable 3D Gaussian Splatting](#4-differentiable-3d-gaussian-splatting)
+- [5. Optimization with Adaptive Density Control](#5-optimization-with-adaptive-density-control-of-3d-gaussians)
+- [6. Fast Differentiable Rasterizer](#6-fast-differentiable-rasterizer-for-gaussians)
+
+---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 기존 Neural Radiance Fields(NeRF) 방식은 고품질의 새로운 뷰 합성이 가능하나, 렌더링 속도가 매우 느리고 훈련 비용이 커서 실시간 인터랙티브 환경에 적용하기 어려움.
+- **Idea**: 장면을 불투명도와 색상을 가진 수백만 개의 3D 가우시안 타원체로 표현하고, 타일 기반 미분 가능 래스터라이저와 점진적인 밀도 제어(Adaptive Density Control)를 통해 최적화함.
+- **Result**: 1080p 해상도에서 30FPS 이상의 실시간 렌더링을 달성하면서도 최신 NeRF 모델과 대등한 수준의 화질을 유지하며 훈련 시간을 대폭 단축함.
+
 
 - SfM(Structure from Motion)으로 얻은 sparse point 집합 → 고품질 장면 표현 최적화
 - Gaussian Splatting
@@ -37,10 +55,7 @@ url:
 
 ---
 
-**문제점 & 한계점**
-
-
----
+## 📖 Paper Review
 
 ## Abstract
 

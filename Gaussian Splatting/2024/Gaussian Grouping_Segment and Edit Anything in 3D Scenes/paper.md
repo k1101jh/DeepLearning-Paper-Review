@@ -1,25 +1,45 @@
 # Gaussian Grouping: Segment and Edit Anything in 3D Scenes
 
-
 ---
 
-- Visual SLAM
+## 📌 Metadata
+---
+분류
+- 3D Segmentation
 - Gaussian Splatting
+- Scene Editing
+
+---
+url:
+- [paper](https://arxiv.org/abs/2312.00732)
+- [project](https://ymq2017.github.io/gaussian-grouping/)
+- [github](https://github.com/lkeab/gaussian-grouping)
+---
+- **Authors**: Mingqiao Ye, Martin Danelljan, Fisher Yu, Lei Ke
+- **Venue**: ECCV 2024
 
 ---
 
-url
-- [paper](https://link.springer.com/chapter/10.1007/978-3-031-73397-0_10) (ECCV 2024)
-- [paper](https://arxiv.org/pdf/2312.00732) (arXiv)
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Works](#2-related-works)
+- [3. Method](#3-method)
+  - [3.1 Preliminaries: 3D Gaussian Splatting](#31-preliminaries-3d-gaussian-splatting)
+  - [3.2 3D Gaussian Grouping](#32-3d-gaussian-grouping)
+  - [3.3 Gaussian Grouping for Scene Editing](#33-gaussian-grouping-for-scene-editing)
+- [4. Experiments](#4-experiments)
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## ⚡ 요약 (Summary)
+- **Problem**: 기존 3D Gaussian Splatting(3DGS)은 장면의 외형 재구수에는 탁월하지만, 개별 객체에 대한 의미론적 이해가 부족하여 특정 사물을 선택하거나 편집하는 작업에 한계가 있음.
+- **Idea**: 각 가우시안 입자에 고유 ID(Identity Encoding)를 부여하고, SAM(Segment Anything Model)으로부터 얻은 2D 마스크 정보를 3D 공간 일관성 정규화(3D Regularization Loss)와 함께 학습시켜 가우시안을 그룹화함.
+- **Result**: 고품질 렌더링 성능을 유지하면서 실시간 3D 세그멘테이션을 달성하고, 객체별 제거, 인페인팅, 스타일 변환 등 복잡한 3D 장면 편집 작업을 효율적으로 수행함.
 
 ---
+
+## 📖 Paper Review
 
 ## Abstract
 

@@ -2,21 +2,37 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Keypoint Extraction
-
 ---
-
-url
+url:
 - [paper](https://ieeexplore.ieee.org/abstract/document/10111017)
+- [arXiv](https://arxiv.org/abs/2304.03608)
+
+---
+- **Authors**: Xiaoming Zhao, Xingming Wu, Weihai Chen, Peter C. Y. Chen, Qingsong Xu, Zhengguo Li
+- **Venue**: IEEE Transactions on Instrumentation and Measurement (TIM) 2023
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [3. Network Architecture of ALIKED](#3-network-architecture-of-aliked)
+  - [A. Feature Encoding](#a-feature-encoding)
+  - [B. Feature Aggregation](#b-feature-aggregation)
+  - [C. Differentiable Keypoint Detection](#c-differentiable-keypoint-detection)
 
 ---
+
+## ⚡ 요약 (Summary)
+
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 
@@ -67,5 +83,3 @@ Feature Encoder
 - keypoint 감지를 위해 SMH(Score Map Head)는 집계된 feature $F$를 사용하여 score map $S \in R^{H \times W}$을 추정
 - SMH는 $1 \times 1$ convolution layer을 사용하여 feature channel을 8개로 줄인 다음, 두 개의 $3 \times 3$ convolution layer을 통해 feature encoding을 수행
 - 마지막으로, $3 \times 3$ 합성곱 계층과 sigmoid layer을 사용하여 score map $S$를 얻음
-
-

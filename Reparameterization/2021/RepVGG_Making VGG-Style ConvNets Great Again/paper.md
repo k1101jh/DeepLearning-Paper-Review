@@ -1,18 +1,41 @@
 # RepVGG: Making VGG-Style ConvNets Great Again
+
 ---
 
+## 📌 Metadata
+---
+분류
 - Reparameterization
 
 ---
-
-- Xiaohan Ding et al.
-- CVPR 2021
-- url: https://openaccess.thecvf.com/content/CVPR2021/html/Ding_RepVGG_Making_VGG-Style_ConvNets_Great_Again_CVPR_2021_paper.html
+url:
+- [paper](https://openaccess.thecvf.com/content/CVPR2021/html/Ding_RepVGG_Making_VGG-Style_ConvNets_Great_Again_CVPR_2021_paper.html)
+- [github](https://github.com/DingXiaoH/RepVGG)
+---
+- **Authors**: Xiaohan Ding, Xiangyu Zhang, Ningning Ma, Jungong Han, Guiguang Ding, Jian Sun
+- **Venue**: CVPR 2021
 
 ---
 
+## 📑 Table of Contents
+- [3. Building RepVGG via Structural Re-param](#3-building-repvgg-via-structural-re-param)
+  - [3.1 Simple is Fast, Memory-economical, Flexible](#31-simple-is-fast-memory-economical-flexible)
+  - [3.2 Training-time Multi-branch Architecture](#32-training-time-multi-branch-architecture)
+  - [3.3 Re-param for Plain Inference-time Model](#33-re-param-for-plain-inference-time-model)
 
 ---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 기존의 복잡한 멀티 브랜치 아키텍처(ResNet, Inception 등)는 성능은 좋으나 메모리 액세스 비용(MAC)이 높고 병렬 처리에 부적합함. 반면 VGG와 같은 단순한 Plain 모델은 효율적이지만 성능이 낮음.
+- **Goal**: 훈련 시에는 멀티 브랜치의 장점을 취하고, 추론 시에는 단순한 $3 \times 3$ 컨볼루션 계열로 변환하여 속도와 성능을 모두 잡는 RepVGG 구조 제안.
+- **Key Method**: 
+    - **Structural Re-parameterization**: 훈련 시에는 $3 \times 3$ Conv, $1 \times 1$ Conv, Identity 분기를 모두 사용하고, 추론 시에는 이들을 수학적으로 결합하여 하나의 $3 \times 3$ Conv 레이어로 통합함.
+    - **Memory-economical & Flexible**: 추론 시 단일 경로 구조를 가짐으로써 메모리 점유율을 최소화하고 채널 가지치기(Pruning) 등에도 유연하게 대처함.
+- **Result**: ImageNet에서 ResNet보다 높은 정확도를 기록하면서도 추론 속도는 훨씬 빠름.
+
+---
+
+## 📖 Paper Review
 
 ## 3. Building RepVGG via Structural Re-param
 

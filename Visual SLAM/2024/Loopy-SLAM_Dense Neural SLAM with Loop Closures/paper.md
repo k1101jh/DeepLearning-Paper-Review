@@ -1,20 +1,41 @@
-# Splat-SLAM: Globally Optimized RGB-only SLAM with 3D Gaussians
+# Loopy-SLAM: Dense Neural SLAM with Loop Closures
 
 ---
 
-- SLAM
+## 📌 Metadata
+---
+분류
+- Dense SLAM
+- Neural SLAM
+- Loop Closure
 
 ---
-
 url:
-- [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Liso_Loopy-SLAM_Dense_Neural_SLAM_with_Loop_Closures_CVPR_2024_paper.html) (CVPR 2024)
+- [paper](https://arxiv.org/abs/2402.09944) (arXiv 2024)
 - [project](https://notchla.github.io/Loopy-SLAM/)
+---
+- **Authors**: Lorenzo Liso, Erik Sandström, Vladimir Yugay, Luc Van Gool, Martin R. Oswald
+- **Venue**: CVPR 2024
 
 ---
-요약
+
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [3. Method](#3-method)
+  - [3.1 Neural Point Cloud-based SLAM](#31-neural-point-cloud-based-slam)
+  - [3.2 Loop Closure and Refinement](#32-loop-closure-and-refinement)
 
 ---
 
+## ⚡ 요약 (Summary)
+- **Problem**: 신경망 기반 SLAM(Neural SLAM)은 미세한 재구성에 유리하지만, 대규모 환경에서 루프 폐쇄(Loop Closure) 기능이 부재하여 주행 거리가 길어질수록 궤적 드리프트와 지도 왜곡이 심화되는 문제가 있음.
+- **Idea**: 장면을 여러 개의 독립적인 로컬 서브맵(Submap)으로 분할하여 관리하고, 전역 장소 인식을 통해 루프를 실시간 감지하여 서브맵 간의 자세를 보정하는 포즈 그래프 최적화(PGO)를 Neural SLAM에 통합함.
+- **Result**: 포인트 기반 표현의 유연성을 극대화하여 비용이 큰 재학습 없이도 드리프트를 효과적으로 보완하였으며, 공개 데이터셋(Replica, ScanNet)에서 기존 Neural SLAM 대비 높은 궤적 정확도와 일관된 전역 지도를 구현함.
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 

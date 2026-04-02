@@ -1,20 +1,49 @@
 # PhysGaussian: Physics-Integrated 3D Gaussians for Generative Dynamics
 
-
 ---
 
+## 📌 Metadata
+---
+분류
 - SLAM
 - Dynamic SLAM
 - 3D Gaussian Splatting
+- Physics-Integrated
 
 ---
-
 url:
 - [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Xie_PhysGaussian_Physics-Integrated_3D_Gaussians_for_Generative_Dynamics_CVPR_2024_paper.html)
 - [project](https://xpandora.github.io/PhysGaussian/)
+- [github](https://github.com/XPandora/PhysGaussian)
+---
+- **Authors**: Tianyi Xie, Zeshun Zong, Yuxin Qiao, Liwen Wan, Xuan Li, Bin Wang, Chenfanfu Jiang
+- **Venue**: CVPR 2024
 
 ---
-요약
+
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Method Overview](#3-method-overview)
+  - [3.1 3D Gaussian Splatting](#31-3d-gaussian-splatting)
+  - [3.2 Continuum Mechanics](#32-continuum-mechanics)
+  - [3.3 Material Point Method](#33-material-point-method)
+  - [3.4 Physics-Integrated 3D Gaussians](#34-physics-integrated-3d-gaussians)
+  - [3.5 Spherical Harmonics Evolution](#35-spherical-harmonics-의-진화하는-방향)
+  - [3.6 Incremental Evolution](#36-gaussian-의-점진적-진화)
+  - [3.7 Internal Filling](#37-internal-filling)
+  - [3.8 Anisotropy Regularizer](#38-anisotropy-regularizer)
+- [4. Experiments](#4-experiments)
+
+---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 3D 가우스 스플래팅(3DGS)은 정적인 장면 복원에는 탁월하나, 중력이나 충돌 등 물리 법칙에 따른 동적인 시뮬레이션과 렌더링을 통합적으로 처리하기 어려움.
+- **Idea**: 3D 가우시안 커널에 속도, 변형기울기, 응력 등 물리적 속성을 직접 부여하고, 연속체 역학(Continuum Mechanics) 기반의 MPM 시뮬레이션 프레임워크를 3DGS에 통합함.
+- custom Material Point Method(MPM)를 적용
+    - 연속체 역학 원리에 따라 발전하는 물리적으로 의미 있는 운동 변형 및 기계적 응력 속성을 3D 가우시안 커널에 통합
+
 
 ![alt text](images/Fig%201.png)
 > **Figure 1.**  
@@ -109,6 +138,8 @@ url:
 - 물체 간 충돌 처리(world model?)
 
 ---
+
+## 📖 Paper Review
 
 ## Abstract
 

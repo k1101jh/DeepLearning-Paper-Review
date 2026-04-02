@@ -2,31 +2,41 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Relative Camera Pose Estimation
 
 ---
-
 url:
-- [paper](https://openreview.net/forum?id=EanCFCwAjM) (ICLR 2024)
-
+- [paper](https://openreview.net/forum?id=EanCFCwAjM)
+- [arXiv](https://arxiv.org/abs/2402.14817)
 ---
-짧은 요약
-
-
----
-
-요약
-
-
+- **Authors**: Jason Y. Zhang, Amy Lin, Manolis Savva, Angel X. Chang, Deva Ramanan, Shubham Tulsiani
+- **Venue**: ICLR 2024 (Oral)
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Method](#3-method)
+  - [3.1 Representing Cameras with Rays](#31-representing-cameras-with-rays)
+  - [3.2 Pose Estimation via Ray Regression](#32-pose-estimation-via-ray-regression)
+  - [3.3 Pose Estimation via Denoising Ray Diffusion](#33-pose-estimation-via-denoising-ray-diffusion)
+  - [3.4 Implementation Details](#34-implementation-details)
 
 ---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 기존의 학습 기반 카메라 포즈 추정 방식은 전역적 포즈(회전 및 변환)를 직접 회귀하려 시도하지만, 이는 이미지 패치별 지역적 기하학 특징과의 결합력이 낮고 대칭적 객체에서 발생하는 다중 해(Multi-modality)와 불확실성을 표현하기 어려움.
+- **Idea**: 카메라를 6차원 Plücker 좌표계로 표현된 광선(Ray)의 집합으로 분산 모델링하고, 트랜스포머 기반의 디퓨전(Diffusion) 모델을 활용하여 노이즈 섞인 초기 광선으로부터 정밀한 카메라 자세를 복원하는 'Ray Diffusion' 기법을 제안함.
+- **Result**: 희소 시점(Sparse-view) 환경에서도 고수준의 기하학적 일관성을 확보하며 CO3D 데이터셋에서 기존 SOTA를 능가하는 성능을 달성했으며, 학습되지 않은 범주의 객체 및 실제 환경 촬영 데이터에서도 강력한 일반화 성능을 입증함.
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 

@@ -1,39 +1,44 @@
 # DUSt3R: Geometric 3D Vision Made Easy
 
-
-
 ---
 
+## 📌 Metadata
+---
+분류
 - Image Matching
-
+- 3D Reconstruction
+- MVS
 ---
-
 url:
-- [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Wang_DUSt3R_Geometric_3D_Vision_Made_Easy_CVPR_2024_paper.html) (CVPR 2024)
-- [project page](https://europe.naverlabs.com/research/publications/dust3r-geometric-3d-vision-made-easy/)
-
+- [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Wang_DUSt3R_Geometric_3D_Vision_Made_Easy_CVPR_2024_paper.html)
+- [project](https://europe.naverlabs.com/research/publications/dust3r-geometric-3d-vision-made-easy/)
 ---
-짧은 요약
-
-
-
-요약
-
+- **Authors**: Shuzhe Wang, Vincent Leroy, Yohann Cabon, Boris Chidlovskii, Jerome Revaud
+- **Venue**: CVPR 2024
 
 ---
 
-**문제점 & 한계점**
-
-
----
-
-목차
-
-0. [Abstract](#abstract)
-1. 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [3. Method](#3-method)
+  - [3.1 개요](#31-개요)
+  - [3.2 훈련 목표](#32-훈련-목표)
+  - [3.3 Downstream Applications](#33-downstream-applications)
 
 ---
 
+## ⚡ 요약 (Summary)
+- **Problem**: 기존 Multi-view Stereo(MVS)는 카메라의 내/외부 파라미터(Calibration, Poses) 추정이 필수적이며, 이는 실제 환경(In-the-wild)에서 큰 병목 현상이 됨.
+- **Goal**: 카메라 정보에 대한 사전 지식 없이 임의의 이미지 컬렉션으로부터 밀집한(Dense) 3D 재구성을 수행하는 새로운 패러다임 제안.
+- **Key Method**: 
+    - **Pointmap Regression**: 3D 재구성 문제를 포인트맵($X \in \mathbb{R}^{W \times H \times 3}$) 회귀 문제로 변환하여 엄격한 투영 모델 제약을 완화함.
+    - **Siamese ViT Encoder-Decoder**: 두 이미지의 특징을 정보를 교환하며 인코딩하고, 첫 번째 이미지의 좌표계에서 두 개의 포인트맵을 직접 출력함.
+    - **Confidence-aware Loss**: 하늘이나 반투명 객체 등 불확실한 영역을 처리하기 위해 신뢰도 점수를 함께 학습함.
+- **Result**: 단안/다중 뷰 깊이 추정 및 상대 포즈 추정에서 SOTA 성능을 기록하며, Pixel matching 및 Focal length 복구 등 다양한 하위 작업에 적용 가능함.
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 

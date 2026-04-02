@@ -1,31 +1,48 @@
 # From Sparse to Dense: Camera Relocalization with Scene-Specific Detector from Feature Gaussian Splatting
 
-
-
 ---
 
+## 📌 Metadata
+---
+분류
 - Camera Relocalization
 - Gaussian Splatting
-
 ---
 
 url:
 - [paper](https://openaccess.thecvf.com/content/CVPR2025/html/Huang_From_Sparse_to_Dense_Camera_Relocalization_with_Scene-Specific_Detector_from_CVPR_2025_paper.html) (CVPR 2025)
 - [project page](https://zju3dv.github.io/STDLoc/)
-
 ---
-요약
-
-
+- **Authors**: Zhiwei Huang, Hailin Yu, Yichun Shentu, Jin Yuan, Guofeng Zhang
+- **Venue**: CVPR 2025
 
 ---
 
-문제점
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2.3 Radiance Field-Based Methods](#23-radiance-field-based-methods)
+- [3. Method](#3-method)
+  - [3.1 Feature Gaussian Training](#31-feature-gaussian-training)
+  - [3.2 Matching-Oriented Sampling](#32-matching-oriented-sampling)
+  - [3.3 Scene-Specific Detector](#33-scene-specific-detector)
+  - [3.4 Sparse-to-Dense Localization](#34-sparse-to-dense-localization)
+
+---
+
+## ⚡ 요약 (Summary)
+### 문제점 (사용자 작성)
 - Gaussian을 의도적으로 균등하게 분포시킴  
--> 사실적인 map은 생성 불가. Gaussian Splatting의 의미가 퇴색됨
+- -> 사실적인 map은 생성 불가. Gaussian Splatting의 의미가 퇴색됨
 
+### 핵심 요약
+- **Problem**: 전통적인 특징점 기반 재위치 추정은 텍스처가 부족한(Weak-texture) 환경에서 매칭 실패가 잦으며, SCR 방식은 대규모 실외 장면에서의 정확도가 제한적임.
+- **Idea**: Feature Gaussian을 활용한 새로운 'Sparse-to-Dense' 패러다임을 제안하고, 효율적인 초기 포즈 추정을 위한 Matching-Oriented 샘플링과 장면 맞춤형 검출기(Scene-specific detector)를 도입함.
+- **Result**: 쿼리 특징 맵을 가우시안 특징 필드와 정밀하게 정렬하여 위치 추정 정확도 및 재현율 측면에서 SOTA를 달성함.
 
 ---
+
+## 📖 Paper Review
 
 ## Abstract
 
@@ -79,8 +96,6 @@ Scene representation
             - 네트워크 가중치에 장면 정보가 직접 인코딩
                 - 목표 장면 크기에 따라 네트워크 용량을 동적으로 조정 불가
             - 대규모 실외 장면에서의 정확도는 상대적으로 제한됨
-
-~
 
 
 ### 2.3 Radiance Field-Based Methods

@@ -2,13 +2,13 @@
 
 ---
 
-- RAG
-
----
-
-Darren Edge et al
-Arxiv, 2024.
-url: https://arxiv.org/abs/2404.16130
+## Metadata
+- **Title**: From Local to Global: A Graph RAG Approach to Query-Focused Summarization
+- **Authors**: Darren Edge et al.
+- **Venue**: Arxiv, 2024
+- **Links**:
+  - [Paper](https://arxiv.org/abs/2404.16130)
+- **Tags**: RAG
 
 ---
 

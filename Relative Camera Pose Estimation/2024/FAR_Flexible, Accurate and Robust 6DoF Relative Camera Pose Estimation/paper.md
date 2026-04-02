@@ -1,22 +1,33 @@
 # FAR: Flexible, Accurate and Robust 6DoF Relative Camera Pose Estimation
 
-
-
 ---
 
+## 📌 Metadata
+---
+분류
 - Relative Camera Pose Estimation
-
 ---
-
 url:
 - [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Rockwell_FAR_Flexible_Accurate_and_Robust_6DoF_Relative_Camera_Pose_Estimation_CVPR_2024_paper.html) (CVPR 2024)
-- [github](https://crockwell.github.io/far)
+- [project](https://crockwell.github.io/far)
+- [github](https://github.com/crockwell/far)
+---
+- **Authors**: Chris Rockwell, Nilesh Kulkarni, Linyi Jin, Jeong Joon Park, Justin Johnson, David F. Fouhey
+- **Venue**: CVPR 2024
 
 ---
 
-요약
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [3. 접근 방법](#3-접근-방법)
+  - [3.1 Approach Outline](#31-approach-outline)
+  - [3.2 Pose Transformer](#32-pose-transformer)
+  - [3.3 Prior-Guided Robust Pose Estimator](#33-prior-guided-robust-pose-estimator)
 
+---
 
+## ⚡ 요약 (Summary)
 **이미지 사이의 상대 카메라 자세 추정**
 - 대응 관계를 찾고 기본 행렬을 해결하는 방법
     - 높은 정확도 제공
@@ -41,10 +52,7 @@ url:
 - 적고 저품질의 correspondence인 경우
     - solver 성능이 떨어지므로 prior은 solver 출력에 강한 영향을 미치도록 transformer 예측(높은 $\text{w}$)에 더 의존하도록 함
 
----
-
-**문제점 & 한계점**
-
+### 문제점 & 한계점
 - 딥러닝 기반 포즈 추정 방법과 기존 포즈 추정 방법 같이 사용
     - 파이프라인이 긺
 - 3D 공간 정보 활용 부재
@@ -54,12 +62,7 @@ url:
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
-
----
+## 📖 Paper Review
 
 ## Abstract
 
@@ -242,7 +245,7 @@ $$
 - Vanilla Transformer: correspondences만 가능한 경우  
     - correspondence만 출력하는 방법에도 적용 가능
 
-각각의 경우, Transformer은 두 개의 MLP head에 입력으로 사용되는 feature $f_o$ 생성
+ 각각의 경우, Transformer은 두 개의 MLP head에 입력으로 사용되는 feature $f_o$ 생성
 
 **8-Point ViT**
 - 입력: 두 이미지의 pairwise dense features $f_i, f_j$

@@ -1,20 +1,43 @@
 # Photo-SLAM: Real-time Simultaneous Localization and Photorealistic Mapping for Monocular, Stereo, and RGB-D Cameras
 
-
-
 ---
 
-- Visual SLAM
+## 📌 Metadata
+---
+분류
+- Photo-SLAM
+- 3DGS
+- SLAM
+- Photorealistic Mapping
 
 ---
-
 url:
-- [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Huang_Photo-SLAM_Real-time_Simultaneous_Localization_and_Photorealistic_Mapping_for_Monocular_Stereo_CVPR_2024_paper.html) (CVPR 2024)
-- [paper](https://arxiv.org/abs/2311.16728) (arXiv)
+- [paper](https://arxiv.org/abs/2311.16728)
+---
+- **Authors**: Huajian Huang, Longwei Li, Hui Cheng, Sai-Kit Yeung
+- **Venue**: CVPR 2024
 
 ---
 
-요약
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Photo-SLAM](#3-photo-slam)
+  - [3.1 Hyper Primitives Map](#31-hyper-primitives-map)
+  - [3.2 Localization and Geometry Mapping](#32-localization-and-geometry-mapping)
+  - [3.3 Photorealistic Mapping](#33-photorealistic-mapping)
+  - [3.4 Gaussian-Pyramid-Based Learning](#34-gaussian-pyramid-based-learning)
+  - [3.5 Loop Closure](#35-loop-closure)
+- [4. Experiment](#4-experiment)
+
+---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 기존의 암시적 표현(Implicit Representation) 기반 SLAM은 MLP 디코딩 연산량이 많아 임베디드 장치에서 실시간 구동이 어렵고, 기하학적 정확도와 사진급 화질을 동시에 만족하기 힘듦.
+- **Idea**: 명시적인 특징점(ORB)과 암시적인 텍스처(3D Gaussian)를 결합한 'Hyper Primitive Map' 구조를 제안하고, 가우시안 피라미드 기반 학습 및 기하학 기반 고밀도화(Geometry-based Densification) 전략을 도입함.
+- **Result**: 단안, 스테레오, RGB-D 카메라에서 실시간 추적과 함께 SOTA 대비 30% 높은 PSNR의 고화질 지도를 생성하며, Jetson Orin 등 임베디드 플랫폼에서도 실시간 성능을 입증함.
+
 
 **Photo-SLAM**
 - hyper primitive map(고차원 표현 방식) 기반 설계
@@ -41,27 +64,19 @@ url:
       - 학습 반복이 늘어남에 따라 하이퍼 프리미티브의 밀도를 높이는 동시에(Sec. 3.3.1 참조) 피라미드의 수준을 줄이고 새로운 정답(ground truth)을 얻음
       - 가우시안 피라미드의 최하단에 도달할 때까지 이어짐
 
----
-
-의문점
+**의문점**
 1. 새로운 프레임이 들어오면 Gaussian을 학습하는데, 고해상도로 학습중일 때 새로운 프레임이 들어와서 동일한 가우시안을 저해상도로 학습시키면 문제가 발생하는게 아닌가?  
 -> 관측 가능한 gaussian만을 최적화? 저해상도에서 사용되는 가우시안과 고해상도에서 사용되는 가우시안이 다른가?
-
----
 
 **문제점 & 한계점**
 
 - Tracking 병목 존재(Rendering 성능이 크게 향상되어서 상대적으로 Tracking 성능이 낮아짐)
     - 딥러닝 기반 pose estimation 방법 적용 고려
 
----
-
-목차
-
-0. [Abstract](#abstract)
-1. 
 
 ---
+
+## 📖 Paper Review
 
 ## Abstract
 

@@ -2,16 +2,43 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Image Matching
-
+- 3D Reconstruction
 ---
-
 url:
-- [paper](https://link.springer.com/chapter/10.1007/978-3-031-73220-1_5) (ECCV 2024)
-- [paper](https://openreview.net/forum?id=w86aGlqyZ9) (arXiv 2024)
+- [paper](https://link.springer.com/chapter/10.1007/978-3-031-73220-1_5)
+- [arXiv](https://arxiv.org/abs/2406.09756)
+---
+- **Authors**: Vincent Leroy, Yohann Cabon, Jérôme Revaud, Boris Chidlovskii, et al.
+- **Venue**: ECCV 2024
 
 ---
-요약
+
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related works](#2-related-works)
+- [3. Method](#3-method)
+  - [3.1 The DUSt3R framework](#31-the-dust3r-framework)
+  - [3.2 Matching prediction head and loss](#32-matching-prediction-head-and-loss)
+  - [3.3 Fast reciprocal matching](#33-fast-reciprocal-matching)
+  - [3.4 Coarse-to-fine matching](#34-coarse-to-fine-matching)
+- [4. Experimental results](#4-experimental-results)
+- [5. 결론](#5-결론)
+
+---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 기존 이미지 매칭은 주로 2D 문제로 다루어졌으나, 실제 매칭은 본질적으로 3D 기하학적 문제임. DUSt3R은 3D 재구성에는 강력하지만 매칭 정확도가 다소 제한적이었음.
+- **Goal**: DUSt3R 프레임워크를 기반으로 매칭 기능을 강화하여, 극단적인 시점 변화에서도 정확하고 조밀한 대응 관계(Dense Correspondences)를 추출하는 MASt3R 제안.
+- **Key Method**: 
+    - **Matching Head**: 3D 포인트 회귀와 함께 미세한 매칭을 위한 밀집 로컬 특징(Local Features) 맵을 출력하는 헤드 추가 (InfoNCE loss로 학습).
+    - **Fast Reciprocal Matching**: 고차원 특징 공간에서의 상호 근접 이웃(Mutual NN) 검색의 복잡도($O(N^2)$)를 서브샘플링과 반복 전파를 통해 획기적으로 개선함.
+    - **Coarse-to-fine Matching**: 고해상도 이미지 처리를 위해 저해상도 매칭 후 중요 윈도우 쌍을 탐욕적으로 선택하여 미세하게 최적화하는 전략 도입.
+- **Result**: Map-free localization, Relative pose estimation 등 극도로 도전적인 벤치마크에서 SOTA를 크게 경신함.
 
 ![image.png](./images/Fig%202.png)
 
@@ -45,18 +72,7 @@ url:
 
 ---
 
-문제점 & 한계점
-
-
-
----
-
-목차
-
-0. [Abstract](#abstract)
-1. 
-
----
+## 📖 Paper Review
 
 ## Abstract
 

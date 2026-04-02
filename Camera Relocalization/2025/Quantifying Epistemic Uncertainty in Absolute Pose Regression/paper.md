@@ -2,26 +2,32 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Camera Relocalization
 - Uncertainty Estimation
 - VAE
-
 ---
-
-url
+url:
 - [paper](https://link.springer.com/chapter/10.1007/978-3-031-95918-9_13) (SCIA 2025)
-- [paper](https://arxiv.org/pdf/2504.07260?) (arXiv 2025)
+- [arXiv](https://arxiv.org/abs/2504.07260?) (arXiv 2025)
+---
+- **Authors**: Fereidoon Zangeneh, Amit Dekel, Alessandro Pieropan, Patric Jensfelt
+- **Venue**: SCIA 2025
 
 ---
 
-주요 참고논문
-- [43]: [Conditional Variational Autoencoders for Probabilistic Pose Regression](https://ieeexplore.ieee.org/abstract/document/10802091) (IEEE/RSJ 2024)
-
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [3. Method](#3-method)
+  - [3.1 Learning a generative model](#31-learning-a-generative-model)
+  - [3.2 Likelihood estimation](#32-likelihood-estimation)
 
 ---
 
-요약
-
+## ⚡ 요약 (Summary)
 - VAE를 사용하여 입력 이미지 $x_i$를 조건으로 넣어 카메라 포즈 $y_i$를 추정
     - VAE가 해당 공간에 대해 훈련되어 있어야 함. 훈련되지 않은 이미지에 대해서는 잘못된 카메라 포즈를 추정
 - likelihood 계산
@@ -32,21 +38,12 @@ url
     - 이 likelihood 측정은 $x$로 조건화된 인코더와 디코더 간의 일치를 정량화. VAE가 어떻게 암묵적으로 epistemic 불확실성을 포착하는지를 보임
     - likelihood $\log p (\hat{y} | x)$를 관측 x에 대한 네트워크의 예측 자신감으로 해석
 
----
-
-**문제점 & 한계점**
-
+### 문제점 & 한계점
 - VAE로 공간을 학습시켜서 이미지 한 장으로 절대 포즈를 추정하기 때문에, 학습되지 않은 이미지에 대해서는 잘못된 자세 추정
 
 ---
 
-
-목차
-
-0. [Abstract](#abstract)
-
-
----
+## 📖 Paper Review
 
 ## Abstract
 

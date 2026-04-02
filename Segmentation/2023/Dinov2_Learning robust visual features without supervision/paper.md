@@ -1,20 +1,43 @@
 # DINOv2: Learning Robust Visual Features without Supervision
 
-
 ---
 
+## 📌 Metadata
+---
+분류
 - Segmentation
-
+- Self-supervised Learning
+- Foundation Model
 ---
-
 url:
-- [paper](https://arxiv.org/abs/2304.07193) (arXiv 2023)
+- [paper](https://arxiv.org/abs/2304.07193)
+- [project](https://dinov2.metademolab.com/)
+---
+- **Authors**: Maxime Oquab, Timothée Darcet, Théo Moutakanni, Huy V. Vo, Marc Szafraniec, et al.
+- **Venue**: TMLR 2023
 
 ---
-요약
 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [3. Data Processing](#3-data-processing)
+- [4. Discriminative Self-supervised Pre-training](#4-discriminative-self-supervised-pre-training)
 
 ---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 컴퓨터 비전에서 텍스트 가이드 사전 학습은 캡션이 이미지의 풍부한 정보를 충분히 담지 못해 저해상도 픽셀 레벨 정보를 잃기 쉬움. 또한 기존 자기주도 학습(SSL)은 대규모 데이터 확장 시 성능 저하나 불안정성 문제가 있었음.
+- **Goal**: 대량의 정제된 데이터를 활용하여 이미지 및 픽셀 레벨 모두에서 즉시 사용 가능한(Frozen) 범용 시각적 특징을 학습하는 DINOv2 제안.
+- **Key Method**: 
+    - **Discriminative SSL**: DINO와 iBOT 손실을 결합하고, 대규모 학습을 위해 안정화된 아키텍처와 하이퍼파라미터를 재검토함.
+    - **Data Pipeline**: NLP 파이프라인에서 영감을 받아 메타데이터 없이 데이터 유사성만을 활용해 비선별 이미지 컬렉션(LVD-142M)을 필터링 및 재조정하는 자동 파이프라인 구축.
+    - **Efficiency**: 대규모 배치 학습을 지원하도록 최적화하여 이전 SSL 방식보다 약 2배 빠르고 메모리 사용량은 3배 적음.
+- **Result**: 별도의 파인튜닝 없이 고정된 특징만으로도 다양한 벤치마크(세그멘테이션, 깊이 추정 등)에서 최첨단 성능을 기록하며 공개된 최고의 약지도(weakly-supervised) 모델과 경쟁함.
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 

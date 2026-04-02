@@ -2,21 +2,37 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Human Pose Estimation
 - Survey
+---
+url:
+- [paper](https://link.springer.com/article/10.1007/s10462-024-11019-3)
+---
+- **Authors**: Rama Bastola Neupane, Kan Li, Tesfaye Fenta Boka
+- **Venue**: Artificial Intelligence Review 2024
 
 ---
 
-paper: https://doi.org/10.1007/s10462-024-11019-3
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. 3D-HPE 문제 해결 전략](#2-3d-hpe-문제-해결-전략)
+- [3. Single-person 3D-HPE 방법](#3-single-person-3d-hpe-방법)
+- [5. Learning techniques](#5-learning-techniques)
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## ⚡ 요약 (Summary)
+- **Overview**: 3D Human Pose Estimation(3D-HPE)의 발전을 CNN, GCN, Transformers 등 기술별로 종합 검토하고, 다양한 시나리오(단안/다중 view, 싱글/멀티 퍼슨)에서의 해결책을 분석한 서베이 논문
+- **Key Focus**: 깊이 모호성, 가려짐, 데이터 부족 문제를 해결하기 위한 패러다임(End-to-end vs Lifting)과 고급 학습 기법(Diffusion, NeRF 등)을 정리
 
 ---
+
+## 📖 Paper Review
+
 
 
 ## Abstract

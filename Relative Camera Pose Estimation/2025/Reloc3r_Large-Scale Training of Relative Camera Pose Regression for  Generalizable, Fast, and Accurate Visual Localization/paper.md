@@ -1,19 +1,36 @@
 # Reloc3r: Large-Scale Training of Relative Camera Pose Regression for Generalizable, Fast, and Accurate Visual Localization
 
-
-
 ---
 
+## 📌 Metadata
+---
+분류
 - Relative Camera Pose Estimation
 
 ---
-
 url:
 - [paper](https://openaccess.thecvf.com/content/CVPR2025/papers/Dong_Reloc3r_Large-Scale_Training_of_Relative_Camera_Pose_Regression_for_Generalizable_CVPR_2025_paper.pdf) (CVPR 2025)
+---
+- **Authors**: Siyan Dong, Shuzhe Wang, Shaohui Liu, Lulu Cai, Qingnan Fan, Juho Kannala, Yanchao Yang
+- **Venue**: CVPR 2025
 
 ---
-짧은 요약
 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Method](#3-method)
+  - [3.1 Relative Camera Pose Regression](#31-relative-camera-pose-regression)
+  - [3.2 Motion Averaging](#32-motion-averaging)
+- [4. Experiments](#4-experiments)
+  - [4.1 Relative Camera Pose Estimation](#41-relative-camera-pose-estimation)
+  - [4.2 Visual Localization](#42-visual-localization)
+  - [4.3 Analyses](#43-analyses)
+
+---
+
+## ⚡ 요약 (Summary)
 - ViT 기반 완전 대칭 구조 아키텍처
 - Translation을 크기 말고 방향만 예측
     - 크기는 motion averaging을 통해 계산
@@ -26,28 +43,15 @@ url:
         - 모든 유효 쌍을 사용하여 평균 교차점 계산
         - 일반적으로 반복 최적화가 필요하지만, 상대 자세 추정치에서 유도된 각 translation 방향까지의 카메라 중심에서의 제곱 거리 합을 최소화하는 최소 자승법 사용
         - 특이값 분해(SVD)를 사용하여 해를 얻음
----
 
-요약
-
-
----
-
-**문제점 & 한계점**
-
+### 문제점 & 한계점
 - 쿼리 이미지와 검색된 데이터베이스 이미지가 일직선상에 있을 경우, motion averaging을 사용하여 metric scale을 해결할 수 없음
 - Visual Localization 과정에서 데이터베이스에서 유사 이미지를 찾아야 함. NetVLAD를 사용해서 진행. 상위 10개의 이미지를 검색. 개선의 여지 있음
 - 동적 장면에 대한 대응 부족
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
-
----
-
+## 📖 Paper Review
 
 ## Abstract
 

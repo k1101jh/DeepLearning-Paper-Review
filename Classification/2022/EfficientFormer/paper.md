@@ -2,21 +2,41 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Classification
 - Edge Computing
+- Vision Transformer
+---
+url:
+- [paper](https://proceedings.neurips.cc/paper_files/paper/2022/hash/5452ad8ee6ea6e7dc41db1cbd31ba0b8-Abstract-Conference.html)
+- [github](https://github.com/snap-research/EfficientFormer)
+---
+- **Authors**: Yanyu Li, Geng Yuan, Yang Wen, Ju Hu, Georgios Evangelidis, Sergey Tulyakov, Yanzhi Wang, Jian Ren
+- **Venue**: NeurIPS 2022
 
 ---
 
-paper: https://proceedings.neurips.cc/paper_files/paper/2022/hash/5452ad8ee6ea6e7dc41db1cbd31ba0b8-Abstract-Conference.html
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [3. Vision Transformers의 On-Device 지연 시간 분석](#3-vision-transformers의-on-device-지연-시간-분석)
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## ⚡ 요약 (Summary)
+- **Problem**: Vision Transformer(ViT)는 성능은 우수하지만 복잡한 어텐션 매커니즘과 설계(예: 큰 커널 패치 임베딩)로 인해 모바일 장치에서 CNN(MobileNet)보다 훨씬 느리며 실시간 배포가 어려움.
+- **Goal**: 고성능을 유지하면서도 모바일 기기에서 MobileNet 수준의 빠른 추론 속도를 달성하는 Pure Transformer 아키텍처(EfficientFormer) 제안.
+- **Key Method**: 
+    - **Latency Analysis**: iPhone 12에서 ViT의 병목 구간을 분석하여 큰 커널의 비중첩 패치 임베딩과 불일치한 피처 차원이 속도 저하의 주원인임을 식별.
+    - **Dimension-Consistent Design**: MobileNet 블록 없이도 효율적인 파라미터 활용이 가능한 순수 트랜스포머 디자인 패러다임 도입.
+    - **Latency-Driven Slimming**: 기존의 MACs나 파라미터 수 대신 실제 기기에서의 '지연 시간(Latency)'을 직접 최적화 지표로 사용하는 Slimming 기법 적용.
+- **Result**: EfficientFormer-L1은 MobileNetV2보다 정확도는 높으면서도 동일한 속도(1.6ms)를 달성하며, 모바일 최적화 ViT 중 최첨단 성능을 입증함.
 
 ---
+
+## 📖 Paper Review
 
 ## Abstract
 
@@ -57,7 +77,7 @@ Transformer 아키텍처
 - long-term dependencies를 모델링하고 쉽게 병렬화할 수 있도록 하는 Multi-Head Self Attention(MHSA) 메커니즘을 도입
 
 Vision Transformer(Vit)
-- Attentioin 메커니즘을 2D 이미지에 적용
+- Attention 메커니즘을 2D 이미지에 적용
 - 입력 이미지를 패치로 나누고 패치 간 표현은 MHSA를 통해 학습(유도 편향이 없다)
 - CNN에 비해 유망한 결과를 보입
 - 일반적으로 CNN보다 몇 배 느리다.  

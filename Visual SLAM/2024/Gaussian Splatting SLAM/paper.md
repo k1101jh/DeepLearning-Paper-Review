@@ -1,24 +1,44 @@
 # Gaussian Splatting SLAM
 
-
 ---
 
+## 📌 Metadata
+---
+분류
+- 3DGS
 - SLAM
 - 3DGS SLAM
 
 ---
-
 url:
 - [paper](https://arxiv.org/abs/2312.06741) (arXiv)
-- [paper](https://openaccess.thecvf.com/content/CVPR2024/papers/Matsuki_Gaussian_Splatting_SLAM_CVPR_2024_paper.pdf)(CVPR 2024)
+- [project](https://rmurai.co.uk/projects/GaussianSplattingSLAM/)
+- [github](https://github.com/muskie82/MonoGS)
+---
+- **Authors**: Hidenobu Matsuki, Riku Murai, Paul H. J. Kelly, Andrew J. Davison
+- **Venue**: CVPR 2024 (Highlight)
 
 ---
-요약
 
-- 문제점
-    - 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Method](#3-method)
+  - [3.1 Gaussian Splatting](#31-gaussian-splatting)
+  - [3.2 Camera Pose Optimisation](#32-camera-pose-optimisation)
+  - [3.3 SLAM](#33-slam)
 
 ---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 기존의 신경망 기반 SLAM(Neural SLAM)은 MLP를 활용한 암시적 표현 방식 때문에 실시간 렌더링과 동적 지도 업데이트 속도가 느리며, 고해상도의 세밀한 재구성에 어려움이 있음.
+- **Idea**: 3D Gaussian Splatting(3DGS)을 유일한 장면 표현 방식으로 사용하는 최초의 온라인 SLAM 시스템을 제안하고, 카메라 포즈 최적화를 위한 Lie Group 상의 해석적 야코비안 및 등방성 정규화(Isotropic Regularization) 기법을 도입함.
+- **Result**: 사전 학습된 깊이 예측기 없이 RGB 단안 입력만으로 실시간 수준의 온라인 추적 및 매핑을 수행하며, 새로운 시점 합성(NVS) 및 궤적 추정 실패율에서 SOTA 성능을 입증함.
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 

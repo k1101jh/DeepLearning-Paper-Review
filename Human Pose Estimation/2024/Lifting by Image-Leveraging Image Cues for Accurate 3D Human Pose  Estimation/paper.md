@@ -1,21 +1,37 @@
-# Lifting by Image- Leveraging Image Cues for Accurate 3D Human Pose Estimation
+# Lifting by Image-- Leveraging Image Cues for Accurate 3D Human Pose Estimation
 
 ---
 
-- Pose Estimation
+## 📌 Metadata
+---
+분류
+- Human Pose Estimation
+- 3D-HPE
+---
+url:
+- [arXiv](https://arxiv.org/abs/2312.15636)
+- [AAAI](https://ojs.aaai.org/index.php/AAAI/article/view/28596)
+---
+- **Authors**: Feng Zhou, Jianqin Yin, Peiyang Li
+- **Venue**: AAAI 2024
 
 ---
 
-paper: 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Background Overfitting](#3-background-overfitting)
+- [4. Method](#4-method)
 
 ---
 
-목차
+## ⚡ 요약 (Summary)
 
-0. [Abstract](#abstract)
-1. 
 
 ---
+
+## 📖 Paper Review
 
 ## Abstract
 

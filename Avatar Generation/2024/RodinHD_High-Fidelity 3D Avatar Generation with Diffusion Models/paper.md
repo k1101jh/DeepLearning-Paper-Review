@@ -1,33 +1,39 @@
 # RodinHD: High-Fidelity 3D Avatar Generation with Diffusion Models
 
-
 ---
 
-- 3D avatar generation
+## 📌 Metadata
+---
+분류
+- 3D Avatar Generation
 - Diffusion
-- Catastrophic forgetting
+---
+url:
+- [paper](https://arxiv.org/abs/2407.06938) (arXiv 2024)
+- [project](https://rodinhd.github.io/)
+---
+- **Authors**: Bowen Zhang, Yiji Cheng, Chunyu Wang, Ting Zhang, Jiaolong Yang, Yansong Tang, Feng Zhao, Dong Chen, Baining Guo
+- **Venue**: ECCV 2024
 
 ---
 
-- Zhang Bowen et al.
-- ECCV 2024.
-- Microsoft
-- url: 
-    - https://link.springer.com/chapter/10.1007/978-3-031-72630-9_27
-    - https://openreview.net/pdf?id=GLzmOSX2yP
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Method](#3-method)
+  - [3.1 Triplane Fitting](#31-triplane-fitting)
+  - [3.2 Triplane Diffusion](#32-triplane-diffusion)
+- [4. Experiments](#4-experiments)
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. [Introduction](#1-introduction)
-2. [Related Work](#2-related-work)
-3. [Method](#3-Method)
+## ⚡ 요약 (Summary)
+**RodinHD**는 단일 인물 사진에서 고해상도 3D 아바타를 생성하는 확산 모델 기반 프레임워크입니다. 대규모 아바타 학습 시 발생하는 **Catastrophic Forgetting(치명적 망각)** 문제를 해결하기 위해 'Task Replay' 전략과 'Weight Consolidation' 정규화를 제안합니다. 이를 통해 별도의 2D Refiner 없이도 미세한 헤어스타일과 의상 질감을 보존하며 고품질의 3D 일관성을 유지합니다.
 
 ---
 
-## GPT 요약
+## 📖 Paper Review
 
 ## Abstract
 

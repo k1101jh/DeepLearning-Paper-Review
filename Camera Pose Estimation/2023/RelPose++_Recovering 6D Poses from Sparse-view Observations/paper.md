@@ -2,31 +2,33 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Relative Camera Pose Estimation
 
 ---
-
 url:
-- [paper](https://ieeexplore.ieee.org/abstract/document/10550461) (3DV 2024)
+- [paper](https://ieeexplore.ieee.org/abstract/document/10550461)
 
 ---
-짧은 요약
-
-
----
-
-요약
-
-
+- **Authors**: Amy Lin, Jason Y. Zhang, Deva Ramanan, Shubham Tulsiani
+- **Venue**: 3DV 2024
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
 
 ---
+
+## ⚡ 요약 (Summary)
+
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 

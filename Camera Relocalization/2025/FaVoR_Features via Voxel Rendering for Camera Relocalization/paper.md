@@ -2,18 +2,35 @@
 
 ---
 
+## 📌 Metadata
+---
+분류
 - Camera Relocalization
 - Visual Positioning System
+- Voxel Rendering
+---
+url:
+- [paper](https://ieeexplore.ieee.org/abstract/document/10943362) (IEEE 2025)
+---
+- **Authors**: Vincenzo Polizzi, Marco Cannici, Davide Scaramuzza, Jonathan Kelly
+- **Venue**: WACV 2025
 
 ---
 
-url
- - [paper](https://ieeexplore.ieee.org/abstract/document/10943362) (IEEE 2025)
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Work](#2-related-work)
+- [3. Methodology](#3-methodology)
+  - [3.1 Landmark Tracking](#31-landmark-tracking)
+  - [3.2 Voxel Creation](#32-voxel-creation)
+  - [3.3 Descriptor Learning and Rendering](#33-descriptor-learning-and-rendering)
+  - [3.4 2D-3D Matching and Pose Estimation](#34-2d-3d-matching-and-pose-estimation)
+- [4. Results](#4-results)
 
 ---
 
-요약
-
+## ⚡ 요약 (Summary)
 
 - **Landmark Tracking**
   - RGB 이미지 sequence를 입력받아 랜드마크 $\ell_i$를 찾아내고, 각 랜드마크의 track을 저장
@@ -54,8 +71,6 @@ url
   - 모든 rendering된 feature가 일치하고 가정된 2D-3D 대응이 가능해지면 PnP RANSAC을 사용해서 카메라 포즈를 결정
     - 추정된 query pose가 실제 query pose에 수렴함에 따라 렌더링된 descriptor은 query 이미지 descriptor의 외관과 점점 더 일치하게 되어 더 많은 대응을 나타냄
 
----
-
 **문제점 & 한계점**
 
 - SLAM에 적용하려면 수정 및 개선 필요
@@ -69,16 +84,7 @@ url
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. [Introduction](#1-introduction)
-2. [Related Work](#2-related-work)
-3. [Methodology](#3-methodology)
-4. [Results](#4-results)
-5. [Conclusion](#5-conclusion)
-
----
+## 📖 Paper Review
 
 ## Abstract
 

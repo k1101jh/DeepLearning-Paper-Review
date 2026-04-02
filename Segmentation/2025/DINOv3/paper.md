@@ -1,21 +1,49 @@
 # DINOv3
 
-
 ---
 
+## 📌 Metadata
+---
+분류
 - Segmentation
-
+- Self-supervised Learning
+- Foundation Model
 ---
-
 url:
 - [paper](https://arxiv.org/abs/2508.10104) (arXiv 2025)
 - [blog](https://ai.meta.com/dinov3/)
+---
+- **Authors**: Oriane Siméoni, Huy V. Vo, Maximilian Seitzer, et al.(Meta AI Research Team)
+- **Venue**: arXiv 2025
 
 ---
-요약
 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [3. Training at Scale Without Supervision](#3-training-at-scale-without-supervision)
+  - [3.1. Data Preparation](#31-data-preparation)
+  - [3.2 Large-Scale Training with Self-Supervision](#32-large-scale-training-with-self-supervision)
+- [4. Gram Anchoring: A Regularization for Dense Features](#4-gram-anchoring-a-regularization-for-dense-features)
+  - [4.1 Loss of Patch-Level Consistency Over Training](#41-loss-of-patch-level-consistency-over-training)
+  - [4.2 Gram Anchoring Objective](#42-gram-anchoring-objective)
+  - [4.3 Leveraging Higher-Resolution Features](#43-leveraging-higher-resolution-features)
+- [5. Post-Training](#5-post-training)
 
 ---
+
+## ⚡ 요약 (Summary)
+- **Problem**: 자기주도 학습(SSL) 모델을 대규모(7B 등)로 확장하고 장시간 훈련할 경우, 글로벌 지표는 개선되지만 패치 레벨의 일관성이 무너져 세그멘테이션이나 깊이 추정 같은 'Dense Task' 성능이 오히려 저하되는 현상이 발생함.
+- **Goal**: 데이터셋과 모델 크기를 대폭 확장(7B 파라미터)하면서도 고품질의 Dense Feature를 유지하는 차세대 시각 파운데이션 모델 DINOv3 제안.
+- **Key Method**: 
+    - **Gram Anchoring**: 훈련 중 발생하는 패치 레벨 붕괴를 방지하기 위해, 초기 훈련 단계의 우수한 기하학적 특징을 가진 모델의 Gram 행렬(패치 간 유사도 행렬)을 앵커로 삼아 정규화하는 새로운 목적 함수 도입.
+    - **LVD-1689M Dataset**: 인스타그램 이미지 170억 장 중 계층적 클러스터링을 통해 균형 잡힌 16억 9천만 장의 표본을 추출하여 학습에 활용.
+    - **7B Model Scaling**: 70억 개의 매개변수를 가진 ViT 모델을 학습시키고, 이를 다양한 크기(Small, Base, Large) 및 아키텍처(ConvNeXt)로 증류(Distillation)하여 배포.
+- **Result**: Dense Task에서 약지도 학습(WSL) 모델을 크게 능가하며, 단일 고정 백본(Frozen Backbone)만으로도 다양한 영상 분석 작업에서 SOTA 성능을 달성함.
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 

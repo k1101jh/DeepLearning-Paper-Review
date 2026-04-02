@@ -1,22 +1,37 @@
 # Perpetual Humanoid Control for Real-time Simulated Avatars
 
-
 ---
 
+## 📌 Metadata
+---
+분류
 - Humanoid Control
+- Physics-based Simulation
 
 ---
-
 url:
 - [paper](https://arxiv.org/abs/2305.06456)
 - [project](https://www.zhengyiluo.com/PHC-Site/)
+---
+- **Authors**: Zhengyi Luo, Jinkun Cao, Alexander Winkler, Kris Kitani, Weipeng Xu
+- **Venue**: ICCV 2023
 
 ---
-요약
 
-
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
+- [2. Related Works](#2-related-works)
+- [3. Method](#3-method)
+  - [3.1. Goal Conditioned Motion Imitation with Adversarial Motion Prior](#31-goal-conditioned-motion-imitation-with-adversarial-motion-prior)
 
 ---
+
+## ⚡ 요약 (Summary)
+
+---
+
+## 📖 Paper Review
 
 ## Abstract
 
