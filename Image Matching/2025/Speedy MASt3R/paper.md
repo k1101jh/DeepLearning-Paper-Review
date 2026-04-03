@@ -1,5 +1,13 @@
 # Speedy MASt3R
 
+---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
 
 
 ---
@@ -56,5 +64,4 @@ Speedy MASt3R
 - mixed-precision 추론을 통해 FP16/FP32 하이브리드 계산(HybridCast)를 적용하여 속도를 높이면서 수치 정밀성을 보장
 - Aachen Day-Night, InLoc, 7-Scenes, ScanNet1500, MegaDepth1500에서 평가
     - 정확도를 손상시키지 않으면서 추론 시간을 54% 단축(198ms -> 91ms 이미지 쌍당)
-
 

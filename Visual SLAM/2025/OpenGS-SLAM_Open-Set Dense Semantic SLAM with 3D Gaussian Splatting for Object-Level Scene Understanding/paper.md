@@ -1,5 +1,13 @@
 # OpenGS-SLAM: Open-Set Dense Semantic SLAM with 3D Gaussian Splatting for Object-Level Scene Understanding
 
+---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
 
 ---
 

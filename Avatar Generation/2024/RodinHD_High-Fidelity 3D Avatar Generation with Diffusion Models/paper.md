@@ -1,6 +1,14 @@
 # RodinHD: High-Fidelity 3D Avatar Generation with Diffusion Models
 
 ---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
+---
 
 ## 📌 Metadata
 ---
@@ -214,4 +222,3 @@ Triplane과 decoder을 학습 -> 아바타 사이를 전환할 때 가끔 발생
 ### 4.2 Implementation Details
 
 ### 4.3 Main Results
-

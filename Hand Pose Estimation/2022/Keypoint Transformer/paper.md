@@ -1,3 +1,10 @@
+---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
 https://openaccess.thecvf.com/content/CVPR2022/papers/Hampali_Keypoint_Transformer_Solving_Joint_Identification_in_Challenging_Hands_and_Object_CVPR_2022_paper.pdf
 
 

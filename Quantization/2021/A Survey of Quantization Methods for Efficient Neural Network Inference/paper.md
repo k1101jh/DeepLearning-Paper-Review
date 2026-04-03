@@ -1,5 +1,14 @@
 # A Survey of Quantization Methods for Efficient Neural Network Inference
 
+---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.  
+(일부 수식은 위키백과에서 발췌하였습니다.)
+
+---
+
+
 ## 📌 Metadata
 ---
 분류
@@ -577,8 +586,9 @@ integer-only quantization을 Transformer 아키텔처로 더욱 확장
 
 **Dyadic quantization**
 
-![alt text](./images/dyadic%20rationals.png)
-[출처: By David Eppstein - Own work, Public Domain, https://commons.wikimedia.org/w/index.php?curid=4134639](https://commons.wikimedia.org/w/index.php?curid=4134639)
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Dyadic_rational.svg/1920px-Dyadic_rational.svg.png" style="background-color: #F0F0F0;">
+
+[출처: https://en.wikipedia.org/wiki/Dyadic_rational]
 
 - Integer-only quantization의 다른 방법
 - 모든 scaling은 분자에 정수 값이 있고 분모에 2의 거듭제곱이 있는 유리수인 dyadic 숫자로 수행  

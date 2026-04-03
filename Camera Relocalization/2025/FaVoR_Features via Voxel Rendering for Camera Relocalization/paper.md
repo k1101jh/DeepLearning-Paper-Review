@@ -1,6 +1,14 @@
 # FaVoR: Features via Voxel Rendering for Camera Relocalization
 
 ---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
+---
 
 ## 📌 Metadata
 ---
@@ -313,5 +321,4 @@ FaVoR과 FQN[14], CROSS-FIRE[28], NeRF-loc[21]을 비교
 - SceneSqueezer[48] 결과도 포함 - 더 적은 메모리를 요구하지만 더 큰 localization error을 보임
 
 ### 4.2 Relocalization Evaluation
-
 

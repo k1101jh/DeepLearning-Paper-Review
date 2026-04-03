@@ -1,6 +1,14 @@
 # MobRecon: Mobile-Friendly Hand Mesh Reconstruction From Monocular Image
 
 ---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
+---
 
 - Hand Mesh Reconstruction
 
@@ -525,7 +533,9 @@ $
 
     예) 1, 4, 4의 harmonic mean:
 
-    <img src="./images/harmonic%20mean.png" style="background-color: #F0F0F0;">
+    <img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/eca5906ddf61080e790c0d4df33f47e12da7d019" style="background-color: #F0F0F0;">
+    
+    [출처: https://en.wikipedia.org/wiki/Harmonic_mean]
     
     - F@5/F@15는 5mm/15mm 임계값에 해당
 - Mult-Adds
@@ -736,4 +746,3 @@ HO3Dv2 데이터셋 평가
 
 - 입력 이미지에서 두 개의 view가 파생됨
 - 본문의 식 11과 같이 2D 공간과 3D 공간 모두에서 설계 가능
-

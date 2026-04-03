@@ -1,6 +1,14 @@
 # RelPose++: Recovering 6D Poses from Sparse-view Observations
 
 ---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
+---
 
 ## 📌 Metadata
 ---
@@ -42,4 +50,3 @@ url:
     - 회전 추정의 모호성을 translation 예측과 분리하는 적절한 좌표계를 정의하여 카메라 translation도 보고할 수 있도록 네트워크 확장
     - seen 및 unseen 객체 범주 모두에서 이전 기술보다 6D pose prediction에서 큰 개선을 이룸
     - in-the-wild 객체에 대한 자세 추정 및 3D 재구성을 가능하게 함
-

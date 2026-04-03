@@ -1,5 +1,13 @@
 # ElasticFusion: Dense SLAM Without A Pose Graph
 
+---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
 
 ---
 
@@ -89,4 +97,3 @@ scene 표현 방식
     $$
 
 A. Geometric Pose Estimation
-

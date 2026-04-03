@@ -1,6 +1,14 @@
 # Lightglue: Local feature matching at light speed
 
 ---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
+---
 
 - Feature Matching
 - Visual Localization
@@ -472,5 +480,4 @@ LightGlue는 SuperGlue에서 영감을 받았지만 정확성, 효율성, 훈련
 LightGlue 아키텍처의 세부 사항이 큰 영향을 미침(Fig 5 참조)
 - AUC-RANSAC과 AUC-DLT가 SuperGlue에 비해 모델 훈련에 필요한 자원을 줄임
    - 훈련 비용을 줄이고 깊은 matcher을 많은 사람들이 활용하기 쉽게 만듦
-
 

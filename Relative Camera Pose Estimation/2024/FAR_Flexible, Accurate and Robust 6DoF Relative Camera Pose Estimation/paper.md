@@ -1,6 +1,14 @@
 # FAR: Flexible, Accurate and Robust 6DoF Relative Camera Pose Estimation
 
 ---
+Reference
+
+본 문서에 사용된 모든 이미지와 표는 해당 논문에서 발췌하였습니다.
+
+---
+
+
+---
 
 ## 📌 Metadata
 ---
@@ -351,4 +359,3 @@ $$
     - 이는 $ w(\text{p}, q) = \exp\left(- \text{Sampson}(\text{p}, q \mid \text{T}_1) / {\tau}\right) $로 영향을 미침
 - biased 샘플링을 사용하여 가설의 절반을 샘플링하고 나머지 절반은 uniform sampling 사용
     - correspondnece가 많은 경우 샘플 다양성을 개선. 이 경우 비편향 샘플링이 효과적
-
