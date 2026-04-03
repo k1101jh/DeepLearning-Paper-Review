@@ -7,11 +7,10 @@ Reference
 
 ---
 
-
-
+## 📌 Metadata
 ---
-
-- Camera Calibration
+분류
+- Visual Place Recognition
 
 ---
 

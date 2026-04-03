@@ -7,9 +7,6 @@ Reference
 
 ---
 
-
----
-
 ## Metadata
 - **Title**: FastViT: A Fast Hybrid Vision Transformer using Structural Reparameterization
 - **Authors**: Pavan Kumar Anasosalu Vasu et al.

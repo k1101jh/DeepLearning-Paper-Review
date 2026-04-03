@@ -7,11 +7,13 @@ Reference
 
 ---
 
-
+## 📌 Metadata
 ---
-
+분류
 - Hand pose estimation
 - LSTM
+
+---
 
 ---
 

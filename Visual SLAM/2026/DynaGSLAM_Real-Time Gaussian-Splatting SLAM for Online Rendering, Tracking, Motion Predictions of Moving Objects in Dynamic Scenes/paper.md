@@ -7,10 +7,9 @@ Reference
 
 ---
 
-
-
+## 📌 Metadata
 ---
-
+분류
 - SLAM
 - Dynamic SLAM
 - 3D Gaussian Splatting

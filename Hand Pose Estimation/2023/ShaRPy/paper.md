@@ -9,14 +9,11 @@ Reference
 
 ---
 
-
+## 📌 Metadata
 ---
-
+분류
 - Hand Pose Estimation
 - RGB-D
-
----
-
 
 ---
 

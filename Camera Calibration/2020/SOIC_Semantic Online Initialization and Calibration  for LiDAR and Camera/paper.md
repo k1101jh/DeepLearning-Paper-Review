@@ -7,21 +7,24 @@ Reference
 
 ---
 
-
+## 📌 Metadata
 ---
-
+분류
 - Camera Calibration
 
 ---
+url:
+- [paper](https://arxiv.org/abs/2003.04260)
 
-url: https://arxiv.org/abs/2003.04260
+---
+- **Authors**: 
+- **Venue**: 
 
 ---
 
-목차
-
-0. [Abstract](#abstract)
-1. 
+## 📑 Table of Contents
+- [Abstract](#abstract)
+- [1. Introduction](#1-introduction)
 
 ---
 

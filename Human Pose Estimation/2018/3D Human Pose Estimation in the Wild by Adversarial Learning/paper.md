@@ -7,15 +7,16 @@ Reference
 
 ---
 
-
+## 📌 Metadata
 ---
-
+분류
 - Human Pose Estimation
 - Adversairal Learning
 
 ---
 
-paper: https://openaccess.thecvf.com/content_cvpr_2018/html/Yang_3D_Human_Pose_CVPR_2018_paper.html
+url:
+- [paper](https://openaccess.thecvf.com/content_cvpr_2018/html/Yang_3D_Human_Pose_CVPR_2018_paper.html)
 
 ---
 

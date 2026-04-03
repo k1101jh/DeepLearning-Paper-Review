@@ -7,13 +7,13 @@ Reference
 
 ---
 
-
+## 📌 Metadata
+---
+분류
+- Gaussian Splatting
 
 ---
 
-- World Model
-
----
 
 url:
 - [paper](https://arxiv.org/abs/2511.04283)

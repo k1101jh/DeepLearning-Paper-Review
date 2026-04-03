@@ -7,16 +7,14 @@ Reference
 
 ---
 
-
-
+## 📌 Metadata
+---
+분류
+- Gaussian Splatting
 
 ---
 
-- RGBD SLAM
-
----
-
-url
+url:
 - [paper](https://ojs.aaai.org/index.php/AAAI/article/view/32193) (aaai 2025)
 - [github](https://github.com/Jumpat/SegAnyGAussians)
 

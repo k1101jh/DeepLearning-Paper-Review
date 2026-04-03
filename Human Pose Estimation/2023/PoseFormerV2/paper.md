@@ -7,10 +7,10 @@ Reference
 
 ---
 
-
+## 📌 Metadata
 ---
-
-- Pose Estimation
+분류
+- Human Pose Estimation
 
 ---
 
