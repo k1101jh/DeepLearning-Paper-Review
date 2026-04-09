@@ -294,12 +294,67 @@ $$
 - 세 가지 상호 보완적인 환경에서 평가 수행
 
 - **LIBERO Simulation Benchmark[37]**
-    - 네 가지 서로 다른 작업 모음으로 
+    - 네 가지 서로 다른 작업
+        - LIBERO-Spatial
+        - LIBERO-Object
+        - LIBERO-Goal
+        - LIBERO-Long
+    - 각 모음에는 10개의 다양한 작업이 포함됨
+    - 작업당 50개의 사람의 원격 조종 시연이 제공됨
+    - 로봇의 공간 관계, 객체 상호작용 및 작업별 목표에 대한 이해 평가를 목표로 함
+    - [29]와 동일한 전처리 파이프라인
+        - 궤적에서 일시 정지 구간 제거
+        - 이미지 해상도를 256 x 256 픽셀로 표준화
+        - 모든 이미지에 180도 회전 적용
 
 - **Bridge-V2 Real-Robot Experiments[60]**
+    - 6-DoF WidowX 로봇 팔 사용
+    - Bridge-V2[60]의 실험 설정을 따름
+    - Bridge-V2 데이터셋으로부터 language-annotated 45k개 궤적을 포함
+    - 다양한 조작 작업 포함
+    - OpenX와 함께 pretraining 단계에서 사용
+        - Bridge-V2에서만 작업별 fine-tuning을 수행
+        - 학습 행동 예측 정확도 95% 기준에 도달
+    - [29]에 따라 네 가지 작업 평가
+        - 시각적 견고성(변화하는 방해 요소)
+        - 동작 일반화(새로운 객체 위치)
+        - 의미 일반화(unseen 언어 지시)
+        - 언어 기반 실행(지시 수행)
+
+
+![alt text](./images/Fig%204.png)
+> **Figure 4. Franka-Tabletop comparisons**  
+> 여섯 가지 서로 다른 조작 과제에 대한 평가 수행  
+> 각 과제마다 개별 모델을 훈련  
+> 좌측: 각 과제 설정의 대표 초기 상태  
+> 우측: 과제별 성공률과 제안 방법 및 기준 모델들의 과제 간 평균  
+> CoT-VLA는 평균 성능에서 가장 우수하며, 단일 지시와 다중 지시 시나리오 모두에서 강력한 능력을 보여줌
 
 - **Franka-Tabletop Real-Robot Experiments**
-    - 각 테스트 시나리오당 10~150개의 제한된 로봇 시연을 갖는 table-mounted Franka Emika Panda 로봇
+    - 고정식 테이블 장착형 Franka Emika Panda 7-DoF 로봇 팔(Franka-Tabletop) 사용
+    - 소량의 로봇 시연만으로도 모델이 새로운 실제 환경에 적응할 수 있는 능력을 평가하도록 설계됨
+    - 6개의 작업에 걸쳐 평가 수행
+        - 3개: 좁은 domain 단일 지시 작업
+        - 3개: 다양한 다중 지시 작업
+        - 각 작업마다 10~150개의 시연 포함
+
+**BaseLines**
+- 4가지 SOTA 모델과 비교
+    - Diffusion Policy[10]
+        - SOTA 모방 학습 알고리즘
+        - LIBERO, Franka-Tabletop의 각 테스트 시나리오마다 처음부터 학습됨
+        - DistilBERT[52] language embeding에 조건화하면서 action chunking과 proprioception(고유수용성)을 포함
+    - OpenVLA[29]
+        - OpenX 데이터셋에서 사전 학습된 vision-language 모델을 fine-tune한 오픈소스 VLA 모델
+    - Octo[59]
+        - VLM 초기화 없이 OpenX에서 사전 학습된 모델
+    - SUSIE[2]
+        - two-stage 접근 방식
+        - goal 생성을 위한 instruction-guided image 편집 & action 생성을 위한 goal-conditioned policy 결합
+- OpenVLA & Octo & SUSIE 는 Bridge-V2 평가를 위해 제공된 checkpoint 사용
+- OpenVLA & Octo는 LIBERO와 Franka-Tabletop 실험을 위해 fine-tune
+
+### 4.2 Evaluations Results
 
 ![alt text](./images/Table%201.png)
 > **Table 1. LIBERO 벤치마크 실험 결과**  
@@ -308,3 +363,107 @@ $$
 > 굵은 글씨: 가장 높은 성공률  
 > 밑줄: 두 번째로 높은 성공률
 
+![alt text](./images/Fig%205.png)
+> **Figure 5. CoT-VLA를 사용한 LIBERO, Bridge-V2, Franka-Tabletop의 작업 실행 예시**  
+> 좌측: 텍스트 지시($l$)과 초기 상태($s_0^{obs}$)  
+> 중앙: 시각적 CoT reasoning을 보여주는 생성된 최근 중간 goal states($\hat{s}_t$), 각 goal image는 지시와 최근 관찰을 모두 조건으로 함  
+> 우측: 작업 완료 시 최종 상태($s_T^{obs}$)  
+> 전체 실행 경로는 보조 동영상에서 확인할 수 있음
+
+**LIBERO**
+- 표 1에서 정량적 결과 제시
+    - 각 방법은 작업 모음별로 500번의 시험을 3개의 random seed로 평가
+    - 평균 & 표준편차를 사용하여 성공률 보고
+- 정성적 결과는 그림 5 참고
+- CoT-VLA가 LIBERO 시뮬레이션 환경에서 작업에 효과적으로 적응
+- baseline 접근법과 비교했을 때, 최고 or 경쟁력 있는 성능을 달성
+- 실패 사례의 실행 비디오 분석 결과
+    - baseline은 때때로 시각적 단서에 과적합되며 언어 지침을 무시하는 경향이 있음
+    - 특히, 초기 상태가 다양한 작업에서 시각적으로 유사하게 보이는 경우(예: LIBERO-Spatial), baseline 방법은 일부 episode에서 명령된 작업과 다른 작업을 수행
+- CoT-VLA는 language 기반 subgoal 생성을 통해 원하는 행동을 시각적으로 먼저 추론하고, 목표 달성을 위한 관련 행동을 예측
+
+**Bridge-V2**
+- [29]에서 확인된 네 가지 일반화 카테고리에 따라 평가(표 2 참고)
+    - visual generalization
+    - motion generalization
+    - semantic generalization
+    - language grounding
+- 각 작업을 10번의 시도로 테스트
+- SUSIE[2]
+    - diffusion prior을 통해 시각적으로 더 높은 품질의 목표 이미지 생성
+    - 새로운 객체가 포함되거나 복잡한 언어 기반이 필요한 작업에서 성공률이 낮음
+- OpenVLA[29]와 비교해서, CoT-VLA는 action chunking으로 인한 물체 파지 실패 때문에 시각적 & 언어 일반화 작업에서 약간 더 낮은 성공률을 보임
+- CoT-VLA는 전체적으로 4가지 일반화 카테고리 모두에서 경쟁력 있는 성능을 보임
+
+**Franka-Tabletop**
+- 표 4(정량적 결과), Fig 5(실행 경로 예시) 참고
+- 모델들은 작은 시연 세트로 fine-tune됨
+- Diffusion 정책은 단일 명령 작업에서 최고의 성능을 달성
+    - 다양한 객체와 복잡한 언어 명령이 포함된 다중 명령 작업에서는 성능이 저하됨
+- OpenX 데이터셋에서 사전학습된 모델들인 Octo, OpenVLA, CoT-VLA는 언어 기반 지시가 중요한 다중 명령 작업에서 더 나은 적응성과 성능을 보임
+- CoT-VLA
+    - baseline과 비교했을 때, 평균 성능이 가장 높음
+    - 단일 명령과 다중 명령 시나리오 모두에서 향상을 보임
+
+### 4.3 Ablation Study
+
+**Visual CoT, Hybrid Attention, Action Chunking**
+- LIBERO-Spatial & LIBERO-Goal에 대해 포괄적인 ablation study 수행
+- 네 가지 모델 변형 평가
+    - VLA-표준
+        - 표준 VLA 프레임워크[29]를 따름
+        - VILA-U 백본을 사용하지만 CoT와 action chunking을 포함하지 않음
+    - + action chunking
+        - 길이 m의 action sequence를 예측
+    - + hybrid attention
+        - 그림 3과 같이, action sequence 예측을 위해 full attention 메커니즘 추가
+    - + CoT(제안 방법)
+        - hybrid attention 메커니즘 & CoT를 포함한 완전 접근 방식
+- 두 벤치마크 모두 action sequence 예측이 단일 action 예측보다 우수함
+- hybrid attention 메커니즘의 추가는 성능을 더욱 향상시킴
+- CoT-VLA는 CoT reasoning이 VLA 작업에 효과적임을 검증하며 최고의 결과를 달성
+
+**Pretraining**
+- 두 단계 훈련 파이프라인
+    1. action-less video dataset으로 보강된 OpenX 데이터셋에서 VILA_U 사전학습
+    2. 로봇 시연 데이터에서 task-specific post-training 단계
+- 사전 학습 단계에서의 중요성 평가를 위해 Franka-Tabletop 환경에서 ablation study 수행(그림 6 참고)
+- pre-training을 거친 CoT-VLA가 Franka-Tabletop 시연에서 기본 VILA-U 모델을 직접 fine-tuning한 경우와 비교하여 53.7% -> 78.8%로 46.7%의 상대적 향상을 달성
+
+### 4.4 Better Visual Reasoning Helps
+- CoT-VLA는 visual CoT reasoning steps를 통해 pretraining 단계에서 action-less video $D_v$도 활용함
+    - caption이 달린 비디오만으로도 dynamic과 명령 수행 능력을 학습 가능
+    - 로봇 시연 데이터보다 구하기 쉬움
+- 두 개의 subtask를 결합한 장기 작업(long-horizon tasks)를 사용하여 Franka-Tabletop 환경에서 ablation study
+    - out-of-distribution 일반화에 도전이 되는 두 가지 과제 설계
+        1. 녹색 파를 사과 표지 책으로 옮기기
+        2. 녹색 컬리플라워를 곰 표지 책으로 옮기기
+    - 각 작업에 대해, 실제 목표 이미지를 얻기 위해 하나의 시연 경로를 수집
+    - 두 가지 조건에서 5번의 실험을 통해 각 작업을 평가
+        1. CoT-VLA가 생성한 목표 이미지를 사용하는 경우
+        2. 수집된 시연에서 얻은 실제 목표 이미지를 사용하는 CoT-VLA의 경우
+    - 실제 목표 이미지를 사용하면 두 작업 모두에서 절대 성공률이 40% 향상됨  
+
+-> 시각적 추론 및 목표 이미지 생성의 발전이 로봇 작업 성능의 향상으로 직접 이어질 수 있음
+- 제안 방법은 여전히 분포 외 하위 목표 생성에서는 어려움을 겪음
+- 대규모 비디오 및 이미지 모델에서의 최근 발전은 확장 & 시각적 추론 능력을 향상시킬 수 있는 방향을 보임
+
+## 5. Conclusion, Limitations and Future Work
+
+**CoT-VLA**
+- 중간 시각 목표를 명시적 추론 단계로 도입
+- vision-language-action 모델과 CoT reasoning을 연결
+- bounding box나 keypoint와 같은 추상적 표현 사용 대신, 동영상에서 샘플링한 subgoal image를 해석 가능하고 효과적인 중간 표현으로 사용하는 것을 제안
+- VILA-U를 기반으로 시스템 구축
+- 다양한 로봇 조작 작업에서 강력한 성능을 입증
+- 제한점
+    1. 추론 중 중간 이미지 토큰 생성은 direct action 생성 방법과 비교하여 상당한 계산 오버헤드 유발
+        - 행동 토큰 생성하기 전에 256개의 image token을 생성해야 하므로, 행동 chunk 크기가 10일 때 평균적으로 7배 느려짐
+        - 행동 청크 및 병렬 디코딩이 추론 속도를 향상시키지만 이미지 생성은 여전히 주요 병목임
+        - 빠른 이미지 생성 또는 빠른 LLM 추론 기술의 최근 발전은 모델의 처리량을 향상시키고 시스템에 통합될 수 있음
+    2. autoregressive 이미지 생성은 SOTA diffusion based 모델에 비해 시각적 품질이 낮음
+        - 최근 unified multimodal model의 발전은 개선을 위한 유망한 뱡항을 제시
+        - 행동 chunk 접근 방식은 효과적이지만 chunk 간에 불연속적인 행동이 생성될 수 있음
+        - 실행 중 high-frequency 피드백이 부족
+        - temporal smoothing 기법과 [10]에서 제안된 것과 유사한 per-step prediction 접근 방식을 통해 해결 가능
+        - CoT-VLA가 action-less video 데이터를 활용하긴 하지만, 현재의 계산 제약으로 인해 완전히 새로운 작업에 대한 visual-reasoning 일반화를 달성하는데 한계가 있음
