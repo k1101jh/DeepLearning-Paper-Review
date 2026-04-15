@@ -46,7 +46,7 @@ url:
         - 시간적 계획 / 추론 능력이 부족함
 
 **CoT-VLA**
-- VLAs에 명시적 시각적 chain-of-throught(CoT) reasoning을 통합하는 방법 제안
+- VLAs에 명시적 시각적 chain-of-thought(CoT) reasoning을 통합하는 방법 제안
     - 시각적 목표를 미래 이미지 frame으로 autoregressively하게 예측
     - 짧은 행동 sequence를 생성
 - SOTA 7B VLA
@@ -168,7 +168,7 @@ url:
         - 현재 관찰 $\rm{s}_t$와 language 지시 $l$로부터 직접 행동 $\hat{\rm{a}}_{t+1}$을 예측하는 방법 학습
         $$
         \displaystyle
-        \hat{\rm{a}}_t ~ P_\theta(\rm{a}_t | \rm{s}_t, l)
+        \hat{\rm{a}}_t \sim P_\theta(\rm{a}_t | \rm{s}_t, l)
         \tag{1}
         $$
 - **CoT_VLA**
@@ -176,15 +176,15 @@ url:
     - 두 개의 sequential phases 수행:
     $$
     \displaystyle
-    \hat{\rm{s}_{t + n} ~ P_\theta(\rm{s}_{t + n} | \rm{s}_t, l)}
+    \hat{\rm{s}}_{t + n} \sim P_\theta(\rm{s}_{t + n} | \rm{s}_t, l)
     \tag{2}
     $$
     $$
     \displaystyle
-    \{ \hat{\rm{a}}_t, ..., \hat{\rm{a}}_{t + m} \} ~ P_\theta (\{\rm{a}_t, ..., \rm{a}_{t+m} | \rm{s}_t, l, \rm{s}_{t + n} \})
+    \{ \hat{\rm{a}}_t, ..., \hat{\rm{a}}_{t + m} \} \sim P_\theta (\{\rm{a}_t, ..., \rm{a}_{t+m} | \rm{s}_t, l, \rm{s}_{t + n} \})
     \tag{3}
     $$
-    1. 충간 추론 단계로서 $n$ 프레임 이후 subgoal image $\hat{\rm{s}}_{t+n}$을 예측(식 2.)
+    1. 중간 추론 단계로서 $n$ 프레임 이후 subgoal image $\hat{\rm{s}}_{t+n}$을 예측(식 2.)
     2. subgoal을 달성하기 위해 $m$개의 action sequence 생성(식 3.)
     - 이는 모델이 시각적으로 생각하는 걸 가능케 함
         - 행동 예측 전, 명시적으로 바라는 미래 상태에 대해 reasoning
@@ -321,15 +321,6 @@ $$
         - 의미 일반화(unseen 언어 지시)
         - 언어 기반 실행(지시 수행)
 
-
-![alt text](./images/Fig%204.png)
-> **Figure 4. Franka-Tabletop comparisons**  
-> 여섯 가지 서로 다른 조작 과제에 대한 평가 수행  
-> 각 과제마다 개별 모델을 훈련  
-> 좌측: 각 과제 설정의 대표 초기 상태  
-> 우측: 과제별 성공률과 제안 방법 및 기준 모델들의 과제 간 평균  
-> CoT-VLA는 평균 성능에서 가장 우수하며, 단일 지시와 다중 지시 시나리오 모두에서 강력한 능력을 보여줌
-
 - **Franka-Tabletop Real-Robot Experiments**
     - 고정식 테이블 장착형 Franka Emika Panda 7-DoF 로봇 팔(Franka-Tabletop) 사용
     - 소량의 로봇 시연만으로도 모델이 새로운 실제 환경에 적응할 수 있는 능력을 평가하도록 설계됨
@@ -356,13 +347,6 @@ $$
 
 ### 4.2 Evaluations Results
 
-![alt text](./images/Table%201.png)
-> **Table 1. LIBERO 벤치마크 실험 결과**  
-> 각 task suite(Spatial, Object, Goal, Long)에 대해 평균 성공률, 표준 오차를 보고  
-> CoT-VLA는 모든 LIBERO 벤치마크 세트에서 baseline 접근 방식과 비교했을 때 가장 우수하거나 경쟁력있는 성능을 달성  
-> 굵은 글씨: 가장 높은 성공률  
-> 밑줄: 두 번째로 높은 성공률
-
 ![alt text](./images/Fig%205.png)
 > **Figure 5. CoT-VLA를 사용한 LIBERO, Bridge-V2, Franka-Tabletop의 작업 실행 예시**  
 > 좌측: 텍스트 지시($l$)과 초기 상태($s_0^{obs}$)  
@@ -371,8 +355,16 @@ $$
 > 전체 실행 경로는 보조 동영상에서 확인할 수 있음
 
 **LIBERO**
+
+![alt text](./images/Table%201.png)
+> **Table 1. LIBERO 벤치마크 실험 결과**  
+> 각 task suite(Spatial, Object, Goal, Long)에 대해 평균 성공률, 표준 오차를 보고  
+> CoT-VLA는 모든 LIBERO 벤치마크 세트에서 baseline 접근 방식과 비교했을 때 가장 우수하거나 경쟁력있는 성능을 달성  
+> 굵은 글씨: 가장 높은 성공률  
+> 밑줄: 두 번째로 높은 성공률
+
 - 표 1에서 정량적 결과 제시
-    - 각 방법은 작업 모음별로 500번의 시험을 3개의 random seed로 평가
+    - 각 방법은 작업 모음별로 3개의 random seed마다 500번의 시험을 거쳐 평가
     - 평균 & 표준편차를 사용하여 성공률 보고
 - 정성적 결과는 그림 5 참고
 - CoT-VLA가 LIBERO 시뮬레이션 환경에서 작업에 효과적으로 적응
@@ -383,6 +375,15 @@ $$
 - CoT-VLA는 language 기반 subgoal 생성을 통해 원하는 행동을 시각적으로 먼저 추론하고, 목표 달성을 위한 관련 행동을 예측
 
 **Bridge-V2**
+
+![alt text](./images/Table%202.png)
+> **Table 2. Bridge-V2 비교**  
+> 4개의 카테고리 당 10회 실험과 [29]의 부분 점수 채점 방식을 따름  
+> Visual: 어수선한 환경에서 "put eggplat into pot"  
+> Motion: 높이 변화가 있는 상황에서 "put carrot on plate"  
+> Semantic: "take purple grapes out of pot"  
+> Language: "put eggplant or red bottle into pot"
+
 - [29]에서 확인된 네 가지 일반화 카테고리에 따라 평가(표 2 참고)
     - visual generalization
     - motion generalization
@@ -396,7 +397,17 @@ $$
 - CoT-VLA는 전체적으로 4가지 일반화 카테고리 모두에서 경쟁력 있는 성능을 보임
 
 **Franka-Tabletop**
-- 표 4(정량적 결과), Fig 5(실행 경로 예시) 참고
+
+
+![alt text](./images/Fig%204.png)
+> **Figure 4. Franka-Tabletop comparisons**  
+> 여섯 가지 서로 다른 조작 과제에 대한 평가 수행  
+> 각 과제마다 개별 모델을 훈련  
+> 좌측: 각 과제 설정의 대표 초기 상태  
+> 우측: 과제별 성공률과 제안 방법 및 기준 모델들의 과제 간 평균  
+> CoT-VLA는 평균 성능에서 가장 우수하며, 단일 지시와 다중 지시 시나리오 모두에서 강력한 능력을 보여줌
+
+- 표 4(정량적 결과. 논문에서 누락됨?), Fig 5(실행 경로 예시. 실제로는 Fig4를 의미하는 듯) 참고
 - 모델들은 작은 시연 세트로 fine-tune됨
 - Diffusion 정책은 단일 명령 작업에서 최고의 성능을 달성
     - 다양한 객체와 복잡한 언어 명령이 포함된 다중 명령 작업에서는 성능이 저하됨
@@ -406,6 +417,11 @@ $$
     - 단일 명령과 다중 명령 시나리오 모두에서 향상을 보임
 
 ### 4.3 Ablation Study
+
+![alt text](./images/Fig%206.png)
+> **Figure 6. Ablation studies of CoT-VLA components**  
+> a) LIBERO-Spatial & Goal에서 세 가지 구성 요소의 효과를 보임  
+> b) Franka-Tabletop에 대한 pretraining 제거 실험은 OpenX 및 Action-less video 사전 학습으로 인한 성능 향상을 보임
 
 **Visual CoT, Hybrid Attention, Action Chunking**
 - LIBERO-Spatial & LIBERO-Goal에 대해 포괄적인 ablation study 수행
@@ -431,6 +447,12 @@ $$
 - pre-training을 거친 CoT-VLA가 Franka-Tabletop 시연에서 기본 VILA-U 모델을 직접 fine-tuning한 경우와 비교하여 53.7% -> 78.8%로 46.7%의 상대적 향상을 달성
 
 ### 4.4 Better Visual Reasoning Helps
+
+![alt text](./images/Table%203.png)
+> **Table 3. Better visual reasoning helps**  
+> out-of-distribution 작업에서 생성된 goal 이미지와 실제 goal 이미지를 사용하여 CoT-VLA를 비교한 성공률  
+> 시각적 추론이 향상되면 더 나은 작업으로 이어질 수 있음
+
 - CoT-VLA는 visual CoT reasoning steps를 통해 pretraining 단계에서 action-less video $D_v$도 활용함
     - caption이 달린 비디오만으로도 dynamic과 명령 수행 능력을 학습 가능
     - 로봇 시연 데이터보다 구하기 쉬움
@@ -463,7 +485,7 @@ $$
         - 빠른 이미지 생성 또는 빠른 LLM 추론 기술의 최근 발전은 모델의 처리량을 향상시키고 시스템에 통합될 수 있음
     2. autoregressive 이미지 생성은 SOTA diffusion based 모델에 비해 시각적 품질이 낮음
         - 최근 unified multimodal model의 발전은 개선을 위한 유망한 뱡항을 제시
-        - 행동 chunk 접근 방식은 효과적이지만 chunk 간에 불연속적인 행동이 생성될 수 있음
+    3. 행동 chunk 접근 방식은 효과적이지만 chunk 간에 불연속적인 행동이 생성될 수 있음
         - 실행 중 high-frequency 피드백이 부족
         - temporal smoothing 기법과 [10]에서 제안된 것과 유사한 per-step prediction 접근 방식을 통해 해결 가능
-        - CoT-VLA가 action-less video 데이터를 활용하긴 하지만, 현재의 계산 제약으로 인해 완전히 새로운 작업에 대한 visual-reasoning 일반화를 달성하는데 한계가 있음
+    4. CoT-VLA가 action-less video 데이터를 활용하긴 하지만, 현재의 계산 제약으로 인해 완전히 새로운 작업에 대한 visual-reasoning 일반화를 달성하는데 한계가 있음
