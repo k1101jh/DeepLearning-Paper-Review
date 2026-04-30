@@ -82,6 +82,13 @@ url:
 
 **DreamVLA**
 
+![alt text](./images/Fig%201.png)
+> **Figure 1.**  
+> (a) Vanilla VLA: visual 관찰과 언어 지시를 직접 행동으로 매핑  
+> (b) 별도의 이미지/비디오 생성 또는 copilot model을 활용하여 미래의 frame이나 궤적 생성  
+> (c) VLA 변형은 행동 생성을 하기 전에 중간 시각적 추론 단계로 subgoal 이미지를 명시적으로 예측  
+> (d) DreamVLA: 동적 영역, depth map, semantics(DINOv2 & SAM) knowledge를 명시적으로 예측하여 모델의 행동 추론과 일반화 크게 향상
+
 - 포괄적인 world knowledge forecasting을 vision-language-action model에 통합
 - manipulation 작업을 위한 perception-prediction-action loop를 구축
 - 전체 미래 프레임을 직접 생성하는 대신, world embedding 도입
@@ -169,6 +176,22 @@ $$
 
 ### 3.2 Model Architecture
 
+![alt text](./images/Fig%202.png)
+> **Figure 2. Framework Overview**  
+> - 다음이 주어지면, DreamVLA는 frozen text, visual encoders, tunable state encoder을 통해 multimodal 입력을 encoding  
+>   - 현재 로봇 상태 $s_t$  
+>   - 관측 $o_t$  
+>   - 언어 지시
+> - 이 토큰들은 학습 가능한 \<dream\> 쿼리 집합과 함께 대규모 언어 모델에 의해 처리되어 world embedding 생성  
+> - 세 개의 경량 decoder은 이 embedding의 각 해당 요소를 다음으로 투영
+>   - dynamic region $\hat{f}_{t+n}$
+>   - monocular depth $\hat{d}_{t+n}$
+>   - high-level semantics $\hat{c}$_{t+n}$
+> - 별도의 \<action\> 쿼리는 latent action embedding을 추출
+> - 가우시안 noise를 $n$-step action sequence $\hat{a}_{t:t+n-1}$로 정제하는 diffusion transformer을 조건화
+> 점선 상자: 훈련 중에만 사용되는 prediction head  
+> - 추론 시에는 이 헤드를 건너뛰고 world embedding에서 직접 작동
+
 **DreamVLA 프레임워크**
 - Encoder
     - 자연어 $l$, 시각 관측 $o_t$, 고유 감각 상태 $s_t$를 포함한 이질적인 입력을 개별적으로 처리
@@ -203,6 +226,16 @@ $$
     - dynamics planning을 위한 look-ahead context 공급
 
 **Motion-centric dynamic-region reconstruction**
+
+![alt text](./images/Fig%203.png)
+> **시간에 따른 동적 영역 시각화**  
+> - 정적 카메라(좌)와 손목 장착 카메라(우) 관찰을 여러 time step에서 생성한 동적 mask와 함께 시각화
+> - 이 마스크는 CoTracker을 통해 추출한 optical flow 궤적을 활용하여 동적 영역 강조  
+> - original 관찰과 비교했을 때,
+>   - 제안 방법은 관련 없는 배경을 효과적으로 억제
+>   - 상호작용 관련 영역에 집중
+>   - 더 구조적이고 효율적인 행동 추론을 가능하게 함
+
 - 동적 영역 예측
     - 각 장면의 어떤 부분이 곧 움직일지 알려줌
     - 모델이 현재 장면, 언어 명령, 예측된 움직임을 실현하는데 필요한 행동 간의 통계적 연관성을 포착할 수 있게 함
@@ -273,6 +306,10 @@ $$
     > $\tau$: temperature
 
 **Structured attention for cross-type knowledge disentanglement**
+
+![alt text](./images/Fig%204.png)
+> **Figure 4. Block-wise structured attention**
+
 - 명확한 cross-type knowledge 경계를 유지하기 위해 \<dream\>을 세 가지 하위 쿼리로 분해
 - 하위 쿼리들이 attention을 주고받을 수 있다면
     - high-frequency flow detail이 depth reasoning을 오염시킴
@@ -343,10 +380,21 @@ $$
 
 ### 4.2 Simulation Benchmark Experiments
 
+![alt text](./images/Table%201.png)
+> **Table 1. CALVIN ABC-D 결과**  
+> 각 작업에 대해 1000번의 시행에서 계산된 평균 성공률과 5개의 instruction을 연속으로 해결한 완료된 작업의 평균 수(평균 길이)를 제시  
+> DreamVLA는 baseline보다 현저한 우수성을 보임  
+> 최고의 결과는 굵게 표시됨
+
+![alt text](./images/Table%202.png)
+> **Table 2. 확장된 LIBERO 실험**  
+> DreamVLA는 이전 접근법과 비교했을 때 모든 TRACK에서 가장 우수하거나 경쟁력 있는 성능 달성  
+> 최고의 결과는 굵게 표시됨
+
 **Simulation setup**
 - CALVIN[117]과 LIBERO[122] 벤치마크에서 평가
 - CALVIN
-    ![alt text](image.png)
+    ![alt text](./images/CALVIN%20dataset.png)
     > **CALVIN 데이터셋**  
     > static & gripper camera의 RGB-D 이미지  
     > proprioceptive 정보  
@@ -389,7 +437,63 @@ $$
 
 ### 4.3 Real World Experiments
 
+![alt text](./images/Fig%205.png)
+> **Figure 5. Real-world experiment setup**
+
 - gripper grasping real-world 실험
     - Franka Panda 로봇 팔 사용
-    - 두 대의 RealSense D415 카메라 사용
-        
+    - 두 대의 RealSense D415 카메라 사용 (Fig 5 참조)
+        - 하나는 제 3자의 시점
+        - 다른 하나는 로봇 팔 끝에 있음
+    - 두 가지 작업(pick, place)을 위해 4 가지 범주의 객체 수집
+    - 서랍 여닫기 작업에 대한 실험 수행
+    - DreamVLA를 DROID 데이터셋에서 사전 학습
+    - 시연 데이터셋(각 task당 100개 궤적 포함)을 사용하여 다음 모델 fine-tuning
+        - Diffusion Policy
+        - Octo-Base
+        - OpenVLA
+        - DreamVLA
+- 각 trail은 최대 20회의 연속 시도를 허용
+- grip 실험
+    - 물체가 table 표면에 무작위로 배치됨
+    - 성공: 로봇 팔이 정해진 시도 제한 내에서 목표 물체를 성공적으로 잡는 경우
+- placement 실험
+    - 로봇이 잡은 물체를 지정된 바구니로 이동시켜야 함
+    - 성공: grip 작업과 batch 작업이 허용된 시도 내에 완료되는 경우
+- 서랍 조작 작업
+    - 서랍이 로봇 팔 앞에 무작위로 배치됨
+    - 성공: 서랍 이동 거리가 10cm를 초과하는 경우
+- 실험 결과는 표 3에서 보임
+
+![alt text](./images/Table%203.png)
+> **Table 3. 세 가지 작업에서 Franka 로봇을 활용한 실제 평가**
+
+### 4.4 Ablation Study
+
+![alt text](./images/Fig%206.png)
+> **Figure 6. 
+
+![alt text](./images/Table%204.png)
+> **Table 4. optical flow와 동적 영역을 예측하는 성능 비교**  
+> '*'는 이 결과가 [56]에서 나온 것임을 나타냄
+
+**Q1:각 modal 특성의 기여도는 무엇인가?**
+
+- DreamVLA의 핵심 동기
+    - 모델이 미래에 대한 포괄적인 visual knowledge를 예측하여 행동 추론 향상
+- 모든 종류의 지식이 이후 실행에 동등하게 기여하지는 않음
+- 네 가지 예측 지식
+    - SAM & DINO에서 얻은 semantic segmentation feature
+    - depth
+    - dynamic region
+- 먼저 각 knowledge 예측을 독립적으로 사용하여 모델 훈련
+    - 녹색 점선: knowledge 예측을 사용하지 않는 Vanilla VLA baseline 성ㄴ으
+- 동적 영역 예측이 가장 유익함
+    - 곧 변화할 픽셀을 명시적으로 표시
+    - policy의 행동 의미와 거의 완벽하게 일치
+- 네트워크를 depth map, DINO, SAM feature만으로 감독하는 것은 종종 성능을 저하시킴
+- 동적 영역 label은 행동 head를 강화하는 gradient 제공
+- depth regression 및 high-demensional feature matching(DINO/SAM)은 최적화를 지배하는 크고 잡음이 많은 loss 주입
+- 제한된 model attention 예산으로 인해, 경쟁 gradients는 작업 관련 feature을 희석하고 backbone을 suboptimal optima로 밀어 넣어 baseline(점선) 아래의 성능 하락을 초래
+
+> 
