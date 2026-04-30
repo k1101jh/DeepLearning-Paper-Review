@@ -131,7 +131,7 @@ url:
 
 ## 3. Methodology
 
-### 3.1 Proble Definition and Notation
+### 3.1 Problem Definition and Notation
 
 - future world knowledge를 로봇 제어를 위한 중간 reasoning으로 간주하는 역동역학 문제로 vision-language-action reasoning을 공식화
     - 예측과 실행의 시너지를 최대한 발휘
@@ -158,7 +158,7 @@ url:
     > $\hat{f}_{t + n}$: 동적 영역 표시  
     > $\hat{d}_{t + n}$: monocular depth encoding  
     > $\hat{c}_{t + n}$: (선택적) high-level semantic feature(예: DINOv2, SAM)을 저장
-- world embedding $\rm{w}_{t + n}$이 주어지면, <action> 쿼리는 관련된 행동 정보를 통합하기 위해 통합 모델 $\mathcal{M}$에 의해 latent action embedding에 할당됨
+- world embedding $\rm{w}_{t + n}$이 주어지면, \<action\> 쿼리는 관련된 행동 정보를 통합하기 위해 통합 모델 $\mathcal{M}$에 의해 latent action embedding에 할당됨
 - denoising-diffusion transformer $D$는 latent feature을 기반으로 $n$-step action을 공식화
 $$
 \hat{a}_{t: t + n - 1} = \mathcal{D}(\mathcal{M}(l, o_t, s_t, <dream> | <action>)),
@@ -238,11 +238,12 @@ $$
     - Depth 센서를 사용할 수 있는 경우
         - GT map을 사용하여 DreamVLA를 지도 학습
     - Depth 센서가 없는 경우
-        - 단일 RGB 스트림으로부터 정렬된 future map $\hat{t + n}$을 회귀하도록 전용 $dpeth query$를 학습
+        - Depth-Anything 예측을 self-supervised teacher로 취급
+        - 정렬된 future map을 회귀하기 위한 전용 depth query 학습
         - objective: scale-normalized mean-squared error
         $$
         \displaystyle
-        \mathcal{L}_{\rm{depth}} = \frac{1}{HW} \sum_{i,j} (\hat{d}_{t + n}^{(i,j)} - \alpha d_{t+n}^{i,j})^2
+        \mathcal{L}_{\rm{depth}} = \frac{1}{HW} \sum_{i,j} (\hat{d}_{t + n}^{(i,j)} - \alpha d_{t+n}^{(i,j)})^2
         \tag{6}
         $$
         $$
