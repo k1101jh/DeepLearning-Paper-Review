@@ -37,7 +37,6 @@ url:
 
 **기존 VLA**
 - 정보 중복 및 동적, 공간적, 의미적 정보를 포함한 포괄적이고 중요한 world knowledge가 부족한 어려운 image-based forecasting에 한정됨
-- inverse dynamics 모델링을 가능하게 함
 
 **DreamVLA**
 - comprehensive world knowledge forecasting을 통합
@@ -472,7 +471,10 @@ $$
 ### 4.4 Ablation Study
 
 ![alt text](./images/Fig%206.png)
-> **Figure 6. 
+> **Figure 6.**
+> knowledge 예측의 다양한 조합에 따른 CALVIN ABC-D 성능
+> - All: 다섯 모델 모두
+> - All-X: All에서 X를 제외한 것
 
 ![alt text](./images/Table%204.png)
 > **Table 4. optical flow와 동적 영역을 예측하는 성능 비교**  
@@ -496,5 +498,125 @@ $$
 - 동적 영역 label은 행동 head를 강화하는 gradient 제공
 - depth regression 및 high-demensional feature matching(DINO/SAM)은 최적화를 지배하는 크고 잡음이 많은 loss 주입
 - 제한된 model attention 예산으로 인해, 경쟁 gradients는 작업 관련 feature을 희석하고 backbone을 suboptimal optima로 밀어 넣어 baseline(점선) 아래의 성능 하락을 초래
+- 5가지 knowledge head를 동시에 학습(ALL) & 제거(ALL-X) 연구 수행(표 4 참조)
+    - F 제거 시 가장 심각한 성능 저하
+    - DINO 제거는 유사하거나 더 나은 성능을 나타냄
+    - 모든 semantic 신호가 결과 예측에 동일하게 유용하거나 안정적이지 않음
 
-> 
+**Q2. Auxiliary Tasks vs Future Knoledge Prediction: 성능 향상을 주도하는 것은 무엇인가?**
+
+![alt text](./images/Table%205.png)
+
+> **Table 5. auxiliary tasks와 함께 co-training하는 것과 comprehensive world knowledge를 예측하는 것 간의 성능 비교**
+
+- ablation study
+    - 모든 예측 전략은 개별적으로 reconstruction 대응 방식으로 대체됨
+        - 각 대체는 일관되게 성능을 낮춤
+    - RGB, 깊이, 의미적 정보 또는 DINOv2 feature만을 다시 그리도록 학습된 VLA
+        - 처음 몇 행동을 처리 가능
+        - 곧 일관성을 잃음
+    - 동적 영역, depth map, semantic을 예측하도록 학습된 VLA
+        - 전체 경로에서 정확성 유지
+        - 실패 전까지 과제를 더 오래 수행
+    - 이유
+        - Future knowledge prediction
+            - 예측이 더 풍부하고 행동 지향적인 신호 제공
+            - 결정을 이끌 픽셀 학습으로 학습 유도
+        - 재구성 작업
+            - 제어 정책이 실제로 필요하지 않는 배경 세부 정보를 반복적으로 방문
+
+**Q3. 직접 예측 대신 mask로 optical flow를 사용하는 이유**
+
+![alt text](./images/Table%206.png)
+
+> **Table 6. optical flow와 dynamic region을 예측하는 것 사이의 성능 비교**
+
+- optical flow
+    - 모델이 subgoal image와 함께 전체 future flow field를 예측해야 함
+    - 학습 복잡도 크게 증가
+- dynamic region 접근법(논문 방법)
+    - 사전 학습된 flow model을 통해 binary mask를 얻음
+    - 모델이 관련된 모션이 발생하는 위치에 집중하도록 함
+
+**Q4. DreamVLA에서 structured attention 효과(표 7 참조)**
+
+![alt text](./images/Table%207.png)
+
+> **Table 7. vanilla causal과 structured attention 간의 성능 비교**
+
+- structured attention 을 일반적인 causal mask로 교체하여 실험
+    - 의미를 포착하도록 설계된 모든 \<dream\> 쿼리가 동일한 step에서 생성된 flow 및 depth token을 읽을 수 있음
+- 추가적인 cross-peek
+    - 관련 없는 신호를 혼합
+    - gradient noise를 추가
+    - long-horizon control을 빠르게 저하시킴
+- 제안 mask
+    - 모든 query 간 edge를 제거
+    - \<action\> 쿼리는 과거의 언어, 상태 및 multimodal 예측만 참조
+    - 형제 쿼리는 참조하지 않음
+- causal 변형은 Vanilla VLA에 약간의 개선을 가져옴
+- block-sparse 버전은 성공률을 높게 유지
+    - 단계 내 누수 차단이 중요함을 확인시킴
+
+**Q5. 공유 쿼리를 사용해서 종합적인 world knowledge를 예측할 수 있는지**
+
+![alt text](./images/Table%208.png)
+
+> **Table 8. shared & seprated query 간의 성능 비교**
+
+- 동적 영역, 깊이, semantic feature에 별도의 쿼리를 할당하는 대신, 하나의 공유 query set이 모든 신호를 예측하도록 할 수 있음
+- 각 world embedding vector를 네 개의 동일한 하위 공간으로 나눔
+- 각 분할은 서로 다른 modality를 담도록 설계
+- 공유 query 설계가 action 성능을 저해함
+    - 동일한 query에서 modality를 혼합하면 간섭 발생
+    - diffusion head가 noisy feature을 받음
+    - 각 modality에 개별 query를 제공하면 표현이 분리된 상태로 유지되어 명확한 성능 향상을 가져옴
+
+**Q6. \<dream\> 쿼리 내 modality 별 query 수의 영향**
+
+![alt text](./images/Table%209.png)
+
+> **Table 9. 다양한 수의 \<dream\> 쿼리 간 성능 비교**
+
+- 각 \<dream\> 쿼리는 dynamic, depth, semantic 세 그룹 요소를 포함
+- 각 그룹에는 $K$개의 쿼리가 할당됨
+- $K \in {4, 9, 16}$을 변화시켜 영향 조사
+- $K = 4$
+    - 제한된 용량 때문에 모델이 세밀한 동작, geometry, semantic을 인코딩하지 못하여 정확도가 떨어짐
+    - 메모리 사용량이 가장 낮음
+- $K = 9$
+    - 각 modality는 backbone을 과부하시키지 않고 충분한 대역폭을 가짐
+    - 최고 성공률과 가장 긴 연속 작업 수행 시간 제공
+- $K = 16$
+    - attention을 놓고 경쟁하는 중복 토큰 발생
+    - GPU 메모리가 늘어나지만 추가적인 이득은 없음
+    - 일반화 성능은 약간 낮아짐
+
+## 5. Limitation & Future Works
+
+**DreamVLA**
+- 견고한 vision-language-action 능력을 보임
+- CALVIN에서 SOTA 달성
+- 범위가 여전히 좁음
+- 주로 병렬 gripper manipulation을 수행
+- RGB-centric 데이터에 의존
+- geometric 및 소재 다양성이 제한된 장면에서 학습됨
+
+**향후 계획**
+1. 풍부한 contact 주석과 함께 섬세한 손 시연을 추가
+2. 3D point cloud 및 공간 정보, 촉각 정보를 도입
+    - 이를 volumetric world state에 융합
+3. 일반화와 long-horizon robustness를 강화하기 위해 데이터 수집과 on-policy fine-tuning을 확장할 계획
+
+## 6. Conclusion
+
+**DreamVLA**
+- 포괄적인 world knowledge 예측을 통해 역동역학 modeling을 가능하게 함
+- manipulation 작업을 위한 perception-prediction-action loop를 지원
+- 공간적 및 의미적 단서를 결합하여 행동 계획을 위한 간결하고 정보가 풍부한 표현을 생성하는 dynamic-region-guided knowledge forecasting을 활용
+- block-wise structured-attention mechanism 도입
+- diffusion-transformer decoder와 결합하여 cross-type knowledge leakage로 인한 representation noise 억제
+- 일관된 multi-step action reasoning을 가능하게 함
+- 실제 및 시뮬레이션 환경에서 수행한 광범위한 실험을 통해 DreamVLA 효과 입증
+- 실제 로봇 작업에서 76.7% 성공률 달성
+- CALVIN ABC-D 벤치마크에서 기존 방법보다 우수한 성능을 보임
