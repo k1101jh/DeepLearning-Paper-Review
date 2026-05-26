@@ -227,7 +227,7 @@ $$
 **Motion-centric dynamic-region reconstruction**
 
 ![alt text](./images/Fig%203.png)
-> **시간에 따른 동적 영역 시각화**  
+> **Figure 3. 시간에 따른 동적 영역 시각화**  
 > - 정적 카메라(좌)와 손목 장착 카메라(우) 관찰을 여러 time step에서 생성한 동적 mask와 함께 시각화
 > - 이 마스크는 CoTracker을 통해 추출한 optical flow 궤적을 활용하여 동적 영역 강조  
 > - original 관찰과 비교했을 때,
