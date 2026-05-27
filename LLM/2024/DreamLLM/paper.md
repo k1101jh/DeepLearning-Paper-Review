@@ -45,6 +45,18 @@ url:
 - zero-shot multimodal generalist로서 뛰어난 성능을 보임
 
 ## 1. Introduction
+
+![alt text](./images/Fig%201.png)
+> **Figure 1. Vision-language(VL) foundation model의 개념적 비교**  
+> - (a) CLIP과 유사한 모델은 두 개의 tower을 활용하여 VL 표현을 명시적으로 정렬
+> - (b) Flamingo/BLIP 유사 모델은 단일 MLLM을 사용하여 VL 표현을 통합 매니폴드 공간으로 인코딩
+>     - 이러한 모델은 언어만 출력하기에 완전한 autoregressivity를 갖추지 못함
+> - (c) 동시 MLLMs는 시각적 출력을 CLIP 표현과 정렬하지만, 이 정렬이 raw 데이터 공간이 아닌 중간 공간에서 발생
+>     - Emu와 같은 모델은 원시 이미지 생성을 위해 Stable Diffusion의 2단계 미세 조정이 필요함
+>     - raw interleaved 문서 생성에도 한계가 있음
+> - (d) DreamLLM은 raw language와 이미지 입력을 통합된 auto-regressive 방식으로 생성하여 자연스럽게 섞인 생성을 가능하게 함
+>     - non-autoregressive generation loss만 기록됨
+
 **MLLM**
 - GPT 스타일 LLM의 확장으로 등장
 - 일반적으로 CLIP feature과 같은 이미지를 multi modal 입력으로 통합
@@ -186,7 +198,151 @@ $$
 
 ## 4. Experiments
 
+### 4.1 Multimodal Comprehension
+
+![alt text](./images/Table%201.png)
+
+- DreamLLM의 multimodal vision 및 언어 능력을 여러 벤치마크에서 평가
+    - COCO, Image2Paragraph에서의 image-to-text captioning
+    - VQAv2, OKVQA, VizWiz에서의 VQA
+    - TextVQA에서의 text-related VQA
+- MMBench, MM-Vet에서 zero-shot 평가 수행
+- DreamLLM이 모든 벤치마크에서 다른 MLLM을 능가
+    - DreamLLM-7B는 이미지 생성 능력을 갖는 동시대 MLLM보다 큰 차이로 우수
+    - Emu-13B 대비 VQAv2에서 +16.6 높은 정확도 달성
+- MMBench 및 MM-Vet과 같은 종합 벤치마크에서도 모든 7B 상대 모델을 상대로 SOTA 달성
+- 다른 MLLM과 비교해 우수한 공간/관계 추론 능력을 보임
+    - 이미지 생성 학습의 결과일 가능성이 높음
+
+### 4.2 Text-conditional Image Synthesis
+
+![alt text](./images/Table%202.png)
+> **Table 2. MS-COCO와 LN-COCO에서의 Zero-shot text-to-image generation FID**
+> - LM: Language Model based 방법
+> - MG: Multimodal Generation 방법
+> - FIG: Free-form Interleavved Genreation 방법
+> - $\dagger$: 우리 상태 $I$ 데이터에서 fine-tune된 SDv2.1
+> - *: 검색 보강(retrieval-augmentation)
+> - $\triangleright$: stage I alignment training 후의 결과
+
+Text2Image
+- 자유 형식 언어를 통해 창의적 콘텐츠 생성
+- MS-COCO validation set, LN-COCO(Localized Narratives의 COCO subset)에서 text 조건부 이미지 합성 평가
+- MS-COCO 데이터셋
+    - 더 짧은 캡션을 갖는 고수준 이미지 추상화를 포함
+    - 각 text prompt당 CLIP 점수 순위에 따라 8개 이미지를 샘플링
+- LN-COCO
+    - 더 포괄적인 이미지 설명 제공
+    - CLIP 순위 없이 각 prompt당 한 개의 이미지만 샘플링
+        - text가 길고 CLIP 길이 제한을 초과함
+- 평가 지표: zero-shot Fréchet Inception Distance(FID)
+- 세 가지 주요 관찰 사항
+    1. DreamLLM은 stage-I 정렬 이후 SD baseline에 비해 FID가 크게 향상됨
+        - MS-COCO와 LN-COCO에서 각각 3.67, 11.83만큼 점수 감소(SDv2.1과 비교)
+        - pretraining과 supervised fine-tuning을 통해 FID가 각각 3.97, 13.73 향상됨
+        - DreamLLM은 긴 문맥 정보 처리에 탁월한 능력을 지님
+            - LN-COCO에서 큰 향상을 보임
+    2. 이전 specialist 모델과 비교할 때, SD image decoder을 기반으로 경쟁력 있는 결과 제공
+    3. DreamLLM은 동시대 MLLMs-based image 합성 방법을 지속적으로 능가
+
+### 4.3 Multimodal Joint Createion & Comprehension
+
+![alt text](./images/Fig%203.png)
+> **Figure 3. 선택된 DreamLLM instruction 준수 interleaved content 생성 예시**
+> - 각 이미지는 DreamLLM이 결정한 위치에서 자동으로 생성됨
+> - 이후 해당 이미지는 다음 content 생성의 multimodal 이해 입력으로 피드백됨
+
+**Free-form Interleaved Document Creation**
+
+- $\mathcal{I}$-GPT의 interleaved generative 모델링을 활용하여 자유로윤 형태의 interleaved document 생성 가능(그림 3 참조)
+    - 이 문서에서는 다음을 보임
+        1. DreamLLM이 지침에 따라 의미있는 콘텐츠를 생성 가능
+        2. 시스템은 제안된 token을 예측하여 지정된 위치에서 자율적으로 이미지를 생성할 수 있음
+**Image Quality**
+- 문서 품질은 text 내용, 이미지 품질(image-text 정렬 포함), 일러스트 위치 지정 등의 요인에 의해 영향을 받을 수 있음
+- InstrcutMMC4에서 제시된 instruction-following subset을 시연 도구로 사용
+    - 하위 집합은 30개의 MMC4-defined topics에 걸쳐 15000개의 문서로 구성됨
+    - 각 주제당 500개의 샘플 존재
+    - 부분집합에 대해 FID를 사용해 이미지 품질을 평가
+    - 실제 택스트 기반으로 각 이미지 생성
+    - 이미지 합성에 매칭된 text input만 사용할 경우, SD는 FID 점수 74.77을 달성
+    - DreamLLM은 FID 점수 36.62로 SD보다 더 우수한 성과를 보임
+
+**Human Evaluation**
+- 생성된 샘플의 품질 평가를 위해 포괄적인 human evaluation 수행
+- 150개 샘플(주제별 5개)을 무작위로 선정하여 instruction-following 문서 생성을 수행
+- 생성된 문서와 실제 MMC4 문서를 식별 정보 없이 혼합하여 작성
+- 다섯 명의 편향되지 않은 자원봉사자가 주어진 샘플이 지지되는지 여부를 판단
+- MMC4에서 중복 및 저화질 이미지가 존재할 때, 지지율은 77.24%에 불과
+- DreamLLM은 60.68%의 지지율을 달성하여 30%인 튜링 테스트 요구사항을 초과
+- 생성된 문서들이 논리적으로 배치된 고품질 이미지를 포함하고 있음을 나타냄
 
 ## 5. Discussions
 
-### 5.1 
+### 5.1 Creation과 이해 사이의 시너지
+
+![alt text](./images/Table%203.png)
+> **Table 3. multimodal 이해와 생성 간의 시너지에 대한 구체적인 분석**
+> - ID는 사전 학습의 두 번째 단계에서 interleaved dataset이 사용되는지를 나타냄
+
+- 동일한 학습 데이터를 사용하면서 학습 목표가 다른 세 가지 방법을 DreamLLM 아키텍처와 비교
+    - 멀티모달 생성과 이해 간의 시너지를 설명하기 
+    위해
+- a. creation-only baseline: text/문서 조건부 이미지 합성에만 집중
+- b. comprehension-only baseline: 단어 생성에만 집중
+- c. Joint-learning: 이미지와 언어 모델링 모두 학습. DreamLLM의 기본 설정
+
+**Quantitative Analysis**
+Table 3에서 다음과 같은 관찰이 이뤄짐
+1. LLM의 강력한 언어 이해 능력은 SD와 같은 text-image 전문가의 성능을 크게 향상시킴
+    - 8.50 FID(1행)로 입증
+2. MMC4와 같은 interleaved data의 사용은 multimodal 이해 성능을 잠재적으로 향상시킬 수 있음(4행)
+3. 제안된 $\mathcal{I}$-GPT는 이해와 생성의 시너지를 더욱 강화하여 성능 향상으로 이어짐(5행)
+4. CLIP 정렬 loss를 통합하는 경우, DreamLLM은 수렴하지 못하고 붕괴 지점에서 끝남(6행)
+    - query가 실제 데이터분포를 적응적으로 학습하고 있음
+    - CLIP semantics가 MLLM-encoded semantics와 충돌하고 있음
+
+**Qualitative Analysis**
+
+![alt text](./images/Fig%204.png)
+> **Figure 4. Qualitative comparison**  
+> - 답변 A: interleaved training 없이 comprehension-only 모델에서 나온 답변
+> - 답변 B: joint-leaning model에서 나온 답변
+
+comprehension-only와 joint learning 모듈 각각의 일부 예제 VQA 과제에 대한 답변 비교(Fig 4)
+1. joint-learning 방법은 객체 크기와 같은 객체 관계 및 속성을 식별하는 데 있어 우수한 multimodal 이해를 보임
+2. 여러 이미지 입력을 포함하는 multimodal 이해 시나리오에서 joint-learning 방법은 정확성 향상을 보임  
+-> $\mathcal{I}$-GPT 사전학습의 자연스러운 결과. 다양한 interleaved 문서에서 multimodal 상관관계를 더 잘 모델링할 수 있게 함
+
+**Multimodal In-Context Generation**
+
+- In-context VQA는 상당한 진전이 있었지만, In-context 이미지 합성은 상대적으로 탐구가 부족
+- in-context 이미지 편집, subject-driven image generation, compositional generation과 같은 작업은 zero-shot 환경에서는 상당한 어려움을 제시
+    - DreamBooth에서와 같은 downstream finetuning이나 Prompt2Prompt에서의 attention 수정 기술 등이 없이는 어려움
+- Fig 5: DreamLLM의 multimodal context 조건부 이미지 합성
+    - DreamLLM이 주제, identity, semantic context를 유지하는데 있어 유망한 잠재력을 갖고 있음
+
+![alt text](./images/Fig%205.png)
+> **Figure 5. 선택된 DreamLLM in-context 이미지 생성 예시**  
+> - 생성된 이미지 아래에 표시된 텍스트 프롬프트로 X의 multimodal 입력이 교체됨
+> - (c)에서는 text prompt X만 사용한 SD ㅠㅁㄴ디ㅑㅜㄷdml rufrhkfmf qhdla
+
+
+### 5.2 What is Learned by DreamLLM?
+
+![alt text](./images/Fig%206.png)
+> **Figure 6. dream queries와 Diffusion U-Net latent의 cross-attention**  
+> - 64개의 query는 64개의 단어로 볼 수 있음
+> - 각 attention map은 각각의 query와 U-Net의 latent feature 간의 cross-attention으로 계산됨
+> - 64개의 querys느 8x8 grid 순서로 배열됨
+> - 각 attention map은 모든 timestamp에 걸쳐 평균화된 결과
+
+**Dream Query Attention**
+- DreamLLM에서는 conditional embedding이 일부 학습된 꿈 쿼리와 함께 MLLM으로부터 유도됨
+- Fig 6은 이러한 query와 diffusion latent 간의 학습된 cross-attention을 시각화
+- (Hertz et al. 2023)과 유사하게, 모든 timestamp에 걸쳐 평균화된 attention map을 시각화
+1. query attention은 구조화되어 있고, 분리되어 있음. 의미론적으로 지향적임
+    - 서로 다른 query가 주제와 배경 의미를 능숙하게 포착한다는 사실에서 입증됨
+2. 다양한 프롬프트에도 불구하고, attention pattern은 놀라운 유사성을 보임
+    - 일반적인 text token에 종속적인 원본 SD의 token attention과는 대조적
+- 모델의 인과적 특성 때문에 발생하여 일관된 의미 구조 순서를 초래한다고 가정
