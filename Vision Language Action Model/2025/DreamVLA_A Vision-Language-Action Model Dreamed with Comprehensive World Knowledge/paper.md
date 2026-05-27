@@ -16,6 +16,7 @@ Reference
 ---
 url:
 - [paper](https://arxiv.org/abs/2507.04447) (arXiv 2025)
+- [paper](https://proceedings.neurips.cc/paper_files/paper/2025/hash/22d4f952efa13970f0b1ffb22170d416-Abstract-Conference.html)(NeurIPS 2025)
 - [project](https://zhangwenyao1.github.io/DreamVLA/)
 
 ---
@@ -387,7 +388,7 @@ $$
 > 최고의 결과는 굵게 표시됨
 
 ![alt text](./images/Table%202.png)
-> **Table 2. 확장된 LIBERO 실험**  
+> **Table 2. Extended LIBERO 실험**  
 > DreamVLA는 이전 접근법과 비교했을 때 모든 TRACK에서 가장 우수하거나 경쟁력 있는 성능 달성  
 > 최고의 결과는 굵게 표시됨
 
@@ -419,7 +420,7 @@ $$
     - 각 track의 성공률과 5개의 작업 평균 길이를 보고
 - LIBERO
     - 네 가지 suites(Spatial/Object/Goal/Long)을 포함하는 시뮬레이션 벤치마크
-    - 각 suite는 공간 추론, 객체 중심 조작, 목표 완료를 복표로 하는 10개 작업과 50개의 human-teleopreated 시연을 지원
+    - 각 suite는 공간 추론, 객체 중심 조작, 목표 완료를 복표로 하는 10개 작업과 50개의 human-teleoperated 시연을 지원
 
 **결과**
 
@@ -470,6 +471,8 @@ $$
 
 ### 4.4 Ablation Study
 
+**Q1:각 modal 특성의 기여도는 무엇인가?**
+
 ![alt text](./images/Fig%206.png)
 > **Figure 6.**
 > knowledge 예측의 다양한 조합에 따른 CALVIN ABC-D 성능
@@ -480,8 +483,6 @@ $$
 > **Table 4. optical flow와 동적 영역을 예측하는 성능 비교**  
 > '*'는 이 결과가 [56]에서 나온 것임을 나타냄
 
-**Q1:각 modal 특성의 기여도는 무엇인가?**
-
 - DreamVLA의 핵심 동기
     - 모델이 미래에 대한 포괄적인 visual knowledge를 예측하여 행동 추론 향상
 - 모든 종류의 지식이 이후 실행에 동등하게 기여하지는 않음
@@ -490,7 +491,7 @@ $$
     - depth
     - dynamic region
 - 먼저 각 knowledge 예측을 독립적으로 사용하여 모델 훈련
-    - 녹색 점선: knowledge 예측을 사용하지 않는 Vanilla VLA baseline 성ㄴ으
+    - 녹색 점선: knowledge 예측을 사용하지 않는 Vanilla VLA baseline 성능
 - 동적 영역 예측이 가장 유익함
     - 곧 변화할 픽셀을 명시적으로 표시
     - policy의 행동 의미와 거의 완벽하게 일치
@@ -503,7 +504,7 @@ $$
     - DINO 제거는 유사하거나 더 나은 성능을 나타냄
     - 모든 semantic 신호가 결과 예측에 동일하게 유용하거나 안정적이지 않음
 
-**Q2. Auxiliary Tasks vs Future Knoledge Prediction: 성능 향상을 주도하는 것은 무엇인가?**
+**Q2. Auxiliary Tasks vs Future Knowledge Prediction: 성능 향상을 주도하는 것은 무엇인가?**
 
 ![alt text](./images/Table%205.png)
 
