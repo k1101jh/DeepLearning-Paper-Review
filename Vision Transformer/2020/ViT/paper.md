@@ -17,7 +17,7 @@ Reference
 ---
 
 Alexey Dosovitskiy et al.  
-arxiv. 2020.  
+ICLR 2021.  
 url: https://arxiv.org/abs/2010.11929
 
 ---
