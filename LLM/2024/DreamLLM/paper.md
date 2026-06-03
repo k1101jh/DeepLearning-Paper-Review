@@ -220,7 +220,7 @@ $$
 > **Table 2. MS-COCO와 LN-COCO에서의 Zero-shot text-to-image generation FID**
 > - LM: Language Model based 방법
 > - MG: Multimodal Generation 방법
-> - FIG: Free-form Interleavved Genreation 방법
+> - FIG: Free-form Interleaved Generation 방법
 > - $\dagger$: 저자의 상태 $I$ 데이터로 fine-tune된 SDv2.1
 > - *: 검색 보강(retrieval-augmentation)
 > - $\triangleright$: stage I alignment training 후의 결과
