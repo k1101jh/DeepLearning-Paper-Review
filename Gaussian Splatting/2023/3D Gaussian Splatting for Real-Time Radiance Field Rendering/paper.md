@@ -101,6 +101,12 @@ Radience Field
 
 ## 3. OVERVIEW
 
+![alt text](./images/Fig%202.png)
+> **Figure 2.**
+> - sparse SfM point cloud에서 시작해서 3D Gaussian set 생성
+> - Gaussian set의 밀도를 최적화하고 적응적으로 제어
+> - 최적화 과정에서 tile-based renderer을 사용해서
+
 ## 4. Differentiable 3D Gaussian Splatting
 
 목표: 희소한(SfM) 점 집합에서 시작하여 고품질의 새로운 뷰 합성이 가능한 장면 표현 최적화
