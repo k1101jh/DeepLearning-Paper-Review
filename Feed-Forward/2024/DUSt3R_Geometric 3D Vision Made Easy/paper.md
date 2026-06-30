@@ -13,6 +13,7 @@ Reference
 - Image Matching
 - 3D Reconstruction
 - MVS
+- Feed Forward
 ---
 url:
 - [paper](https://openaccess.thecvf.com/content/CVPR2024/html/Wang_DUSt3R_Geometric_3D_Vision_Made_Easy_CVPR_2024_paper.html)
