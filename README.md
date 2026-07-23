@@ -76,6 +76,18 @@ category/
 
 ---
 
+## 📝 리뷰 작성 및 링크 추가 가이드
+새로운 논문 리뷰를 추가할 때는 다음 규칙을 따라야 합니다.
+
+- 리뷰 파일은 [카테고리/연도/논문명/paper.md](./) 형식으로 저장합니다.
+- 논문 리뷰를 작성한 뒤에는 README에도 해당 리뷰 링크를 추가해야 합니다.
+- 링크는 저장소 기준의 상대 경로로 작성합니다.
+  - 예시: [MapAnything_Universal Feed-Forward Metric 3D Reconstruction](./3D%20reconstruction/2025/MapAnything_Universal%20Feed-Forward%20Metric%203D%20Reconstruction/paper.md)
+- 공백이나 특수문자가 포함된 경로는 파일명 규칙에 맞게 변환된 폴더명을 사용합니다.
+- 가능하면 관련 분야 섹션이나 최근 리뷰 섹션에 새 항목을 추가해 두면 찾기 쉽습니다.
+
+---
+
 ## ⚖️ 저작권 및 라이선스 (License & Disclaimer)
 
 ### License
