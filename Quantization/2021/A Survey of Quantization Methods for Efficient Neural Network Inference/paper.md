@@ -51,6 +51,18 @@ url:
 
 ---
 
+## 1. 한 줄 요약
+**본 서베이 논문**은 딥러닝 모델의 추론 가속 및 메모리 절감을 위한 기본 양자화 메커니즘(Uniform/Non-uniform, Static/Dynamic, Granularity)부터 고급 기술(PTQ, QAT, Mixed-Precision, Integer-only)과 하드웨어 지향 양자화 패러다임을 종합 체계화한 분석 논문이다.
+
+---
+
+## 2. 핵심 아이디어
+- **Basic Quantization Fundamentals**: Uniform vs Non-Uniform, Symmetric vs Asymmetric, Static vs Dynamic calibration, Layer-wise vs Channel-wise vs Group-wise granularity 분류.
+- **PTQ vs QAT**: 추가 학습 없이 가중치/활성화 범위를 캘리브레이션하는 Post-Training Quantization(PTQ)과 Straight-Through Estimator(STE) 등을 통해 양자화 오차를 적응적으로 학습하는 Quantization-Aware Training(QAT) 방법론 정리.
+- **Advanced & Hardware-Aware Techniques**: Mixed-Precision, Bit-level sparsity, Distillation 연계 양자화 및 FPGA/GPU/NPU 특성에 맞춘 하드웨어 지향 양자화 연구 방향 제시.
+
+---
+
 ## Abstract
 
 **양자화:**

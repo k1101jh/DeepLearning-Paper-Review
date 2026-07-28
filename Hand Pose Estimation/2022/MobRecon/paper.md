@@ -29,6 +29,18 @@ Reference
 
 ---
 
+## 1. 한 줄 요약
+**MobRecon**은 모바일 기기에서의 실시간 단안 3D 손 메쉬 재공성을 위해 2D/3D 간 격차를 줄이는 MapReg 기반 Lifting 모듈과 계산 효율적인 Depth-Separable Spiral Convolution 구조를 제안하여 높은 정확도와 초고속 추론(Apple A14 CPU 83 FPS)을 달성한 모바일 프레임워크이다.
+
+---
+
+## 2. 핵심 아이디어
+- **MapReg & 2D-to-3D Lifting**: Heatmap 인코딩과 Position Regression의 장점을 결합한 MapReg 블록을 통해 2D 랜드마크 정확도 및 시간적 안정성 확보.
+- **Depth-Separable Spiral Convolution**: 3D Graph Mesh 디코딩 시 계산 오버헤드를 대폭 줄여 모바일 CPU 환경에서 실시간 추론(83 FPS)이 가능하도록 설계.
+- **Pose Pooling & Pose-to-Vertex Lifting**: 2D 관절 인코딩 정보를 3D 메쉬 버텍스의 의미론적 3D 특징 공간으로 효율적으로 매핑.
+
+---
+
 ## Abstract
 
 - 높은 재구성 정확도, 빠른 추론 속도 및 시간적 일관성을 동시에 달성할 수 있는 single view hand mesh reconstruction을 위한 프레임워크 제안

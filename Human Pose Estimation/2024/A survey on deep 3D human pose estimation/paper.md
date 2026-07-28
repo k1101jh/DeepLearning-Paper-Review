@@ -30,14 +30,17 @@ url:
 
 ---
 
-## ⚡ 요약 (Summary)
-- **Overview**: 3D Human Pose Estimation(3D-HPE)의 발전을 CNN, GCN, Transformers 등 기술별로 종합 검토하고, 다양한 시나리오(단안/다중 view, 싱글/멀티 퍼슨)에서의 해결책을 분석한 서베이 논문
-- **Key Focus**: 깊이 모호성, 가려짐, 데이터 부족 문제를 해결하기 위한 패러다임(End-to-end vs Lifting)과 고급 학습 기법(Diffusion, NeRF 등)을 정리
+## 1. 한 줄 요약
+**본 서베이 논문**은 3D Human Pose Estimation(3D-HPE) 분야의 딥러닝 기법(CNN, GCN, Transformer, Diffusion 등)과 주요 처리 패러다임(End-to-End vs Lifting, Single/Multi-person, Monocular/Multi-view)을 체계적으로 분류하고 한계점 및 향후 연구 방향을 종합적으로 정리한 서베이 논문이다.
 
 ---
 
-## 📖 Paper Review
+## 2. 핵심 아이디어
+- **Comprehensive Taxonomy**: CNN, GCN, Transformer, Diffusion, NeRF 등 3D-HPE에 적용된 주요 네트워크 구조와 학습 패러다임을 체계적으로 분류함.
+- **Problem Formulation & Scenarios**: 깊이 모호성(Depth ambiguity), self/inter-person occlusion, data scarcity 등을 극복하기 위한 단안(Monocular) 및 다중 시점(Multi-view), Single-person 및 Multi-person 시나리오별 접근 전략 비교.
+- **Processing Paradigms**: Direct 3D estimation (End-to-end) vs 2D-to-3D Lifting, absolute vs relative keypoints, volumetric/voxel vs implicit representation 등의 핵심 차이점 분석.
 
+---
 
 
 ## Abstract
