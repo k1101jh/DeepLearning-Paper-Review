@@ -12,7 +12,6 @@
 | [**3D reconstruction**](./3D%20reconstruction) | Surface Reconstruction, Mesh Generation | 2024 - 2025 |
 | [**Avatar Generation**](./Avatar%20Generation) | Digital Humans, Neural Avatars | 2024 |
 | [**Gaussian Splatting**](./Gaussian%20Splatting) | 3D Scene Representation & Rendering | 2023 - 2025 |
-  - [Long-LRM: Long-sequence Large Reconstruction Model for Wide-coverage Gaussian Splats](./Gaussian%20Splatting/2025/Long-LRM_Long-sequence%20Large%20Reconstruction%20Model%20for%20Wide-coverage%20Gaussian%20Splats/paper.md)
 | [**World Model**](./World%20Model) | Video Models, Prediction & Planning | 2025 |
 
 ### 📍 SLAM & Pose Estimation
@@ -38,7 +37,6 @@
 | 분야 | 주제 | 연도 |
 | :--- | :--- | :--- |
 | [**LLM**](./LLM) | Large Language Models, Transformers, Instruction Tuning | 2023 - 2024 |
-  - [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](./LLM/2023/Mamba/paper.md)
 | [**RAG**](./RAG) | Retrieval-Augmented Generation, GraphRAG | 2024 |
 
 ### ⚡ Model Efficiency & Optimization
@@ -63,6 +61,12 @@
 | 분야 | 주제 | 연도 |
 | :--- | :--- | :--- |
 | [**Audio**](./Audio) | Audio Synthesis, Fugatto | 2024 |
+
+---
+
+## 🆕 최근 리뷰
+- [Long-LRM: Long-sequence Large Reconstruction Model for Wide-coverage Gaussian Splats](./Gaussian%20Splatting/2025/Long-LRM_Long-sequence%20Large%20Reconstruction%20Model%20for%20Wide-coverage%20Gaussian%20Splats/paper.md) (Gaussian Splatting, 2025)
+- [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](./LLM/2023/Mamba/paper.md) (LLM, 2023)
 
 ---
 

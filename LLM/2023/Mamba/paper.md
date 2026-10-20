@@ -17,7 +17,7 @@ Reference
 ---
 - **논문 제목**: Mamba: Linear-Time Sequence Modeling with Selective State Spaces
 - **저자**: Albert Gu, Tri Dao
-- **발표 연도**: arXiv 2023
+- **발표 연도**: COLM 2024 (arXiv 2023.12)
 - **공식 링크**: [arXiv](https://arxiv.org/abs/2312.00752), [GitHub](https://github.com/state-spaces/mamba)
 
 ---
@@ -38,7 +38,7 @@ Reference
 
 ### 4. 실험 결과 및 의의
 - **합성 과제 (Synthetic Tasks)**: Selective Copying 과제 및 Induction Heads 과제(최대 100만 토큰 외삽)를 완벽하게 해결하였다.
-- **언어 모델링 (Language Modeling)**: 125M부터 2.8B 매개변수 스케일링 평가에서 최신 Transformer++ 레시피(LLaMa 구조 기반)와 대등하거나 우수한 성능을 보였으며, Mamba-3B는 Pythia-3B를 능가하고 Pythia-7B 수준에 도달함과 동시에 5배 빠른 Autoregressive 추론 처리량을 달성하였다.
+- **언어 모델링 (Language Modeling)**: 125M~1.3B 규모의 Scaling Law 평가에서 최신 Transformer++ 레시피(PaLM/LLaMa 구조 기반)와 대등한 성능을 보인 최초의 attention-free 모델이며, zero-shot 다운스트림 평가에서 Mamba-3B는 Pythia-3B를 능가하고 Pythia-7B 수준에 도달함과 동시에 5배 빠른 Autoregressive 추론 처리량을 달성하였다.
 - **DNA 및 오디오 (DNA & Audio)**: 백만 길이 시퀀스 pre-training 및 다운스트림 분류/생성 과제에서 기존 SOTA 모델들(HyenaDNA, SaShiMi)을 큰 폭으로 능가하였다.
 
 ### 5. 한계 및 의견
@@ -144,6 +144,7 @@ $$
     - **RetNet**: 게이트를 추가하고 MHA 변형 병렬 경로를 갖는 아키텍처.
     - **RWKV**: Linear attention 근사 기반의 아키텍처로 WKV 메커니즘이 LTI recurrence에 해당.
 
+![Figure 1](./images/Fig%201.png)
 > **Figure 1. Selective State Space Model Overview.** 기존 구조화된 SSM은 각 채널($D$)을 고차원 은닉 상태($N$)로 독립 매핑하며, LTI 제약(시간에 대해 고정된 $\Delta, A, B, C$)을 통해 컨볼루션 형태 경로를 사용하여 $DN$ 차원의 상태 확장을 피했다. 반면 Mamba의 선택 메커니즘은 입력 종속 동역학을 복원하며, GPU 메모리 계층(HBM/SRAM)을 고려한 하드웨어 인식 알고리즘을 통해 확장 상태를 필요한 순간에만 구현한다.
 
 ---
@@ -159,6 +160,7 @@ $$
     - **Induction Heads**: 이전 문맥의 패턴(예: "Harry Potter")을 기반으로 다음 토큰을 예측하는 연상 기억(associative recall) 과제이다.
 - LTI 모델은 시점 불변 동역학으로 인해 문맥에 따른 선택적 정보 전달이 불가능하다. 전역 컨볼루션은 단순 Copying은 해결하지만 토큰 간 간격이 가변적인 Selective Copying은 해결하지 못한다.
 
+![Figure 2](./images/Fig%202.png)
 > **Figure 2. Synthetic Tasks Comparison.** (좌) 표준 Copying 과제는 고정된 간격을 가져 LTI 모델로도 쉽게 해결된다. (우상) Selective Copying 과제는 간격이 무작위이며 입력 내용에 따라 선택적으로 기억/무시할 수 있는 시간 가변(Time-varying) 모델이 필요하다. (우하) Induction Heads 과제는 맥락에 기반한 연상 기억을 요구하는 LLM의 핵심 기능이다.
 
 ### 3.2 Improving SSMs with Selection (선택 메커니즘을 통한 SSM 개선)
@@ -167,6 +169,8 @@ $$
     - $s_C(x) = \text{Linear}_N(x)$
     - $s_\Delta(x) = \text{Broadcast}_D(\text{Linear}_1(x))$
     - $\tau_\Delta = \text{softplus}$
+
+![Algorithm 1&2](./images/Algorithm%201%262.png)
 
 ```
 Algorithm 1: Standard SSM (S4)
@@ -209,6 +213,7 @@ Output: y (B, L, D)
 - 기존 H3 아키텍처와 Transformer의 Gated MLP(SwiGLU) 구조를 결합하여 Attention 및 MLP 블록 없이 단일 Mamba 블록을 균일하게(homogenously) 쌓아 올린 아키텍처를 제안한다.
 - 확장 계수 $E=2$를 적용하여 파라미터 수를 조정하고, 활성화 함수로 SiLU/Swish를 사용하며 LayerNorm을 normalization에 활용한다.
 
+![Figure 3](./images/Fig%203.png)
 > **Figure 3. Architecture Comparison.** H3 블록과 Gated MLP 블록을 결합하여 Mamba 아키텍처 블록을 구성한다. Mamba는 첫 번째 곱셈 게이트 대신 활성화 함수를 적용하고 메인 브랜치에 SSM 계층을 추가하였다.
 
 ### 3.5 Properties of Selection Mechanisms (선택 메커니즘의 특성)
@@ -245,11 +250,13 @@ $$
 #### 4.1.1 Selective Copying
 - 토큰 간 간격을 무작위화한 과제로 LTI 모델(S4 등)이나 아키텍처 게이팅(H3, Hyena)은 부분적 개선만 가능하지만, Selective SSM(S6 계층)을 탑재한 Mamba는 99.8%의 정확도로 완전히 해결하였다.
 
+![Table 1](./images/Table%201.png)
 > **Table 1. Selective Copying Accuracy.** 아키텍처 블록과 내부 시퀀스 계층 결합에 따른 정확도 비교. S6 선택적 계층 적용 시 정확도가 99% 이상으로 비약적 향상된다.
 
 #### 4.1.2 Induction Heads
 - 훈련 길이(256) 대비 테스트 시 시퀀스 길이를 최대 1,048,576(1M, 4000배)까지 확장 평가하였다.
 
+![Table 2](./images/Table%202.png)
 > **Table 2. Induction Heads Extrapolation Accuracy.** Mamba(selective SSM)는 1M 토큰 길이까지 100% 완벽한 외삽 능력을 보여주지만 다른 Attention 및 기존 SSM 기법들은 길이가 늘어나면 실패한다.
 
 ### 4.2 Language Modeling
@@ -257,11 +264,13 @@ $$
 #### 4.2.1 Scaling Laws
 - The Pile 데이터셋에서 125M부터 1.3B 매개변수 범위로 Chinchilla 프로토콜 하에 평가를 진행하였다.
 
+![Figure 4](./images/Fig%204.png)
 > **Figure 4. Scaling Laws on The Pile.** Mamba는 기존의 모든 Attention-free 모델을 능가하며, 최신 강력한 Transformer++ 레시피와 대등한 성능을 달성하는 최초의 선형 시간 시퀀스 모델이다.
 
 #### 4.2.2 Downstream Evaluations
 - Zero-shot 다운스트림 평가 결과, 동일한 데이터셋 및 토크나이저로 훈련된 동급 Pythia 및 RWKV 모델들을 전 영역에서 능가하였다.
 
+![Table 3](./images/Table%203.png)
 > **Table 3. Zero-shot Downstream Evaluations.** 동일 파라미터 체급에서 Mamba는 모든 단일 평가 지표에서 Best-in-class 성능을 나타내며, 2배 크기의 모델(Pythia-7B 등)과 대등한 성과를 거둔다.
 
 ### 4.3 DNA Modeling
@@ -272,50 +281,61 @@ $$
 #### 4.3.2 Scaling: Context Length
 - 시퀀스 길이를 1024에서 1,048,576(1M)까지 확장 시, Mamba는 컨텍스트가 길어질수록 Perplexity가 지속적으로 개선된 반면 HyenaDNA(LTI 모델)는 컨텍스트가 길어지면 오히려 성능이 악화되었다.
 
+![Figure 5](./images/Fig%205.png)
 > **Figure 5. DNA Scaling Laws on HG38.** (좌) 모델 크기 증가 시 Mamba가 가장 우수한 Scaling을 보임. (우) 시퀀스 길이 증가 시 Mamba는 1M 토큰까지 단조적 성능 향상을 보여주나 HyenaDNA는 저하된다.
 
 #### 4.3.3 Synthetic Species Classification
 - DNA 99%를 공유하는 영장류 5종(인간, 침팬지, 고릴라, 오랑우탄, 보노보) 분류 과제에서 Fine-tuning 정확도를 평가하였다.
 
+![Figure 6](./images/Fig%206.png)
 > **Figure 6. Great Apes DNA Classification Accuracy.** 시퀀스 길이가 1M에 도달함에 따라 Mamba 기반 fine-tuning 정확도가 독보적으로 상승한다.
 
 ### 4.4 Audio Modeling and Generation
 
-#### 4.4.1 Long-Context Autoregressive Autoregressive Pretraining
+#### 4.4.1 Long-Context Autoregressive Pretraining
 - YouTubeMix 피아노 오디오 데이터셋에서 시퀀스 길이를 8,192에서 1M까지 확장 평가하였다. 복소수(complex) 파라미터화를 적용한 Mamba는 기존 SaShiMi(S4+MLP) 대비 뛰어난 bpb(bits per byte) 성과를 달성하였다.
 
+![Figure 7](./images/Fig%207.png)
 > **Figure 7. Audio Pretraining (YouTubeMix).** 1분 길이(약 1M 시퀀스)에 이르는 long context 오디오 pretraining에서 Mamba가 SaShiMi 대비 우수한 bpb 성능을 보인다.
 
 #### 4.4.2 Autoregressive Speech Generation
 - SC09 음성 생성 데이터셋 평가에서 소형 Mamba 모델이 기존 GAN 및 Diffusion 모델 기반 SOTA를 능가하였고, 큰 모델은 품질 지표(FID, IS 등)를 획기적으로 개선하였다.
 
+![Table 4](./images/Table%204.png)
 > **Table 4. SC09 Automated Metrics.** 무조건부 음성 생성 평가에서 Mamba는 기존 Autoregressive 및 GAN/Diffusion 기법 대비 월등히 낮은 FID와 높은 IS/mIS를 기록하였다.
 
+![Table 5](./images/Table%205.png)
 > **Table 5. SC09 Model Ablations.** U-Net 아키텍처의 Outer 및 Center 블록에 Mamba를 적용 시 S4+MLP 및 MHA+MLP 조합보다 항상 우수한 품질을 보여준다.
 
 ### 4.5 Speed and Memory Benchmarks
 - **Training Speed**: Mamba의 융합된 Selective Scan 커널은 PyTorch 기본 스캔 구현보다 20~40배 빠르며, 2K 시퀀스 이상부터 FlashAttention-2보다 빠른 계산 속도를 나타낸다.
 - **Inference Throughput**: KV 캐시가 필요 없으므로 대용량 배치를 사용할 수 있어 Transformer 대비 4~5배 높은 추론 처리량을 제공한다.
 
+![Figure 8](./images/Fig%208.png)
 > **Figure 8. Efficiency Benchmarks.** (좌) 학습 시 융합 스캔 커널은 PyTorch 스캔 대비 40배 빠름. (우) 추론 시 Mamba-6.9B는 5배 작은 Transformer-1.3B보다 높은 처리량을 보여준다.
 
 ### 4.6 Model Ablations
 
 #### 4.6.1 Architecture
-- LTI 모델 간에는 복소수/실수 파라미터화의 차이가 적으나, Selective SSM(S6)을 적용할 경우 아키텍처 종류와 상관없이 Perplexity가 대폭 개선(10.5 -> 8.6)되었다.
+- LTI 모델 간에는 복소수/실수 파라미터화의 차이가 적으나, Selective SSM(S6)을 적용할 경우 아키텍처 종류와 상관없이 Perplexity가 대폭 개선(Mamba 블록 기준 S4 10.54 → S6 8.69, H3 블록 기준 S4 10.30 → S6 8.95)되었다.
 
+![Table 6](./images/Table%206.png)
 > **Table 6. Ablations: Architecture and SSM layer.** H3 및 Mamba 블록 모두 S6 선택적 계층을 장착할 때 Perplexity가 압도적으로 개선된다.
 
 #### 4.6.2 Selective SSM
 - 매개변수 선택성 조합 중 $\Delta$의 선택성이 가장 결정적인 역할을 수행하며, $(\Delta, B, C)$를 모두 선택적으로 구성할 때 시너지가 극대화된다.
 - SSM 상태 차원 $N$을 확대할 때, $B, C$가 선택적일 때만 파라미터 증가(1% 미만) 대비 Perplexity가 1.0 이상 대폭 개선되는 효과를 거두었다.
 
+![Table 7](./images/Table%207.png)
 > **Table 7. Ablations: Selective parameters.** $\Delta, B, C$의 선택성 여부에 따른 Perplexity 변화. $\Delta$의 선택성이 가장 핵심적이다.
 
+![Table 8](./images/Table%208.png)
 > **Table 8. Ablations: Parameterization of A.** 선택적 SSM 환경에서는 실수 기반 S4D-Real 및 무작위 초기화가 복소수 기반 초기화보다 더 좋은 performance를 나타낸다.
 
+![Table 9](./images/Table%209.png)
 > **Table 9. Ablations: Expressivity of $\Delta$.** $\Delta$ 사상 차원을 1차원에서 64차원까지 확장 시 적은 파라미터 추가로 성능이 꾸준히 향상된다.
 
+![Table 10](./images/Table%2010.png)
 > **Table 10. Ablations: SSM state dimension N.** $B, C$가 선택적(Bottom)일 때 상태 차원 $N$을 늘리면 계산 비용 증가 없이 Perplexity가 비약적으로 개선된다.
 
 ---
